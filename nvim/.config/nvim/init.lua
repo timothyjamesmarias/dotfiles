@@ -137,7 +137,7 @@ require("lazy").setup({
 			telescope.load_extension("ui-select")
 
 			local builtin = require("telescope.builtin")
-			vim.keymap.set("n", "<leader>ff", "<cmd>Telescope find_files follow=true no_ignore=true hidden=true <CR>", { silent = true })
+			vim.keymap.set("n", "<leader>ff", "<cmd>Telescope find_files follow=true hidden=true <CR>", { silent = true })
 			vim.keymap.set("n", "<leader>fg", builtin.git_commits, { silent = true })
 			vim.keymap.set("n", "<leader>fw", builtin.live_grep, { silent = true })
 			vim.keymap.set("n", "<leader>fk", builtin.keymaps, { silent = true })
