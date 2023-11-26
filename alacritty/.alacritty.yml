@@ -9,8 +9,8 @@
 # All imports must either be absolute paths starting with `/`, or paths relative
 # to the user's home directory starting with `~/`.
 
-import:
-  - ~/alacritty-theme/themes/tokyo-night.yaml
+# import:
+#   -
 
 # Any items in the `env` entry below will be added as
 # environment variables. Some entries may override variables
@@ -316,7 +316,7 @@ schemes:
       white:   '#e4e4e4'
 
 # Colors
-# colors: *moonfly
+colors: *everforest_dark_hard
 
 # colors:
 #   # Default colors

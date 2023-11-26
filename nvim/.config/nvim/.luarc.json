@@ -1,0 +1,20 @@
+{
+    "workspace.library": [
+        "/Users/timmarias/.config/nvim",
+        "/Users/timmarias/.local/share/nvim/site",
+        "/Users/timmarias/.local/share/nvim/lazy/lazy.nvim",
+        "/Users/timmarias/.local/share/nvim/lazy/nvim-web-devicons",
+        "/Users/timmarias/.local/share/nvim/lazy/nvim-tree.lua",
+        "/Users/timmarias/.local/share/nvim/lazy/plenary.nvim",
+        "/Users/timmarias/.local/share/nvim/lazy/nvim-lsp-file-operations",
+        "/Users/timmarias/.local/share/nvim/lazy/nvim-lspconfig",
+        "/Users/timmarias/.local/share/nvim/lazy/mason-lspconfig.nvim",
+        "/Users/timmarias/.local/share/nvim/lazy/mason.nvim",
+        "/Users/timmarias/.local/share/nvim/lazy/vim-commentary",
+        "/Users/timmarias/.local/share/nvim/lazy/zenbones.nvim",
+        "/opt/homebrew/Cellar/neovim/0.9.2/share/nvim/runtime",
+        "/opt/homebrew/Cellar/neovim/0.9.2/lib/nvim",
+        "/Users/timmarias/.local/state/nvim/lazy/readme",
+        "${3rd}/luassert/library"
+    ]
+}
