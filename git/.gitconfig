@@ -1,0 +1,7 @@
+[user]
+	name = timothyjamesmarias
+	email = timothyjamesmarias@gmail.com
+[core]
+	autocrlf = input
+[alias]
+  mergetool = "!nvim -c DiffviewOpen"
