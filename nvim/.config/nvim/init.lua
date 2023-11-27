@@ -110,7 +110,7 @@ require("lazy").setup({
 					},
 					sorting_strategy = "ascending",
 					layout_strategy = "center",
-					border = false,
+					border = true,
 					hidden = true,
 					file_ignore_patterns = {
 						".git/",
@@ -597,6 +597,9 @@ require("lazy").setup({
 
 -- options
 vim.cmd("syntax on")
+
+vim.cmd("au FileType netrw setl bufhidden=wipe")
+vim.api.nvim_set_var("netrw_fastbrowse", 0)
 
 vim.opt.clipboard = "unnamedplus"
 vim.opt.background = "dark"
