@@ -28,13 +28,19 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
+	-- {
+	-- 	"sainnhe/everforest",
+	-- 	lazy = false,
+	-- 	priority = 1000,
+	-- 	config = function()
+	-- 		vim.api.nvim_set_var("everforest_background", "hard")
+	-- 		vim.cmd("colorscheme everforest")
+	-- 	end,
+	-- },
 	{
-		"sainnhe/everforest",
-		lazy = false,
-		priority = 1000,
+		"ellisonleao/gruvbox.nvim",
 		config = function()
-			vim.api.nvim_set_var("everforest_background", "hard")
-			vim.cmd("colorscheme everforest")
+			vim.cmd("colorscheme gruvbox")
 		end,
 	},
 	{
@@ -137,7 +143,12 @@ require("lazy").setup({
 			telescope.load_extension("ui-select")
 
 			local builtin = require("telescope.builtin")
-			vim.keymap.set("n", "<leader>ff", "<cmd>Telescope find_files follow=true hidden=true <CR>", { silent = true })
+			vim.keymap.set(
+				"n",
+				"<leader>ff",
+				"<cmd>Telescope find_files follow=true hidden=true <CR>",
+				{ silent = true }
+			)
 			vim.keymap.set("n", "<leader>fg", builtin.git_commits, { silent = true })
 			vim.keymap.set("n", "<leader>fw", builtin.live_grep, { silent = true })
 			vim.keymap.set("n", "<leader>fk", builtin.keymaps, { silent = true })
