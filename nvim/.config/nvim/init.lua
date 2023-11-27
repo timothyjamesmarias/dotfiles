@@ -28,21 +28,6 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-	-- {
-	-- 	"sainnhe/everforest",
-	-- 	lazy = false,
-	-- 	priority = 1000,
-	-- 	config = function()
-	-- 		vim.api.nvim_set_var("everforest_background", "hard")
-	-- 		vim.cmd("colorscheme everforest")
-	-- 	end,
-	-- },
-	{
-		"ellisonleao/gruvbox.nvim",
-		config = function()
-			vim.cmd("colorscheme gruvbox")
-		end,
-	},
 	{
 		"nvim-treesitter/nvim-treesitter",
 		event = { "BufReadPre", "BufNewFile" },
@@ -71,6 +56,15 @@ require("lazy").setup({
 					enable = true,
 				},
 			})
+		end,
+	},
+	{
+		"baliestri/aura-theme",
+		lazy = false,
+		priority = 1000,
+		config = function(plugin)
+			vim.opt.rtp:append(plugin.dir .. "/packages/neovim")
+			vim.cmd([[colorscheme aura-dark]])
 		end,
 	},
 	{
