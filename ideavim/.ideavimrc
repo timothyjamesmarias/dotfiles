@@ -1,0 +1,29 @@
+let mapleader = " "
+set visualbell
+set noerrorbells
+set ideajoin
+set idearefactormode=keep
+nmap <leader>w :w<CR>
+nmap <leader>q :q<CR>
+nmap <leader>v :vsplit<CR>
+nmap <leader>h :split<CR>
+imap jj <Esc>
+set relativenumber number
+set clipboard+=unnamed
+set commentary
+set surround
+set NERDTree
+nmap <leader>n :NERDTreeToggle<CR>
+let g:NERDTRreeMapActivateNode = 'l'
+let g:NERDTreeMAPJumpParent = 'h'
+nmap <c-p> <Action>(PreviousTab)
+nmap <c-n> <Action>(NextTab)
+nmap <c-l> <Action>(NextSplitter)
+nmap <c-h> <Action>(NextSplitter)
+nmap <leader>s <Action>(Find)
+nmap <leader>ff <Action>(SearchEverywhere)
+nmap <leader>fd <Action>(FindInPath)
+nmap <leader>ee <Action>(RunAnything)
+nmap <leader>rn <Action>(RenameElement)
+nmap <leader>rp <Action>(Replace)
+nmap ; :
