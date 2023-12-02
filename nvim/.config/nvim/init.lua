@@ -448,7 +448,6 @@ require("lazy").setup({
 			vim.opt.termguicolors = true
 			bufferline.setup({
 				options = {
-          -- separator_style = "slant",
 					diagnostics = "nvim_lsp",
 					diagnostics_indicator = function(count, level)
 						local icon = level:match("error") and " " or " "
@@ -472,9 +471,6 @@ require("lazy").setup({
 					ignore_whitespace = false,
 				},
 			})
-			vim.keymap.set("n", "<leader>hn", gitsigns.next_hunk, { silent = true })
-			vim.keymap.set("n", "<leader>hp", gitsigns.prev_hunk, { silent = true })
-			vim.keymap.set("n", "<leader>hv", gitsigns.preview_hunk, { silent = true })
 		end,
 	},
 	{
