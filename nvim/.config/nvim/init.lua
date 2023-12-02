@@ -1,3 +1,4 @@
+vim.opt.termguicolors = true
 -- remaps
 vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>w", "<cmd>w<CR>")
@@ -59,12 +60,12 @@ require("lazy").setup({
 		end,
 	},
 	{
-		"baliestri/aura-theme",
+		"catppuccin/nvim",
+		name = "catppuccin",
 		lazy = false,
 		priority = 1000,
-		config = function(plugin)
-			vim.opt.rtp:append(plugin.dir .. "/packages/neovim")
-			vim.cmd([[colorscheme aura-dark]])
+		config = function()
+			vim.cmd.colorscheme("catppuccin-mocha")
 		end,
 	},
 	{
@@ -104,7 +105,7 @@ require("lazy").setup({
 					},
 					sorting_strategy = "ascending",
 					layout_strategy = "center",
-					border = true,
+					border = false,
 					hidden = true,
 					file_ignore_patterns = {
 						".git/",
@@ -590,7 +591,6 @@ vim.opt.clipboard = "unnamedplus"
 vim.opt.background = "dark"
 vim.opt.number = true
 vim.opt.relativenumber = true
-vim.opt.termguicolors = true
 vim.opt.smartindent = true
 vim.opt.mouse = a
 vim.opt.spelllang = "en_us"
