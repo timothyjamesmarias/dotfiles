@@ -11,9 +11,9 @@
 
 import:
   # uncomment the flavour you want below:
-  - ~/.config/alacritty/catppuccin/catppuccin-mocha.yml
+  # - ~/.config/alacritty/catppuccin/catppuccin-mocha.yml
 #  - ~/.config/alacritty/catppuccin/catppuccin-macchiato.yml
- # - ~/.config/alacritty/catppuccin/catppuccin-frappe.yml
+ - ~/.config/alacritty/catppuccin/catppuccin-frappe.yml
 #  - ~/.config/alacritty/catppuccin/catppuccin-latte.yml
 
 # Any items in the `env` entry below will be added as
@@ -121,7 +121,7 @@ font:
    family: victormono nerd font mono
    style: Bold
 
-  size: 16
+  size: 16 
 
   # Offset is the extra space around each character. `offset.y` can be thought
   # of as modifying the line spacing, and `offset.x` as modifying the letter

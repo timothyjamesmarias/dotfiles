@@ -65,7 +65,7 @@ require("lazy").setup({
 		lazy = false,
 		priority = 1000,
 		config = function()
-			vim.cmd.colorscheme("catppuccin-mocha")
+			vim.cmd.colorscheme("catppuccin-frappe")
 		end,
 	},
 	{
@@ -448,6 +448,7 @@ require("lazy").setup({
 			vim.opt.termguicolors = true
 			bufferline.setup({
 				options = {
+          -- separator_style = "slant",
 					diagnostics = "nvim_lsp",
 					diagnostics_indicator = function(count, level)
 						local icon = level:match("error") and " " or " "
