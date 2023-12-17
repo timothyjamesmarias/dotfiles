@@ -101,6 +101,7 @@
     "tt" '(counsel-load-theme :which-key "choose theme")
     "w" '(save-buffer :which-key "save buffer")
     "q" '(kill-this-buffer :which-key "kill buffer")
+    "g" '(magit-status :which-key "open magit")
     ))
 
 (use-package projectile
@@ -162,6 +163,13 @@
 (key-chord-mode 1)
 
 (key-chord-define evil-insert-state-map "jj" 'evil-normal-state)
+
+; Ruby packages
+
+(use-package projectile-rails)
+
+(use-package robe)
+
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
