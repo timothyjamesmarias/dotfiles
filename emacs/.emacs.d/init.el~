@@ -28,6 +28,8 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 
+(use-package exec-path-from-shell)
+
 (use-package undo-tree)
 
 (use-package catppuccin-theme)
@@ -112,11 +114,10 @@
 (use-package counsel-projectile
   :config (counsel-projectile-mode))
 
-(use-package projectile-rails
-  :after projectile
-  :config
-  (projectile-rails-global-mode)
-  (define-key projectile-rails-mode-map (kbd "C-c r") 'projectile-rails-command-map))
+;; (use-package projectile-rails
+;;   :after projectile
+;;   :config
+;;   (projectile-rails-global-mode))
   
 (use-package evil
   :init
@@ -149,9 +150,6 @@
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
-(use-package evil-magit
-  :after magit)
-
 ; run M-x all-the-icons-install-fonts
 (use-package all-the-icons)
 
@@ -166,7 +164,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
+   '(exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
