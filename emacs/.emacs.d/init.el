@@ -101,6 +101,7 @@
     "tt" '(counsel-load-theme :which-key "choose theme")
     "w" '(save-buffer :which-key "save buffer")
     "q" '(kill-this-buffer :which-key "kill buffer")
+    "g" '(magit-status :which-key "open magit")
     ))
 
 (use-package projectile
@@ -153,6 +154,8 @@
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
+(use-package forge)
+
 ; run M-x all-the-icons-install-fonts
 (use-package all-the-icons)
 
@@ -169,7 +172,7 @@
  '(custom-safe-themes
    '("97ef2fe48a437ea2e734556d5acf4c08c74647c497a952c1ae8571a71369f7a7" default))
  '(package-selected-packages
-   '(kanagawa-theme exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
+   '(forge kanagawa-theme exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
