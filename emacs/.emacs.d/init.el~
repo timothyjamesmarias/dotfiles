@@ -29,12 +29,18 @@
 (setq use-package-always-ensure t)
 
 (use-package exec-path-from-shell)
+(when (memq window-system '(mac ns x))
+  (exec-path-from-shell-initialize)
+  (exec-path-from-shell-copy-env "SSH_AGENT_PID")
+  (exec-path-from-shell-copy-env "SSH_AUTH_SOCK"))
 
 (use-package undo-tree)
 
-(use-package catppuccin-theme)
-(load-theme 'catppuccin :no-confirm) 
-(setq catppuccin-flavor 'frappe)
+;; (use-package catppuccin-theme)
+;; (load-theme 'catppuccin :no-confirm) 
+;; (setq catppuccin-flavor 'frappe)
+(use-package kanagawa-theme)
+(load-theme 'kanagawa)
 
 (use-package which-key
   :defer 0
@@ -163,8 +169,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("97ef2fe48a437ea2e734556d5acf4c08c74647c497a952c1ae8571a71369f7a7" default))
  '(package-selected-packages
-   '(exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
+   '(kanagawa-theme exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
