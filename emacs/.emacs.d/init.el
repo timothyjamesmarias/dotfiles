@@ -164,12 +164,44 @@
 
 (key-chord-define evil-insert-state-map "jj" 'evil-normal-state)
 
+; LSP stuff
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  :config
+  (lsp-enable-which-key-integration t))
+
+(use-package lsp-ivy
+  :after lsp-mode)
+
+(use-package company
+  :after lsp-mode
+  :hook (prog-mode . company-mode)
+  :bind (:map company-active-map
+	      ("<tab>" . company-indent-or-complete-common))
+  :custom
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.0))
+
+(use-package company-box
+  :hook (company-mode . company-box-mode))
+
+; JS, TS, Vue packages
+(use-package web-mode)
+
 ; Ruby packages
-
 (use-package projectile-rails)
-
 (use-package robe)
 
+; Org mode
+
+(use-package org)
+
+; asdf for managing ruby and node versions
+;; (add-to-list 'load-path "~/.emacs.d/asdf.el/asdf.el")
+;; (require 'asdf)
+;; (asdf enable)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -179,7 +211,7 @@
  '(custom-safe-themes
    '("97ef2fe48a437ea2e734556d5acf4c08c74647c497a952c1ae8571a71369f7a7" default))
  '(package-selected-packages
-   '(robe forge kanagawa-theme exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
+   '(web-mode lsp-ivy company-box company typescript-mode lsp-mode robe forge kanagawa-theme exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
