@@ -6,7 +6,7 @@ vim.keymap.set("n", ";", ":")
 vim.keymap.set("i", "jj", "<Esc>", { silent = true })
 vim.keymap.set("n", "<C-n>", "<cmd>bnext<CR>", { silent = true, remap = true })
 vim.keymap.set("n", "<C-p>", "<cmd>bprevious<CR>", { silent = true, remap = true })
-vim.keymap.set("n", "<leader>n", "<cmd>enew<CR>", { silent = true })
+vim.keymap.set("n", "<leader>b", "<cmd>enew<CR>", { silent = true })
 vim.keymap.set("n", "<leader>q", "<cmd>bd<CR>", { silent = true })
 vim.keymap.set("n", "n", "nzzzv", { silent = true })
 vim.keymap.set("n", "N", "Nzzzv", { silent = true })
@@ -59,21 +59,26 @@ require("lazy").setup({
 			})
 		end,
 	},
-	-- {
-	-- 	"catppuccin/nvim",
-	-- 	name = "catppuccin",
-	-- 	lazy = false,
-	-- 	priority = 1000,
-	-- 	config = function()
-	-- 		vim.cmd.colorscheme("catppuccin-frappe")
-	-- 	end,
-	-- },
 	{
 		"rebelot/kanagawa.nvim",
 		lazy = false,
 		priority = 1000,
 		config = function()
 			vim.cmd.colorscheme("kanagawa")
+		end,
+	},
+	{
+		"nvim-neo-tree/neo-tree.nvim",
+		branch = "v3.x",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+			"MunifTanjim/nui.nvim",
+			"3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
+		},
+		config = function()
+			local neotree = require("neo-tree").setup({})
+			vim.keymap.set("n", "<leader>n", "<cmd>Neotree<CR>", { silent = true })
 		end,
 	},
 	{
