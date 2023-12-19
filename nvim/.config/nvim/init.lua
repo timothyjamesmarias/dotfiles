@@ -77,8 +77,31 @@ require("lazy").setup({
 			"3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
 		},
 		config = function()
-			local neotree = require("neo-tree").setup({})
-			vim.keymap.set("n", "<leader>n", "<cmd>Neotree<CR>", { silent = true })
+			local neotree = require("neo-tree").setup({
+				close_if_last_window = true,
+				enable_git_status = true,
+				enable_diagnostics = true,
+        window = {
+          width = "30%",
+        },
+				filesystem = {
+					filtered_items = {
+						visible = true,
+						hide_dotfiles = false,
+						hide_gitignored = true,
+						hide_hidden = true,
+						hide_by_name = {
+							"node_modules",
+							"vendor",
+						},
+						hide_by_pattern = {},
+						always_show = {},
+						never_show = {},
+						never_show_by_pattern = {},
+					},
+				},
+			})
+			vim.keymap.set("n", "<leader>n", "<cmd>Neotree toggle<CR>", { silent = true })
 		end,
 	},
 	{
