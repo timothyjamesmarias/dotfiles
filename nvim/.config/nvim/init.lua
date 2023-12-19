@@ -59,13 +59,21 @@ require("lazy").setup({
 			})
 		end,
 	},
+	-- {
+	-- 	"catppuccin/nvim",
+	-- 	name = "catppuccin",
+	-- 	lazy = false,
+	-- 	priority = 1000,
+	-- 	config = function()
+	-- 		vim.cmd.colorscheme("catppuccin-frappe")
+	-- 	end,
+	-- },
 	{
-		"catppuccin/nvim",
-		name = "catppuccin",
+		"rebelot/kanagawa.nvim",
 		lazy = false,
 		priority = 1000,
 		config = function()
-			vim.cmd.colorscheme("catppuccin-frappe")
+			vim.cmd.colorscheme("kanagawa")
 		end,
 	},
 	{
@@ -569,12 +577,6 @@ require("lazy").setup({
 	},
 	{
 		"tpope/vim-rails",
-	},
-	{
-		"tpope/vim-haml",
-		config = function()
-			vim.cmd("au BufNewFile,BufRead *.slim set filetype=slim")
-		end,
 	},
 })
 

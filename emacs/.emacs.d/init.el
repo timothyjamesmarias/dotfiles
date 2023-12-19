@@ -10,7 +10,7 @@
 (setq use-dialog-box nil)
 (global-auto-revert-mode 1)
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-(set-face-attribute 'default nil :height 180)
+(set-face-attribute 'default nil :family "VictorMono Nerd Font Mono" :height 160)
 (setq-default line-spacing 10)
 
 (require 'package)
@@ -52,19 +52,14 @@
          :map ivy-minibuffer-map
          ("TAB" . ivy-alt-done)
          ("C-l" . ivy-alt-done)
-         ("C-j" . ivy-next-line)
-         ("C-k" . ivy-previous-line)
          :map ivy-switch-buffer-map
-         ("C-k" . ivy-previous-line)
          ("C-l" . ivy-done)
          ("C-d" . ivy-switch-buffer-kill)
          :map ivy-reverse-i-search-map
-         ("C-k" . ivy-previous-line)
          ("C-d" . ivy-reverse-i-search-kill))
   :config
   (ivy-mode 1))
 
-(global-set-key (kbd "C-j") 'counsel-switch-buffer)
 
 (use-package ivy-rich
   :after ivy
@@ -102,6 +97,7 @@
     "w" '(save-buffer :which-key "save buffer")
     "q" '(kill-this-buffer :which-key "kill buffer")
     "g" '(magit-status :which-key "open magit")
+    "fb" '(counsel-switch-buffer :which-key "find open buffers")
     ))
 
 (use-package projectile
