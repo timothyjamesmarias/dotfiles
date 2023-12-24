@@ -78,11 +78,11 @@ require("lazy").setup({
 		},
 		config = function()
 			local neotree = require("neo-tree").setup({
-				close_if_last_window = true,
+				close_if_last_window = false,
 				enable_git_status = true,
 				enable_diagnostics = true,
         window = {
-          width = "30%",
+          width = "40%",
         },
 				filesystem = {
 					filtered_items = {
@@ -300,7 +300,12 @@ require("lazy").setup({
 			lspconfig["volar"].setup({
 				on_attach = on_attach,
 				capabilities = capabilities,
-				filetypes = { "vue", "javascript", "typescript", "javascriptreact", "typescriptreact" },
+				filetypes = { "vue" },
+			})
+			lspconfig["tsserver"].setup({
+				on_attach = on_attach,
+				capabilities = capabilities,
+				filetypes = {"javascript", "typescript", "javascriptreact", "typescriptreact" },
 			})
 			lspconfig["tailwindcss"].setup({
 				on_attach = on_attach,
