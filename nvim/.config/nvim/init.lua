@@ -3,6 +3,7 @@ vim.opt.termguicolors = true
 vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>w", "<cmd>w<CR>")
 vim.keymap.set("n", ";", ":")
+vim.keymap.set("n", ":", ":!")
 vim.keymap.set("i", "jj", "<Esc>", { silent = true })
 vim.keymap.set("n", "<C-n>", "<cmd>bnext<CR>", { silent = true, remap = true })
 vim.keymap.set("n", "<C-p>", "<cmd>bprevious<CR>", { silent = true, remap = true })
@@ -342,7 +343,7 @@ require("lazy").setup({
 			lspconfig["solargraph"].setup({
 				on_attach = on_attach,
 				capabilities = capabilities,
-				filetypes = { "ruby", "eruby", "rake", "slim" },
+				filetypes = { "ruby" },
 			})
 			lspconfig["bashls"].setup({
 				on_attach = on_attach,
