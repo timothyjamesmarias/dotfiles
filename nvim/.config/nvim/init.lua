@@ -222,6 +222,7 @@ require("lazy").setup({
 				{ silent = true, noremap = true }
 			)
 			vim.keymap.set("n", "<leader>sl", builtin.grep_string, { silent = true, noremap = true })
+			vim.keymap.set("v", "<leader>sl",  'y<ESC>:Telescope grep_string default_text=<c-r>0<CR>', { silent = true, noremap = true })
 			vim.keymap.set("n", "<leader>u", "<cmd>Telescope undo<CR>")
 		end,
 	},
