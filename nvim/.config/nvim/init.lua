@@ -43,9 +43,7 @@ require("lazy").setup({
 		config = function()
 			local treesitter = require("nvim-treesitter.configs")
 			treesitter.setup({
-				highlight = {
-					enable = true,
-				},
+				highlight = { enable = true },
 				modules = {},
 				indent = { enable = true },
 				autotag = { enable = true },
@@ -59,6 +57,28 @@ require("lazy").setup({
 				},
 			})
 		end,
+	},
+	{
+		"windwp/nvim-ts-autotag",
+		dependencies = "nvim-treesitter/nvim-treesitter",
+		config = function()
+			require("nvim-ts-autotag").setup({
+				filetypes = {
+					"html",
+					"xml",
+					"embedded_template",
+					"eruby",
+					"php",
+					"js",
+					"ts",
+					"jsx",
+					"tsx",
+					"vue",
+				},
+			})
+		end,
+		lazy = true,
+		event = "VeryLazy",
 	},
 	{
 		"rebelot/kanagawa.nvim",
@@ -82,9 +102,9 @@ require("lazy").setup({
 				close_if_last_window = false,
 				enable_git_status = true,
 				enable_diagnostics = true,
-        window = {
-          width = "40%",
-        },
+				window = {
+					width = "40%",
+				},
 				filesystem = {
 					filtered_items = {
 						visible = true,
@@ -307,7 +327,7 @@ require("lazy").setup({
 			lspconfig["tsserver"].setup({
 				on_attach = on_attach,
 				capabilities = capabilities,
-				filetypes = {"javascript", "typescript", "javascriptreact", "typescriptreact" },
+				filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
 			})
 			lspconfig["tailwindcss"].setup({
 				on_attach = on_attach,
@@ -613,6 +633,7 @@ require("lazy").setup({
 	{
 		"tpope/vim-rails",
 	},
+	{},
 })
 
 -- options
