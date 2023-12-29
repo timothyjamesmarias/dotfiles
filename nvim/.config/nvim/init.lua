@@ -340,6 +340,8 @@ require("lazy").setup({
 					t(".each do | "),
 					i(2),
 					t(" | %>"),
+					i(3),
+					t("<% end %>"),
 				}),
 				s("times do", {
 					t("<% "),
@@ -347,6 +349,22 @@ require("lazy").setup({
 					t(".times do | "),
 					i(2),
 					t(" | %>"),
+					i(3),
+					t("<% end %>"),
+				}),
+				s("form", {
+					t("<%= form_with "),
+					i(1),
+					t(" do |f| %>"),
+					i(2),
+					t("<% end %>"),
+				}),
+				s("form input", {
+					t("<%= f."),
+					i(1),
+					t(" :"),
+					i(2),
+					t(" %>"),
 				}),
 			})
 
