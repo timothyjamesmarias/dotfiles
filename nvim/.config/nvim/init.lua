@@ -428,7 +428,7 @@ require("lazy").setup({
 			lspconfig["tsserver"].setup({
 				on_attach = on_attach,
 				capabilities = capabilities,
-				filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
+				filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact", "html", "eruby", "slim" },
 			})
 			lspconfig["tailwindcss"].setup({
 				on_attach = on_attach,
@@ -749,7 +749,7 @@ require("lazy").setup({
           require("neotest-rspec")
         }
       })
-    end
+    end,
 	},
 })
 
