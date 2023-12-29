@@ -123,7 +123,7 @@ require("lazy").setup({
 				},
 			})
 			vim.keymap.set("n", "<leader>nn", "<cmd>Neotree toggle<CR>", { silent = true })
-			vim.keymap.set("n", "<leader>ns", "<cmd>Neotree action=show reveal=true<CR>", { silent = true })
+			vim.keymap.set("n", "<leader>ns", "<cmd>Neotree action=focus reveal=true<CR>", { silent = true })
 		end,
 	},
 	{
@@ -222,7 +222,12 @@ require("lazy").setup({
 				{ silent = true, noremap = true }
 			)
 			vim.keymap.set("n", "<leader>sl", builtin.grep_string, { silent = true, noremap = true })
-			vim.keymap.set("v", "<leader>sl",  'y<ESC>:Telescope grep_string default_text=<c-r>0<CR>', { silent = true, noremap = true })
+			vim.keymap.set(
+				"v",
+				"<leader>sl",
+				"y<ESC>:Telescope grep_string default_text=<c-r>0<CR>",
+				{ silent = true, noremap = true }
+			)
 			vim.keymap.set("n", "<leader>u", "<cmd>Telescope undo<CR>")
 		end,
 	},
@@ -267,6 +272,83 @@ require("lazy").setup({
 			local cmp = require("cmp")
 			local lspkind = require("lspkind")
 			local luasnip = require("luasnip")
+
+			local s = luasnip.snippet
+			local t = luasnip.text_node
+			local i = luasnip.insert_node
+
+			luasnip.add_snippets("ruby", {
+				s("abort", {
+					t("abort "),
+					i(1),
+					t(".inspect"),
+				}),
+				s("sql", {
+					t("<<~SQL.squish"),
+					i(1),
+					t("SQL"),
+				}),
+				s("lambda", {
+					t("lambda "),
+					t("{ "),
+					i(1),
+					t(" }"),
+				}),
+				s("each", {
+					t("each { "),
+					i(1),
+					t(" }"),
+				}),
+				s("each do", {
+					t("each do | "),
+					i(1),
+					t(" | "),
+					i(2),
+					t(" end"),
+				}),
+				s("times do", {
+					t("times do | "),
+					i(1),
+					t(" | "),
+					i(2),
+					t(" end"),
+				}),
+				s("times", {
+					t("times { "),
+					i(1),
+					t(" }"),
+				}),
+			})
+
+			luasnip.add_snippets("eruby", {
+				s("%", {
+					t("<% "),
+					i(1),
+					t(" %>"),
+				}),
+				s("%=", {
+					t("<%= "),
+					i(1),
+					t(" %>"),
+				}),
+				s("end", {
+					t("<% end %>"),
+				}),
+				s("each do", {
+					t("<% "),
+					i(1),
+					t(".each do | "),
+					i(2),
+					t(" | %>"),
+				}),
+				s("times do", {
+					t("<% "),
+					i(1),
+					t(".times do | "),
+					i(2),
+					t(" | %>"),
+				}),
+			})
 
 			local on_attach = function()
 				vim.keymap.set("n", "gr", "<cmd>Telescope lsp_references<CR>")
