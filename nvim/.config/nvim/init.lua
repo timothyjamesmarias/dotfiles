@@ -162,8 +162,7 @@ require("lazy").setup({
 						height = 0.6,
 					},
 					sorting_strategy = "ascending",
-					layout_strategy = "center",
-					border = false,
+					border = true,
 					hidden = true,
 					file_ignore_patterns = {
 						".git/",
