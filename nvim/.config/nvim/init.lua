@@ -3,12 +3,12 @@ vim.opt.termguicolors = true
 vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>w", "<cmd>w<CR>")
 vim.keymap.set("n", ";", ":")
-vim.keymap.set("n", ":", ":!")
 vim.keymap.set("i", "jj", "<Esc>", { silent = true })
 vim.keymap.set("n", "<C-n>", "<cmd>bnext<CR>", { silent = true, remap = true })
 vim.keymap.set("n", "<C-p>", "<cmd>bprevious<CR>", { silent = true, remap = true })
 vim.keymap.set("n", "<leader>b", "<cmd>enew<CR>", { silent = true })
 vim.keymap.set("n", "<leader>q", "<cmd>bd<CR>", { silent = true })
+vim.keymap.set("n", "<leader>Q", "<cmd>q!<CR>", { silent = true })
 vim.keymap.set("n", "n", "nzzzv", { silent = true })
 vim.keymap.set("n", "N", "Nzzzv", { silent = true })
 vim.keymap.set("n", "<leader>vv", "<cmd>vsp<CR>", { silent = true })
@@ -282,17 +282,6 @@ require("lazy").setup({
 					i(1),
 					t(".inspect"),
 				}),
-				s("sql", {
-					t("<<~SQL.squish"),
-					i(1),
-					t("SQL"),
-				}),
-				s("lambda", {
-					t("lambda "),
-					t("{ "),
-					i(1),
-					t(" }"),
-				}),
 				s("each", {
 					t("each { "),
 					i(1),
@@ -494,6 +483,10 @@ require("lazy").setup({
 				on_attach = on_attach,
 				capabilities = capabilities,
 			})
+			lspconfig["ocamllsp"].setup({
+				on_attach = on_attach,
+				capabilities = capabilities,
+			})
 
 			cmp.setup({
 				snippet = {
@@ -673,6 +666,12 @@ require("lazy").setup({
 						},
 						stdin = true,
 					},
+          ocaml = {
+            exe = "ocamlformat",
+          },
+          php = {
+            exe = "pint"
+          },
 					["*"] = {
 						require("formatter.filetypes.any").remove_trailing_whitespace,
 					},
@@ -732,6 +731,9 @@ require("lazy").setup({
 	},
 	{
 		"tpope/vim-rails",
+    config = function ()
+      vim.api.nvim_set_var('rails_ctags_arguments', '--languages=ruby,javascript,css,scss,slim')
+    end
 	},
 	{
 		"nvim-neotest/neotest",
