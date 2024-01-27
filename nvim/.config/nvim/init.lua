@@ -80,14 +80,17 @@ require("lazy").setup({
 		lazy = true,
 		event = "VeryLazy",
 	},
-	{
-		"rebelot/kanagawa.nvim",
-		lazy = false,
-		priority = 1000,
-		config = function()
-			vim.cmd.colorscheme("kanagawa")
-		end,
-	},
+	-- {
+	-- 	"rebelot/kanagawa.nvim",
+	-- 	lazy = false,
+	-- 	priority = 1000,
+	-- 	config = function()
+	-- 		vim.cmd.colorscheme("kanagawa")
+	-- 	end,
+	-- },
+  {
+
+  },
 	{
 		"nvim-neo-tree/neo-tree.nvim",
 		branch = "v3.x",
