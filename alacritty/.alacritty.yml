@@ -9,8 +9,8 @@
 # All imports must either be absolute paths starting with `/`, or paths relative
 # to the user's home directory starting with `~/`.
 
-import:
-  - "~/.config/alacritty/themes/alabaster_dark.yaml"
+# import:
+#   - "~/.config/alacritty/themes/alabaster_dark.yaml"
 
 # Any items in the `env` entry below will be added as
 # environment variables. Some entries may override variables
@@ -351,7 +351,7 @@ schemes:
       white:   '#e4e4e4'
 
 # Colors
-# colors: *aura
+colors: *moonfly
 
 # colors:
 #   # Default colors

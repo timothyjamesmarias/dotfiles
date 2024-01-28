@@ -31,6 +31,15 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
 	{
+		"bluz71/vim-moonfly-colors",
+		name = "moonfly",
+		lazy = false,
+		priority = 1000,
+		config = function()
+			vim.cmd([[colorscheme moonfly]])
+		end,
+	},
+	{
 		"nvim-treesitter/nvim-treesitter",
 		event = { "BufReadPre", "BufNewFile" },
 		build = "<cmd>TSUpdate",
@@ -168,12 +177,6 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>fn", "<cmd>Telescope file_browser<CR>", { silent = true, noremap = true })
 			vim.keymap.set("n", "<leader>fa", "<cmd>Telescope aerial<CR>", { silent = true, noremap = true })
 			vim.keymap.set("n", "<leader>tg", builtin.tagstack, { silent = true })
-			vim.keymap.set(
-				"n",
-				"<leader>fl",
-				"<cmd>Telescope file_browser path=%:p:h select_buffer=true<CR>",
-				{ silent = true, noremap = true }
-			)
 			vim.keymap.set("n", "<leader>sl", builtin.grep_string, { silent = true, noremap = true })
 			vim.keymap.set(
 				"v",
