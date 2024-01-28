@@ -80,55 +80,6 @@ require("lazy").setup({
 		lazy = true,
 		event = "VeryLazy",
 	},
-	-- {
-	-- 	"rebelot/kanagawa.nvim",
-	-- 	lazy = false,
-	-- 	priority = 1000,
-	-- 	config = function()
-	-- 		vim.cmd.colorscheme("kanagawa")
-	-- 	end,
-	-- },
-  {
-
-  },
-	{
-		"nvim-neo-tree/neo-tree.nvim",
-		branch = "v3.x",
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-			"nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
-			"MunifTanjim/nui.nvim",
-			"3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
-		},
-		config = function()
-			local neotree = require("neo-tree").setup({
-				close_if_last_window = false,
-				enable_git_status = true,
-				enable_diagnostics = true,
-				window = {
-					width = "40%",
-				},
-				filesystem = {
-					filtered_items = {
-						visible = true,
-						hide_dotfiles = false,
-						hide_gitignored = true,
-						hide_hidden = true,
-						hide_by_name = {
-							"node_modules",
-							"vendor",
-						},
-						hide_by_pattern = {},
-						always_show = {},
-						never_show = {},
-						never_show_by_pattern = {},
-					},
-				},
-			})
-			vim.keymap.set("n", "<leader>nn", "<cmd>Neotree toggle<CR>", { silent = true })
-			vim.keymap.set("n", "<leader>ns", "<cmd>Neotree action=focus reveal=true<CR>", { silent = true })
-		end,
-	},
 	{
 		"stevearc/aerial.nvim",
 		dependencies = {
@@ -419,7 +370,15 @@ require("lazy").setup({
 			lspconfig["tsserver"].setup({
 				on_attach = on_attach,
 				capabilities = capabilities,
-				filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact", "html", "eruby", "slim" },
+				filetypes = {
+					"javascript",
+					"typescript",
+					"javascriptreact",
+					"typescriptreact",
+					"html",
+					"eruby",
+					"slim",
+				},
 			})
 			lspconfig["tailwindcss"].setup({
 				on_attach = on_attach,
@@ -541,15 +500,6 @@ require("lazy").setup({
 		opts = {},
 	},
 	{
-		"sindrets/diffview.nvim",
-		config = function()
-			local diffview = require("diffview")
-			diffview.setup()
-			vim.keymap.set("n", "<leader>df", diffview.open, { silent = true })
-			vim.keymap.set("n", "<leader>dq", diffview.close, { silent = true })
-		end,
-	},
-	{
 		"nvim-lualine/lualine.nvim",
 		dependencies = {
 			"rmagatti/auto-session",
@@ -669,12 +619,12 @@ require("lazy").setup({
 						},
 						stdin = true,
 					},
-          ocaml = {
-            exe = "ocamlformat",
-          },
-          php = {
-            exe = "pint"
-          },
+					ocaml = {
+						exe = "ocamlformat",
+					},
+					php = {
+						exe = "pint",
+					},
 					["*"] = {
 						require("formatter.filetypes.any").remove_trailing_whitespace,
 					},
@@ -734,26 +684,9 @@ require("lazy").setup({
 	},
 	{
 		"tpope/vim-rails",
-    config = function ()
-      vim.api.nvim_set_var('rails_ctags_arguments', '--languages=ruby,javascript,css,scss,slim')
-    end
-	},
-	{
-		"nvim-neotest/neotest",
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-			"antoinemadec/FixCursorHold.nvim",
-			"nvim-treesitter/nvim-treesitter",
-			"olimorris/neotest-rspec",
-		},
-    config = function ()
-      local neotest = require("neotest")
-      neotest.setup({
-        adapters = {
-          require("neotest-rspec")
-        }
-      })
-    end,
+		config = function()
+			vim.api.nvim_set_var("rails_ctags_arguments", "--languages=ruby,javascript,css,scss,slim")
+		end,
 	},
 })
 
