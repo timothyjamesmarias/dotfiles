@@ -1,4 +1,3 @@
-vim.opt.termguicolors = true
 -- remaps
 vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>w", "<cmd>w<CR>")
@@ -406,7 +405,6 @@ require("lazy").setup({
 					"scss",
 					"less",
 					"eruby",
-					"slim",
 					"blade",
 					"vue",
 					"javascript",
