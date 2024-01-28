@@ -10,7 +10,7 @@
 # to the user's home directory starting with `~/`.
 
 import:
-  - "~/.config/alacritty/themes/kanagawa_wave.yaml"
+  - "~/.config/alacritty/themes/alabaster_dark.yaml"
 
 # Any items in the `env` entry below will be added as
 # environment variables. Some entries may override variables
@@ -106,16 +106,16 @@ window:
 # Font configuration
 font:
   normal:
-   family: victormono nerd font mono
-   style: Regular
+   family: Iosevka Nerd Font Mono
+   style: Light
 
   italic:
    family: victormono nerd font mono
-   style: Italic
+   style: Light Italic
 
   bold:
    family: victormono nerd font mono
-   style: Bold
+   style: Light Bold
 
   size: 16 
 
