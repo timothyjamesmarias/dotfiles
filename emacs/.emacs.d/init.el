@@ -1,8 +1,9 @@
 (setq inhibit-startup-message t)
 (tool-bar-mode -1)
+
 (scroll-bar-mode -1)
 (global-display-line-numbers-mode 1)
-(setq display-line-numbers 'relative)
+(setq display-line-numbers-type 'relative)
 (recentf-mode 1)
 (setq history-length 25)
 (savehist-mode 1)
@@ -10,8 +11,14 @@
 (setq use-dialog-box nil)
 (global-auto-revert-mode 1)
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-(set-face-attribute 'default nil :family "VictorMono Nerd Font Mono" :height 160)
+(set-face-attribute 'default nil :family "VictorMono Nerd Font Mono" :height 170)
 (setq-default line-spacing 10)
+(setq redisplay-dont-pause t
+      scroll-margin 4
+      scroll-step 1
+      scroll-conservatively 10000
+      scroll-preserve-screen-position 1)
+(electric-pair-mode 1)
 
 (require 'package)
 
@@ -36,8 +43,17 @@
 
 (use-package undo-tree)
 
-(use-package kanagawa-theme)
-(load-theme 'kanagawa :no-confirm)
+(use-package doom-themes
+  :ensure t
+  :config
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t)
+  (load-theme 'doom-Iosvkem t)
+  (doom-themes-visual-bell-config)
+  ;; (doom-themes-neotree-config)
+  ;; (setq doom-themes-treemacs-theme "doom-atom")
+  (doom-themes-treemacs-config)
+  (doom-themes-org-config))
 
 (use-package which-key
   :defer 0
@@ -93,32 +109,36 @@
     :global-prefix "C-SPC")
 
   (efs/leader-keys
-    "tt" '(counsel-load-theme :which-key "choose theme")
+    "tt" '(eshell :which-key "choose theme")
+    "th" '(counsel-load-theme :which-key "choose theme")
     "w" '(save-buffer :which-key "save buffer")
     "q" '(kill-this-buffer :which-key "kill buffer")
     "g" '(magit-status :which-key "open magit")
     "fb" '(counsel-switch-buffer :which-key "find open buffers")
+    "ff" '(projectile-find-file :which-key "find file in project")
     ))
+
+(use-package dirvish
+  :ensure t
+  :config
+  (dirvish-override-dired-mode))
 
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode)
   :custom ((projectile-completion-system 'ivy))
+
   :bind-keymap
   ("C-c p" . projectile-command-map)
   :init
   (when (file-directory-p "~/projects")
-    (setq projectile-project-search-path '("~/projects")))
+    (setq
+     projectile-project-search-path '("~/projects")))
   (setq projectile-switch-project-action #'projectile-dired))
 
 (use-package counsel-projectile
   :config (counsel-projectile-mode))
 
-;; (use-package projectile-rails
-;;   :after projectile
-;;   :config
-;;   (projectile-rails-global-mode))
-  
 (use-package evil
   :init
   (setq evil-want-integration t)
@@ -145,6 +165,11 @@
   :config
   (evil-commentary-mode))
 
+(use-package evil-surround
+  :ensure t
+  :config
+  (global-evil-surround-mode 1))
+
 (use-package magit
   :commands (magit-status magit-get-current-branch)
   :custom
@@ -154,6 +179,7 @@
 
 ; run M-x all-the-icons-install-fonts
 (use-package all-the-icons)
+
 
 (use-package key-chord)
 (key-chord-mode 1)
@@ -180,24 +206,50 @@
   (company-minimum-prefix-length 1)
   (company-idle-delay 0.0))
 
+(global-company-mode 1)
+
 (use-package company-box
   :hook (company-mode . company-box-mode))
 
 ; JS, TS, Vue packages
 (use-package web-mode)
+(use-package vue-mode)
 
-; Ruby packages
-(use-package projectile-rails)
-(use-package robe)
+; Go packages
+(setenv "PATH" (concat (getenv "PATH") ":/Users/timmarias/go"))
+(use-package go-mode
+  :ensure t
+  :hook ((go-mode . lsp-deferred)
+	 (go-mode . company-mode))
+  :bind (:map go-mode-map
+	      ("C-c 4" . gofmt))
+  :config
+  (require 'lsp-go)
+  (setq lsp-go-analyses
+	'((fieldalignment . t)
+	  (nilness . t)
+	  (unusedwrite . t)
+	  (unusedparams . t)))
+  (add-to-list 'exec-path "~/go/bin")
+  (setq gofmt-command "goimports"))
+
+(use-package typescript-mode
+  :mode "\\.ts\\'"
+  :hook (typescript-mode . lsp-deferred)
+  :config
+  (setq typescript-indent-level 2))
+
+(add-hook 'python-mode-hook #'lsp)
+(add-hook 'typescript-mode-hook #'lsp)
+(add-hook 'js-mode-hook #'lsp)
+(add-hook 'go-mode-hook #'lsp)
+(add-hook 'cpp-mode-hook #'lsp)
+(add-hook 'c-mode-hook #'lsp)
 
 ; Org mode
 
 (use-package org)
 
-; asdf for managing ruby and node versions
-;; (add-to-list 'load-path "~/.emacs.d/asdf.el/asdf.el")
-;; (require 'asdf)
-;; (asdf enable)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -207,7 +259,7 @@
  '(custom-safe-themes
    '("97ef2fe48a437ea2e734556d5acf4c08c74647c497a952c1ae8571a71369f7a7" default))
  '(package-selected-packages
-   '(web-mode lsp-ivy company-box company typescript-mode lsp-mode robe forge kanagawa-theme exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
+   '(dirvish doom-themes go-mode web-mode lsp-ivy company-box company typescript-mode lsp-mode robe forge exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
