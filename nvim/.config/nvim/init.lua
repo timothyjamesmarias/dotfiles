@@ -542,6 +542,9 @@ require("lazy").setup({
 					php = {
 						exe = "pint",
 					},
+					go = {
+						exe = "gofmt",
+					},
 					["*"] = {
 						require("formatter.filetypes.any").remove_trailing_whitespace,
 					},
