@@ -5,6 +5,7 @@
 (global-display-line-numbers-mode 1)
 (setq display-line-numbers-type 'relative)
 (recentf-mode 1)
+
 (setq history-length 25)
 (savehist-mode 1)
 (save-place-mode 1)
@@ -48,12 +49,15 @@
   :config
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t)
-  (load-theme 'doom-Iosvkem t)
   (doom-themes-visual-bell-config)
   ;; (doom-themes-neotree-config)
   ;; (setq doom-themes-treemacs-theme "doom-atom")
   (doom-themes-treemacs-config)
   (doom-themes-org-config))
+
+(add-to-list 'load-path "~/.emacs.d/doom-moonfly-theme.el")
+(require 'doom-moonfly-theme)
+(load-theme 'doom-moonfly)
 
 (use-package which-key
   :defer 0
@@ -246,6 +250,11 @@
 (add-hook 'cpp-mode-hook #'lsp)
 (add-hook 'c-mode-hook #'lsp)
 
+; DAP stuff
+(use-package dap-mode)
+
+
+
 ; Org mode
 
 (use-package org)
@@ -257,9 +266,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("97ef2fe48a437ea2e734556d5acf4c08c74647c497a952c1ae8571a71369f7a7" default))
+   '("60d142f405a0bd2b653e2fea70b2ac80b0a2e5d55405a57e4c59df767fe0a45c" "97ef2fe48a437ea2e734556d5acf4c08c74647c497a952c1ae8571a71369f7a7" default))
  '(package-selected-packages
-   '(dirvish doom-themes go-mode web-mode lsp-ivy company-box company typescript-mode lsp-mode robe forge exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
+   '(dap-mode dirvish doom-themes go-mode web-mode lsp-ivy company-box company typescript-mode lsp-mode robe forge exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

@@ -596,18 +596,6 @@ require("lazy").setup({
 			})
 		end,
 	},
-	{
-		"slim-template/vim-slim",
-		config = function()
-			vim.cmd("au BufNewFile,BufRead *.slim set filetype=slim")
-		end,
-	},
-	{
-		"tpope/vim-rails",
-		config = function()
-			vim.api.nvim_set_var("rails_ctags_arguments", "--languages=ruby,javascript,css,scss,slim")
-		end,
-	},
 })
 
 -- options
