@@ -50,14 +50,12 @@
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t)
   (doom-themes-visual-bell-config)
+  (load-theme 'doom-pine t)
   ;; (doom-themes-neotree-config)
   ;; (setq doom-themes-treemacs-theme "doom-atom")
   (doom-themes-treemacs-config)
   (doom-themes-org-config))
 
-(add-to-list 'load-path "~/.emacs.d/doom-moonfly-theme.el")
-(require 'doom-moonfly-theme)
-(load-theme 'doom-moonfly)
 
 (use-package which-key
   :defer 0
@@ -121,11 +119,6 @@
     "fb" '(counsel-switch-buffer :which-key "find open buffers")
     "ff" '(projectile-find-file :which-key "find file in project")
     ))
-
-(use-package dirvish
-  :ensure t
-  :config
-  (dirvish-override-dired-mode))
 
 (use-package projectile
   :diminish projectile-mode
@@ -217,7 +210,6 @@
 
 ; JS, TS, Vue packages
 (use-package web-mode)
-(use-package vue-mode)
 
 ; Go packages
 (setenv "PATH" (concat (getenv "PATH") ":/Users/timmarias/go"))
@@ -252,8 +244,6 @@
 
 ; DAP stuff
 (use-package dap-mode)
-
-
 
 ; Org mode
 
