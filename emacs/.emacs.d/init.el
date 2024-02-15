@@ -21,6 +21,8 @@
       scroll-preserve-screen-position 1)
 (electric-pair-mode 1)
 
+(setq dired-dwim-target t)
+
 (require 'package)
 
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
@@ -44,6 +46,7 @@
 
 (use-package undo-tree)
 
+
 (use-package doom-themes
   :ensure t
   :config
@@ -56,6 +59,11 @@
   (doom-themes-treemacs-config)
   (doom-themes-org-config))
 
+(use-package doom-modeline
+  :ensure t
+  :config
+  (setq doom-modeline-height 40)
+  :init (doom-modeline-mode 1))
 
 (use-package which-key
   :defer 0
@@ -118,6 +126,9 @@
     "g" '(magit-status :which-key "open magit")
     "fb" '(counsel-switch-buffer :which-key "find open buffers")
     "ff" '(projectile-find-file :which-key "find file in project")
+    "vv" '(split-window-vertically :which-key "split vertically")
+    "hh" '(split-window-horizontally :which-key "split horizontally")
+    "nn" '(treemacs :which-key "open treemacs")
     ))
 
 (use-package projectile
@@ -150,6 +161,13 @@
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal))
 
+(eval-after-load "evil"
+  '(progn
+     (define-key evil-normal-state-map (kbd "C-h") 'evil-window-left)
+     (define-key evil-normal-state-map (kbd "C-j") 'evil-window-down)
+     (define-key evil-normal-state-map (kbd "C-k") 'evil-window-up)
+     (define-key evil-normal-state-map (kbd "C-l") 'evil-window-right)))
+
 (evil-mode 1)
 
 (use-package evil-collection
@@ -177,6 +195,54 @@
 ; run M-x all-the-icons-install-fonts
 (use-package all-the-icons)
 
+(use-package treemacs
+  :ensure t
+  :defer t
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  :config
+    (treemacs-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (setq treemacs-width 70)
+    (treemacs-fringe-indicator-mode 'always)
+    (when treemacs-python-executable
+	(treemacs-git-commit-diff-mode t))
+
+    (pcase (cons (not (null (executable-find "git")))
+		    (not (null treemacs-python-executable)))
+	(`(t . t)
+	(treemacs-git-mode 'deferred))
+	(`(t . _)
+	(treemacs-git-mode 'simple)))
+
+    (treemacs-hide-gitignored-files-mode nil))
+
+(use-package treemacs-evil
+  :after (treemacs evil)
+  :ensure t)
+
+(use-package treemacs-projectile
+  :after (treemacs projectile)
+  :ensure t)
+
+(use-package treemacs-icons-dired
+  :hook (dired-mode . treemacs-icons-dired-enable-once)
+  :ensure t)
+
+(use-package treemacs-magit
+  :after (treemacs magit)
+  :ensure t)
+
+(use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
+  :after (treemacs persp-mode) ;;or perspective vs. persp-mode
+  :ensure t
+  :config (treemacs-set-scope-type 'Perspectives))
+
+(use-package treemacs-tab-bar ;;treemacs-tab-bar if you use tab-bar-mode
+  :after (treemacs)
+  :ensure t
+  :config (treemacs-set-scope-type 'Tabs))
 
 (use-package key-chord)
 (key-chord-mode 1)
@@ -258,7 +324,7 @@
  '(custom-safe-themes
    '("60d142f405a0bd2b653e2fea70b2ac80b0a2e5d55405a57e4c59df767fe0a45c" "97ef2fe48a437ea2e734556d5acf4c08c74647c497a952c1ae8571a71369f7a7" default))
  '(package-selected-packages
-   '(dap-mode dirvish doom-themes go-mode web-mode lsp-ivy company-box company typescript-mode lsp-mode robe forge exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
+   '(treemacs-tab-bar treemacs-persp treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil doom-modeline dap-mode dirvish doom-themes go-mode web-mode lsp-ivy company-box company typescript-mode lsp-mode robe forge exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
