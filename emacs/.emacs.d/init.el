@@ -20,6 +20,8 @@
       scroll-conservatively 10000
       scroll-preserve-screen-position 1)
 (electric-pair-mode 1)
+(setq global-tab-line-mode 1)
+(setq tab-bar-mode 1)
 
 (setq dired-dwim-target t)
 
@@ -125,7 +127,7 @@
     "q" '(kill-this-buffer :which-key "kill buffer")
     "g" '(magit-status :which-key "open magit")
     "fb" '(counsel-switch-buffer :which-key "find open buffers")
-    "ff" '(projectile-find-file :which-key "find file in project")
+    "ff" '(projectile-find-file-dwim :which-key "find file in project")
     "vv" '(split-window-vertically :which-key "split vertically")
     "hh" '(split-window-horizontally :which-key "split horizontally")
     "nn" '(treemacs :which-key "open treemacs")
@@ -244,10 +246,19 @@
   :ensure t
   :config (treemacs-set-scope-type 'Tabs))
 
+(use-package perspective
+  :bind
+  ("C-x C-b" . persp-list-buffers)         ; or use a nicer switcher, see below
+  ("C-x k" . persp-kill-buffer*)
+  :custom
+  (persp-mode-prefix-key (kbd "C-c M-p"))  ; pick your own prefix key here
+  :init
+  (persp-mode))
+
 (use-package key-chord)
 (key-chord-mode 1)
 
-(key-chord-define evil-insert-state-map "jj" 'evil-normal-state)
+(key-chord-define evil-insert--map "jj" 'evil-normal-state)
 
 ; LSP stuff
 (use-package lsp-mode
@@ -324,7 +335,7 @@
  '(custom-safe-themes
    '("60d142f405a0bd2b653e2fea70b2ac80b0a2e5d55405a57e4c59df767fe0a45c" "97ef2fe48a437ea2e734556d5acf4c08c74647c497a952c1ae8571a71369f7a7" default))
  '(package-selected-packages
-   '(treemacs-tab-bar treemacs-persp treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil doom-modeline dap-mode dirvish doom-themes go-mode web-mode lsp-ivy company-box company typescript-mode lsp-mode robe forge exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
+   '(perspective treemacs-tab-bar treemacs-persp treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil doom-modeline dap-mode dirvish doom-themes go-mode web-mode lsp-ivy company-box company typescript-mode lsp-mode robe forge exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
