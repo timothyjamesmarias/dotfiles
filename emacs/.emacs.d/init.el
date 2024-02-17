@@ -55,7 +55,7 @@
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t)
   (doom-themes-visual-bell-config)
-  (load-theme 'doom-pine t)
+  (load-theme 'doom-sourcerer t)
   ;; (doom-themes-neotree-config)
   ;; (setq doom-themes-treemacs-theme "doom-atom")
   (doom-themes-treemacs-config)
@@ -258,7 +258,7 @@
 (use-package key-chord)
 (key-chord-mode 1)
 
-(key-chord-define evil-insert--map "jj" 'evil-normal-state)
+(key-chord-define evil-insert-state-map "jj" 'evil-normal-state)
 
 ; LSP stuff
 (use-package lsp-mode
