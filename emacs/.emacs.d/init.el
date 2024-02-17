@@ -20,7 +20,6 @@
       scroll-conservatively 10000
       scroll-preserve-screen-position 1)
 (electric-pair-mode 1)
-(setq global-tab-line-mode 1)
 (setq tab-bar-mode 1)
 
 (setq dired-dwim-target t)
@@ -56,8 +55,8 @@
         doom-themes-enable-italic t)
   (doom-themes-visual-bell-config)
   (load-theme 'doom-sourcerer t)
-  ;; (doom-themes-neotree-config)
-  ;; (setq doom-themes-treemacs-theme "doom-atom")
+  (doom-themes-neotree-config)
+  (setq doom-themes-treemacs-theme "doom-sourcerer")
   (doom-themes-treemacs-config)
   (doom-themes-org-config))
 
@@ -115,10 +114,13 @@
 (use-package general
   :after evil
   :config
+  (general-evil-setup)
   (general-create-definer efs/leader-keys
     :keymaps '(normal insert visual emacs)
     :prefix "SPC"
     :global-prefix "C-SPC")
+  (general-nmap
+    "C-c 3" compile-command)
 
   (efs/leader-keys
     "tt" '(eshell :which-key "choose theme")
@@ -131,6 +133,7 @@
     "vv" '(split-window-vertically :which-key "split vertically")
     "hh" '(split-window-horizontally :which-key "split horizontally")
     "nn" '(treemacs :which-key "open treemacs")
+    "sf" '(evil-search :which-key "search file")
     ))
 
 (use-package projectile
@@ -162,13 +165,6 @@
   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal))
-
-(eval-after-load "evil"
-  '(progn
-     (define-key evil-normal-state-map (kbd "C-h") 'evil-window-left)
-     (define-key evil-normal-state-map (kbd "C-j") 'evil-window-down)
-     (define-key evil-normal-state-map (kbd "C-k") 'evil-window-up)
-     (define-key evil-normal-state-map (kbd "C-l") 'evil-window-right)))
 
 (evil-mode 1)
 
@@ -206,7 +202,7 @@
   :config
     (treemacs-follow-mode t)
     (treemacs-filewatch-mode t)
-    (setq treemacs-width 70)
+    (setq treemacs-width 100)
     (treemacs-fringe-indicator-mode 'always)
     (when treemacs-python-executable
 	(treemacs-git-commit-diff-mode t))
@@ -259,6 +255,7 @@
 (key-chord-mode 1)
 
 (key-chord-define evil-insert-state-map "jj" 'evil-normal-state)
+
 
 ; LSP stuff
 (use-package lsp-mode
