@@ -1,0 +1,262 @@
+[colors.bright]
+black = "#949494"
+blue = "#74b2ff"
+cyan = "#85dc85"
+green = "#36c692"
+magenta = "#ae81ff"
+red = "#ff5189"
+white = "#e4e4e4"
+yellow = "#c2c292"
+
+[colors.cursor]
+cursor = "#9e9e9e"
+text = "#080808"
+
+[colors.normal]
+black = "#323437"
+blue = "#80a0ff"
+cyan = "#79dac8"
+green = "#8cc85f"
+magenta = "#cf87e8"
+red = "#ff5454"
+white = "#c6c6c6"
+yellow = "#e3c78a"
+
+[colors.primary]
+background = "#080808"
+bright_foreground = "#eeeeee"
+foreground = "#bdbdbd"
+
+[colors.selection]
+background = "#b2ceee"
+text = "#080808"
+
+[env]
+TERM = "xterm-256color"
+
+[font]
+size = 20
+
+[font.glyph_offset]
+x = 0
+y = 5
+
+[font.offset]
+x = 0
+y = 10
+
+[schemes.aura.bright]
+black = "#4d4d4d"
+blue = "#a277ff"
+cyan = "#61ffca"
+green = "#61ffca"
+magenta = "#a277ff"
+red = "#ff6767"
+white = "#edecee"
+yellow = "#ffca85"
+
+[schemes.aura.cursor]
+cursor = "#a277ff"
+
+[schemes.aura.normal]
+black = "#110f18"
+blue = "#a277ff"
+cyan = "#61ffca"
+green = "#61ffca"
+magenta = "#a277ff"
+red = "#ff6767"
+white = "#edecee"
+yellow = "#ffca85"
+
+[schemes.aura.primary]
+background = "#15141b"
+foreground = "#edecee"
+
+[schemes.aura.selection]
+background = "#29263c"
+text = "CellForeground"
+
+[schemes.everforest_dark_hard.bright]
+black = "#475258"
+blue = "#7fbbb3"
+cyan = "#83c092"
+green = "#a7c080"
+magenta = "#d699b6"
+red = "#e67e80"
+white = "#d3c6aa"
+yellow = "#dbbc7f"
+
+[schemes.everforest_dark_hard.normal]
+black = "#414b50"
+blue = "#7fbbb3"
+cyan = "#83c092"
+green = "#a7c080"
+magenta = "#d699b6"
+red = "#e67e80"
+white = "#d3c6aa"
+yellow = "#dbbc7f"
+
+[schemes.everforest_dark_hard.primary]
+background = "#272e33"
+foreground = "#d3c6aa"
+
+[schemes.everforest_dark_medium.bright]
+black = "#475258"
+blue = "#7fbbb3"
+cyan = "#83c092"
+green = "#a7c080"
+magenta = "#d699b6"
+red = "#e67e80"
+white = "#d3c6aa"
+yellow = "#dbbc7f"
+
+[schemes.everforest_dark_medium.normal]
+black = "#475258"
+blue = "#7fbbb3"
+cyan = "#83c092"
+green = "#a7c080"
+magenta = "#d699b6"
+red = "#e67e80"
+white = "#d3c6aa"
+yellow = "#dbbc7f"
+
+[schemes.everforest_dark_medium.primary]
+background = "#2d353b"
+foreground = "#d3c6aa"
+
+[schemes.everforest_dark_soft.bright]
+black = "#4d5960"
+blue = "#7fbbb3"
+cyan = "#83c092"
+green = "#a7c080"
+magenta = "#d699b6"
+red = "#e67e80"
+white = "#d3c6aa"
+yellow = "#dbbc7f"
+
+[schemes.everforest_dark_soft.normal]
+black = "#4d5960"
+blue = "#7fbbb3"
+cyan = "#83c092"
+green = "#a7c080"
+magenta = "#d699b6"
+red = "#e67e80"
+white = "#d3c6aa"
+yellow = "#dbbc7f"
+
+[schemes.everforest_dark_soft.primary]
+background = "#333c43"
+foreground = "#d3c6aa"
+
+[schemes.everforest_light_hard.bright]
+black = "#5c6a72"
+blue = "#3a94c5"
+cyan = "#35a77c"
+green = "#8da101"
+magenta = "#df69ba"
+red = "#f85552"
+white = "#e8e5d5"
+yellow = "#dfa000"
+
+[schemes.everforest_light_hard.normal]
+black = "#5c6a72"
+blue = "#3a94c5"
+cyan = "#35a77c"
+green = "#8da101"
+magenta = "#df69ba"
+red = "#f85552"
+white = "#e8e5d5"
+yellow = "#dfa000"
+
+[schemes.everforest_light_hard.primary]
+background = "#fffbef"
+foreground = "#5c6a72"
+
+[schemes.everforest_light_medium.bright]
+black = "#5c6a72"
+blue = "#3a94c5"
+cyan = "#35a77c"
+green = "#8da101"
+magenta = "#df69ba"
+red = "#f85552"
+white = "#e0dcc7"
+yellow = "#dfa000"
+
+[schemes.everforest_light_medium.normal]
+black = "#5c6a72"
+blue = "#3a94c5"
+cyan = "#35a77c"
+green = "#8da101"
+magenta = "#df69ba"
+red = "#f85552"
+white = "#e0dcc7"
+yellow = "#dfa000"
+
+[schemes.everforest_light_medium.primary]
+background = "#fdf6e3"
+foreground = "#5c6a72"
+
+[schemes.everforest_light_soft.bright]
+black = "#5c6a72"
+blue = "#3a94c5"
+cyan = "#35a77c"
+green = "#8da101"
+magenta = "#df69ba"
+red = "#f85552"
+white = "#d8d3ba"
+yellow = "#dfa000"
+
+[schemes.everforest_light_soft.normal]
+black = "#5c6a72"
+blue = "#3a94c5"
+cyan = "#35a77c"
+green = "#8da101"
+magenta = "#df69ba"
+red = "#f85552"
+white = "#d8d3ba"
+yellow = "#dfa000"
+
+[schemes.everforest_light_soft.primary]
+background = "#f3ead3"
+foreground = "#5c6a72"
+
+[schemes.moonfly.bright]
+black = "#949494"
+blue = "#74b2ff"
+cyan = "#85dc85"
+green = "#36c692"
+magenta = "#ae81ff"
+red = "#ff5189"
+white = "#e4e4e4"
+yellow = "#c2c292"
+
+[schemes.moonfly.cursor]
+cursor = "#9e9e9e"
+text = "#080808"
+
+[schemes.moonfly.normal]
+black = "#323437"
+blue = "#80a0ff"
+cyan = "#79dac8"
+green = "#8cc85f"
+magenta = "#cf87e8"
+red = "#ff5454"
+white = "#c6c6c6"
+yellow = "#e3c78a"
+
+[schemes.moonfly.primary]
+background = "#080808"
+bright_foreground = "#eeeeee"
+foreground = "#bdbdbd"
+
+[schemes.moonfly.selection]
+background = "#b2ceee"
+text = "#080808"
+
+[shell]
+args = ["-l", "-c", "tmux attach || tmux"]
+program = "/bin/zsh"
+
+[window.padding]
+x = 0
+y = 0

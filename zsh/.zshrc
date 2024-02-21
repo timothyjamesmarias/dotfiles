@@ -93,3 +93,5 @@ export PATH="$HOME/.config/emacs/bin/:$PATH"
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+. /opt/asdf-vm/asdf.sh
