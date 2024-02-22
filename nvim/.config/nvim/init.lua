@@ -1,3 +1,6 @@
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
 -- remaps
 vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>w", "<cmd>w<CR>")
@@ -36,6 +39,32 @@ require("lazy").setup({
 		priority = 1000,
 		config = function()
 			vim.cmd([[colorscheme moonfly]])
+		end,
+	},
+	{
+		"nvim-tree/nvim-tree.lua",
+		dependencies = {
+			"nvim-tree/nvim-web-devicons",
+		},
+		config = function()
+			local nvim_tree = require("nvim-tree")
+			nvim_tree.setup({
+				filters = {
+					dotfiles = true,
+				},
+			})
+			vim.keymap.set(
+				"n",
+				"<leader>nn",
+				"<cmd>NvimTreeToggle<CR>",
+				{ silent = true }
+			)
+			vim.keymap.set(
+				"n",
+				"<leader>ns",
+				"<cmd>NvimTreeFindFile<CR>",
+				{ silent = true }
+			)
 		end,
 	},
 	{
