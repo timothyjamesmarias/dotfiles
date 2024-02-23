@@ -1,6 +1,6 @@
 (setq inhibit-startup-message t)
 (tool-bar-mode -1)
-
+(menu-bar-mode -1)
 (scroll-bar-mode -1)
 (global-display-line-numbers-mode 1)
 (setq display-line-numbers-type 'relative)
@@ -54,9 +54,9 @@
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t)
   (doom-themes-visual-bell-config)
-  (load-theme 'doom-sourcerer t)
+  (load-theme 'doom-dark+ t)
   (doom-themes-neotree-config)
-  (setq doom-themes-treemacs-theme "doom-sourcerer")
+  (setq doom-themes-treemacs-theme "doom-dark+")
   (doom-themes-treemacs-config)
   (doom-themes-org-config))
 
@@ -202,7 +202,7 @@
   :config
     (treemacs-follow-mode t)
     (treemacs-filewatch-mode t)
-    (setq treemacs-width 100)
+    (setq treemacs-width 60)
     (treemacs-fringe-indicator-mode 'always)
     (when treemacs-python-executable
 	(treemacs-git-commit-diff-mode t))

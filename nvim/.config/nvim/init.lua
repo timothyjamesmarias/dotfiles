@@ -33,11 +33,11 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
   {
-    'Tsuzat/NeoSolarized.nvim',
+    "protesilaos/tempus-themes-vim",
 		lazy = false,
 		priority = 1000,
 		config = function()
-			vim.cmd([[colorscheme NeoSolarized]])
+			vim.cmd([[colorscheme tempus_future]])
 		end,
   },
 	{
@@ -473,7 +473,7 @@ require("lazy").setup({
 				},
 				sections = {
 					lualine_a = { "mode" },
-					lualine_b = { "branch", "diff", "diagnostics", require("auto-session.lib").current_session_name },
+					lualine_b = { "branch", "diagnostics" },
 					lualine_c = { "filename" },
 					lualine_x = { "searchcount", "fileformat", "filetype" },
 					lualine_y = { "progress" },
@@ -639,8 +639,8 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.smartindent = true
 vim.opt.mouse = a
-vim.opt.spelllang = "en_us"
-vim.opt.spell = true
+-- vim.opt.spelllang = "en_us"
+-- vim.opt.spell = true
 vim.opt.updatetime = 1000
 vim.opt.completeopt = { "menuone", "longest", "preview" }
 vim.opt.ignorecase = true
