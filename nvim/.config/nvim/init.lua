@@ -13,8 +13,8 @@ vim.keymap.set("n", "<leader>q", "<cmd>bd<CR>", { silent = true })
 vim.keymap.set("n", "<leader>Q", "<cmd>q!<CR>", { silent = true })
 vim.keymap.set("n", "n", "nzzzv", { silent = true })
 vim.keymap.set("n", "N", "Nzzzv", { silent = true })
-vim.keymap.set("n", "<leader>vv", "<cmd>vsp<CR>", { silent = true })
-vim.keymap.set("n", "<leader>hh", "<cmd>sp<CR>", { silent = true })
+vim.keymap.set("n", "<leader>hh", "<cmd>vsp<CR>", { silent = true })
+vim.keymap.set("n", "<leader>vv", "<cmd>sp<CR>", { silent = true })
 vim.keymap.set("n", "<leader>sf", "/")
 
 -- plugins
@@ -32,15 +32,14 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-	{
-		"bluz71/vim-moonfly-colors",
-		name = "moonfly",
+  {
+    'Tsuzat/NeoSolarized.nvim',
 		lazy = false,
 		priority = 1000,
 		config = function()
-			vim.cmd([[colorscheme moonfly]])
+			vim.cmd([[colorscheme NeoSolarized]])
 		end,
-	},
+  },
 	{
 		"nvim-tree/nvim-tree.lua",
 		dependencies = {
@@ -249,6 +248,7 @@ require("lazy").setup({
 			"L3MON4D3/LuaSnip",
 			"onsails/lspkind-nvim",
 			"nvim-telescope/telescope.nvim",
+      "rafamadriz/friendly-snippets",
 		},
 		config = function()
 			local lspconfig = require("lspconfig")
