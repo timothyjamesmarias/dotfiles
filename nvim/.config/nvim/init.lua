@@ -32,14 +32,15 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-  {
-    "protesilaos/tempus-themes-vim",
+	{
+		"rose-pine/neovim",
+		name = "rose-pine",
 		lazy = false,
 		priority = 1000,
 		config = function()
-			vim.cmd([[colorscheme tempus_future]])
+			vim.cmd([[colorscheme rose-pine]])
 		end,
-  },
+	},
 	{
 		"nvim-tree/nvim-tree.lua",
 		dependencies = {
@@ -51,19 +52,12 @@ require("lazy").setup({
 				filters = {
 					dotfiles = true,
 				},
+				view = {
+					width = 70,
+				},
 			})
-			vim.keymap.set(
-				"n",
-				"<leader>nn",
-				"<cmd>NvimTreeToggle<CR>",
-				{ silent = true }
-			)
-			vim.keymap.set(
-				"n",
-				"<leader>ns",
-				"<cmd>NvimTreeFindFile<CR>",
-				{ silent = true }
-			)
+			vim.keymap.set("n", "<leader>nn", "<cmd>NvimTreeToggle<CR>", { silent = true })
+			vim.keymap.set("n", "<leader>ns", "<cmd>NvimTreeFindFile<CR>", { silent = true })
 		end,
 	},
 	{
@@ -248,7 +242,7 @@ require("lazy").setup({
 			"L3MON4D3/LuaSnip",
 			"onsails/lspkind-nvim",
 			"nvim-telescope/telescope.nvim",
-      "rafamadriz/friendly-snippets",
+			"rafamadriz/friendly-snippets",
 		},
 		config = function()
 			local lspconfig = require("lspconfig")

@@ -47,21 +47,20 @@
 
 (use-package undo-tree)
 
-
 (use-package doom-themes
-  :ensure t
+  ;; :ensure t
   :config
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t)
   (doom-themes-visual-bell-config)
   (load-theme 'doom-dark+ t)
-  (doom-themes-neotree-config)
-  (setq doom-themes-treemacs-theme "doom-dark+")
-  (doom-themes-treemacs-config)
-  (doom-themes-org-config))
+  ;; (setq doom-themes-treemacs-theme "doom-dark+")
+  ;; (doom-themes-treemacs-config)
+  ;; (doom-themes-org-config)
+  )
 
 (use-package doom-modeline
-  :ensure t
+  ;; :ensure t
   :config
   (setq doom-modeline-height 40)
   :init (doom-modeline-mode 1))
@@ -103,16 +102,15 @@
   (counsel-mode 1))
 
 (use-package ivy-prescient
-  :after counsel
+  :after (counsel ivy)
   :custom
   (ivy-prescient-enable-filtering nil)
   :config
-  ;; Uncomment the following line to have sorting remembered across sessions!
-  ;(prescient-persist-mode 1)
   (ivy-prescient-mode 1))
 
 (use-package general
   :after evil
+  :defer t
   :config
   (general-evil-setup)
   (general-create-definer efs/leader-keys
@@ -137,6 +135,7 @@
     ))
 
 (use-package projectile
+  :defer t
   :diminish projectile-mode
   :config (projectile-mode)
   :custom ((projectile-completion-system 'ivy))
@@ -150,6 +149,8 @@
   (setq projectile-switch-project-action #'projectile-dired))
 
 (use-package counsel-projectile
+  :defer t
+  :after (projectile counsel)
   :config (counsel-projectile-mode))
 
 (use-package evil
@@ -170,6 +171,7 @@
 
 (use-package evil-collection
   :after evil
+  :defer t
   :config
   (evil-collection-init))
 
@@ -179,7 +181,7 @@
   (evil-commentary-mode))
 
 (use-package evil-surround
-  :ensure t
+  :after evil
   :config
   (global-evil-surround-mode 1))
 
@@ -187,8 +189,6 @@
   :commands (magit-status magit-get-current-branch)
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
-
-(use-package forge)
 
 ; run M-x all-the-icons-install-fonts
 (use-package all-the-icons)
@@ -256,7 +256,6 @@
 
 (key-chord-define evil-insert-state-map "jj" 'evil-normal-state)
 
-
 ; LSP stuff
 (use-package lsp-mode
   :commands (lsp lsp-deferred)
@@ -317,12 +316,20 @@
 (add-hook 'c-mode-hook #'lsp)
 
 ; DAP stuff
-(use-package dap-mode)
+(use-package dap-mode
+  :commands dap-debug)
 
 ; Org mode
+(use-package org
+  :defer t)
 
-(use-package org)
-
+(defun efs/display-startup-time ()
+  (message "Emacs loaded in %s with %d garbage collections."
+	   (format "%.2f seconds"
+		   (float-time
+		    (time-subtract after-init-time before-init-time)))
+	   gcs-done))
+(add-hook 'emacs-startup-hook #'efs/display-startup-time)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
