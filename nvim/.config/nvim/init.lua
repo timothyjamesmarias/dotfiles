@@ -33,12 +33,11 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
 	{
-		"rose-pine/neovim",
-		name = "rose-pine",
-		lazy = false,
+		"catppuccin/nvim",
+		name = "catppuccin",
 		priority = 1000,
 		config = function()
-			vim.cmd([[colorscheme rose-pine]])
+			vim.cmd([[colorscheme catppuccin-mocha]])
 		end,
 	},
 	{
@@ -633,8 +632,8 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.smartindent = true
 vim.opt.mouse = a
--- vim.opt.spelllang = "en_us"
--- vim.opt.spell = true
+vim.opt.spelllang = "en_us"
+vim.opt.spell = true
 vim.opt.updatetime = 1000
 vim.opt.completeopt = { "menuone", "longest", "preview" }
 vim.opt.ignorecase = true
