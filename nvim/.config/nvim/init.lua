@@ -218,10 +218,6 @@ require("lazy").setup({
 		dependencies = {
 			-- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
 			"MunifTanjim/nui.nvim",
-			-- OPTIONAL:
-			--   `nvim-notify` is only needed, if you want to use the notification view.
-			--   If not available, we use `mini` as the fallback
-			"rcarriga/nvim-notify",
 		},
 	},
 	{
@@ -589,6 +585,9 @@ require("lazy").setup({
 					},
 				},
 			})
+			vim.api.nvim_create_autocmd("BufWritePost", {
+				command = "Format",
+			})
 			vim.keymap.set("n", "<leader>fm", "<cmd>Format<CR>", { silent = false })
 		end,
 	},
@@ -639,11 +638,9 @@ require("lazy").setup({
 
 -- options
 vim.cmd("syntax on")
-
 vim.cmd("au FileType netrw setl bufhidden=wipe")
 vim.api.nvim_set_var("netrw_fastbrowse", 0)
-
-vim.opt.clipboard = "unnamedplus"
+vim.opt.clipboard = "unnamedplus" --requires a clipboard manager like xclip
 vim.opt.background = "dark"
 vim.opt.number = true
 vim.opt.relativenumber = true
