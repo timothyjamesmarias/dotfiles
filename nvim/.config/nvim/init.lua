@@ -67,11 +67,12 @@ require("lazy").setup({
 			"JoosepAlviste/nvim-ts-context-commentstring",
 			"EmranMR/tree-sitter-blade",
 			"RRethy/nvim-treesitter-endwise",
+			"vrischmann/tree-sitter-templ",
 		},
 		config = function()
 			local treesitter = require("nvim-treesitter.configs")
 			treesitter.setup({
-				highlight = { enable = true },
+				highlight = { enable = true, additional_vim_regex_highlighting = false },
 				modules = {},
 				indent = { enable = true },
 				autotag = { enable = true },
@@ -82,6 +83,11 @@ require("lazy").setup({
 				},
 				endwise = {
 					enable = true,
+				},
+			})
+			vim.filetype.add({
+				extension = {
+					templ = "templ",
 				},
 			})
 		end,
@@ -592,7 +598,7 @@ require("lazy").setup({
 	},
 	{
 		"rmagatti/session-lens",
-		dependenceis = {
+		dependencies = {
 			"rmagatti/auto-session",
 			"nvim-telescope/telescope.nvim",
 			"nvim-lualine/lualine.nvim",
@@ -677,7 +683,22 @@ require("lazy").setup({
 			"nvim-lua/plenary.nvim",
 			"antoinemadec/FixCursorHold.nvim",
 			"nvim-treesitter/nvim-treesitter",
+			"nvim-neotest/neotest-go",
 		},
+		config = function()
+			local neotest = require("neotest")
+			neotest.setup({
+				adapters = {
+					require("neotest-go"),
+				},
+			})
+			vim.keymap.set("n", "<leader>tt", ":lua require('neotest').run.run()<CR>", {})
+			vim.keymap.set("n", "<leader>tl", ":lua require('neotest').run.run_last()<CR>", {})
+			vim.keymap.set("n", "<leader>tf", ":lua require('neotest').run.run(vim.fn.expand('%'))<CR>", {})
+			vim.keymap.set("n", "<leader>ta", ":lua require('neotest').run.run(vim.fn.getcwd())<CR>", {})
+			vim.keymap.set("n", "<leader>ts", ":lua require('neotest').run.stop()<CR>", {})
+			vim.keymap.set("n", "<leader>tw", ":lua require('neotest').watch.toggle()<CR>", {})
+		end,
 	},
 })
 
