@@ -634,24 +634,6 @@ require("lazy").setup({
 		end,
 	},
 	{
-		"folke/neodev.nvim",
-		dependencies = {
-			"rcarriga/nvim-dap-ui",
-			"hrsh7th/nvim-cmp",
-		},
-		config = function()
-			local neodev = require("neodev")
-			neodev.setup({
-				library = {
-					plugins = {
-						"nvim-dap-ui",
-					},
-					types = true,
-				},
-			})
-		end,
-	},
-	{
 		"mfussenegger/nvim-dap",
 		dependencies = {
 			"rcarriga/nvim-dap-ui",
@@ -686,18 +668,16 @@ require("lazy").setup({
 		"leoluz/nvim-dap-go",
 		config = function()
 			local dap_go = require("dap-go")
-			dap_go.setup({
-				-- dap_configurations = {
-				-- 	{
-				-- 		type = "go",
-				-- 		name = "Attach remote",
-				-- 		mode = "remote",
-				-- 		request = "attach",
-				-- 	},
-				-- },
-			})
-			-- vim.keymap.set("n", "<leader>dt", dap_go.debut_test(), {})
+			dap_go.setup()
 		end,
+	},
+	{
+		"nvim-neotest/neotest",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"antoinemadec/FixCursorHold.nvim",
+			"nvim-treesitter/nvim-treesitter",
+		},
 	},
 })
 
