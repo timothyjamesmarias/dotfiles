@@ -8,7 +8,6 @@ vim.keymap.set("n", ";", ":")
 vim.keymap.set("i", "jj", "<Esc>", { silent = true })
 vim.keymap.set("n", "<C-n>", "<cmd>bnext<CR>", { silent = true, remap = true })
 vim.keymap.set("n", "<C-p>", "<cmd>bprevious<CR>", { silent = true, remap = true })
-vim.keymap.set("n", "<leader>b", "<cmd>enew<CR>", { silent = true })
 vim.keymap.set("n", "<leader>q", "<cmd>bd<CR>", { silent = true })
 vim.keymap.set("n", "<leader>Q", "<cmd>q!<CR>", { silent = true })
 vim.keymap.set("n", "n", "nzzzv", { silent = true })
@@ -271,8 +270,8 @@ require("lazy").setup({
 				vim.keymap.set("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>")
 				vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action)
 				vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename)
-				vim.keymap.set("n", "[d", vim.diagnostic.goto_prev)
-				vim.keymap.set("n", "]d", vim.diagnostic.goto_next)
+				vim.keymap.set("n", "<leader>en", vim.diagnostic.goto_prev)
+				vim.keymap.set("n", "<leader>ep", vim.diagnostic.goto_next)
 				vim.keymap.set("n", "K", vim.lsp.buf.hover)
 				vim.keymap.set("n", "<leader>rs", "<cmd>LspRestart<CR>")
 			end
@@ -632,6 +631,72 @@ require("lazy").setup({
 					next = "<C-Space>",
 				},
 			})
+		end,
+	},
+	{
+		"folke/neodev.nvim",
+		dependencies = {
+			"rcarriga/nvim-dap-ui",
+			"hrsh7th/nvim-cmp",
+		},
+		config = function()
+			local neodev = require("neodev")
+			neodev.setup({
+				library = {
+					plugins = {
+						"nvim-dap-ui",
+					},
+					types = true,
+				},
+			})
+		end,
+	},
+	{
+		"mfussenegger/nvim-dap",
+		dependencies = {
+			"rcarriga/nvim-dap-ui",
+		},
+		enabled = true,
+		config = function()
+			local dap = require("dap")
+			local dapui = require("dapui")
+			dapui.setup()
+			dap.listeners.before.attach.dapui_config = function()
+				dapui.open()
+			end
+			dap.listeners.before.launch.dapui_config = function()
+				dapui.open()
+			end
+			dap.listeners.before.event_terminated.dapui_config = function()
+				dapui.close()
+			end
+			dap.listeners.before.event_exited.dapui_config = function()
+				dapui.close()
+			end
+			vim.keymap.set("n", "<leader>b", ":lua require('dap').toggle_breakpoint()<CR>", {})
+			vim.keymap.set("n", "<leader>dc", ":lua require('dap').continue()<CR>", {})
+			vim.keymap.set("n", "<leader>dq", ":lua require('dap').terminate()<CR>", {})
+			vim.keymap.set("n", "<leader>do", ":lua require('dap').step_over()<CR>", {})
+			vim.keymap.set("n", "<leader>dp", ":lua require('dap').pause()<CR>", {})
+			vim.keymap.set("n", "<leader>di", ":lua require('dap').step_into()<CR>", {})
+			vim.keymap.set("n", "<leader>dr", ":lua require('dap').reverse_continue()<CR>", {})
+		end,
+	},
+	{
+		"leoluz/nvim-dap-go",
+		config = function()
+			local dap_go = require("dap-go")
+			dap_go.setup({
+				-- dap_configurations = {
+				-- 	{
+				-- 		type = "go",
+				-- 		name = "Attach remote",
+				-- 		mode = "remote",
+				-- 		request = "attach",
+				-- 	},
+				-- },
+			})
+			-- vim.keymap.set("n", "<leader>dt", dap_go.debut_test(), {})
 		end,
 	},
 })
