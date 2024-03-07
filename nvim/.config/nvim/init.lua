@@ -700,6 +700,10 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>tw", ":lua require('neotest').watch.toggle()<CR>", {})
 		end,
 	},
+	{
+		"slim-template/vim-slim",
+		vim.cmd("au BufNewFile,BufRead *.slim setlocal filetype=slim"),
+	},
 })
 
 -- options

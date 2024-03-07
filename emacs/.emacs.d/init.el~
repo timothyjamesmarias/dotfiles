@@ -1,6 +1,6 @@
 (setq inhibit-startup-message t)
 (tool-bar-mode -1)
-
+(menu-bar-mode -1)
 (scroll-bar-mode -1)
 (global-display-line-numbers-mode 1)
 (setq display-line-numbers-type 'relative)
@@ -12,7 +12,7 @@
 (setq use-dialog-box nil)
 (global-auto-revert-mode 1)
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-(set-face-attribute 'default nil :family "VictorMono Nerd Font Mono" :height 170)
+(set-face-attribute 'default nil :family "Iosevka Nerd Font Mono" :height 140)
 (setq-default line-spacing 10)
 (setq redisplay-dont-pause t
       scroll-margin 4
@@ -20,6 +20,7 @@
       scroll-conservatively 10000
       scroll-preserve-screen-position 1)
 (electric-pair-mode 1)
+(setq tab-bar-mode 1)
 
 (setq dired-dwim-target t)
 
@@ -46,24 +47,14 @@
 
 (use-package undo-tree)
 
-
-(use-package doom-themes
-  :ensure t
-  :config
-  (setq doom-themes-enable-bold t
-        doom-themes-enable-italic t)
-  (doom-themes-visual-bell-config)
-  (load-theme 'doom-pine t)
-  ;; (doom-themes-neotree-config)
-  ;; (setq doom-themes-treemacs-theme "doom-atom")
-  (doom-themes-treemacs-config)
-  (doom-themes-org-config))
-
 (use-package doom-modeline
-  :ensure t
+  ;; :ensure t
   :config
   (setq doom-modeline-height 40)
   :init (doom-modeline-mode 1))
+
+(use-package catppuccin-theme)
+(load-theme 'catppuccin :no-confirm)
 
 (use-package which-key
   :defer 0
@@ -102,21 +93,23 @@
   (counsel-mode 1))
 
 (use-package ivy-prescient
-  :after counsel
+  :after (counsel ivy)
   :custom
   (ivy-prescient-enable-filtering nil)
   :config
-  ;; Uncomment the following line to have sorting remembered across sessions!
-  ;(prescient-persist-mode 1)
   (ivy-prescient-mode 1))
 
 (use-package general
   :after evil
+  :defer t
   :config
+  (general-evil-setup)
   (general-create-definer efs/leader-keys
     :keymaps '(normal insert visual emacs)
     :prefix "SPC"
     :global-prefix "C-SPC")
+  (general-nmap
+    "C-c 3" compile-command)
 
   (efs/leader-keys
     "tt" '(eshell :which-key "choose theme")
@@ -125,13 +118,15 @@
     "q" '(kill-this-buffer :which-key "kill buffer")
     "g" '(magit-status :which-key "open magit")
     "fb" '(counsel-switch-buffer :which-key "find open buffers")
-    "ff" '(projectile-find-file :which-key "find file in project")
+    "ff" '(projectile-find-file-dwim :which-key "find file in project")
     "vv" '(split-window-vertically :which-key "split vertically")
     "hh" '(split-window-horizontally :which-key "split horizontally")
     "nn" '(treemacs :which-key "open treemacs")
+    "sf" '(evil-search :which-key "search file")
     ))
 
 (use-package projectile
+  :defer t
   :diminish projectile-mode
   :config (projectile-mode)
   :custom ((projectile-completion-system 'ivy))
@@ -145,6 +140,8 @@
   (setq projectile-switch-project-action #'projectile-dired))
 
 (use-package counsel-projectile
+  :defer t
+  :after (projectile counsel)
   :config (counsel-projectile-mode))
 
 (use-package evil
@@ -161,17 +158,11 @@
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal))
 
-(eval-after-load "evil"
-  '(progn
-     (define-key evil-normal-state-map (kbd "C-h") 'evil-window-left)
-     (define-key evil-normal-state-map (kbd "C-j") 'evil-window-down)
-     (define-key evil-normal-state-map (kbd "C-k") 'evil-window-up)
-     (define-key evil-normal-state-map (kbd "C-l") 'evil-window-right)))
-
 (evil-mode 1)
 
 (use-package evil-collection
   :after evil
+  :defer t
   :config
   (evil-collection-init))
 
@@ -181,7 +172,7 @@
   (evil-commentary-mode))
 
 (use-package evil-surround
-  :ensure t
+  :after evil
   :config
   (global-evil-surround-mode 1))
 
@@ -189,8 +180,6 @@
   :commands (magit-status magit-get-current-branch)
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
-
-(use-package forge)
 
 ; run M-x all-the-icons-install-fonts
 (use-package all-the-icons)
@@ -204,7 +193,7 @@
   :config
     (treemacs-follow-mode t)
     (treemacs-filewatch-mode t)
-    (setq treemacs-width 70)
+    (setq treemacs-width 60)
     (treemacs-fringe-indicator-mode 'always)
     (when treemacs-python-executable
 	(treemacs-git-commit-diff-mode t))
@@ -245,8 +234,11 @@
   :config (treemacs-set-scope-type 'Tabs))
 
 (use-package perspective
-  :ensure t
-  :bind (("C-x k" . persp-kill-buffer*))
+  :bind
+  ("C-x C-b" . persp-list-buffers)         ; or use a nicer switcher, see below
+  ("C-x k" . persp-kill-buffer*)
+  :custom
+  (persp-mode-prefix-key (kbd "C-c M-p"))  ; pick your own prefix key here
   :init
   (persp-mode))
 
@@ -301,6 +293,11 @@
   (add-to-list 'exec-path "~/go/bin")
   (setq gofmt-command "goimports"))
 
+; racket
+(use-package racket-mode)
+(use-package racket-language-server)
+
+; typescript 
 (use-package typescript-mode
   :mode "\\.ts\\'"
   :hook (typescript-mode . lsp-deferred)
@@ -315,12 +312,20 @@
 (add-hook 'c-mode-hook #'lsp)
 
 ; DAP stuff
-(use-package dap-mode)
+(use-package dap-mode
+  :commands dap-debug)
 
 ; Org mode
+(use-package org
+  :defer t)
 
-(use-package org)
-
+(defun efs/display-startup-time ()
+  (message "Emacs loaded in %s with %d garbage collections."
+	   (format "%.2f seconds"
+		   (float-time
+		    (time-subtract after-init-time before-init-time)))
+	   gcs-done))
+(add-hook 'emacs-startup-hook #'efs/display-startup-time)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -330,7 +335,7 @@
  '(custom-safe-themes
    '("60d142f405a0bd2b653e2fea70b2ac80b0a2e5d55405a57e4c59df767fe0a45c" "97ef2fe48a437ea2e734556d5acf4c08c74647c497a952c1ae8571a71369f7a7" default))
  '(package-selected-packages
-   '(perspective treemacs-tab-bar treemacs-persp treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil doom-modeline dap-mode dirvish doom-themes go-mode web-mode lsp-ivy company-box company typescript-mode lsp-mode robe forge exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
+   '(racket-language-server perspective treemacs-tab-bar treemacs-persp treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil doom-modeline dap-mode dirvish go-mode web-mode lsp-ivy company-box company typescript-mode lsp-mode robe forge exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

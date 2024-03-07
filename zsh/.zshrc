@@ -66,7 +66,7 @@ ZSH_THEME="robbyrussell"
 # ZSH_CUSTOM=/path/to/new-custom-folder
 
 plugins=(git ssh-agent asdf rails yarn)
-zstyle :omz:plugins:ssh-agent identities github 
+zstyle :omz:plugins:ssh-agent identities github
 
 source $ZSH/oh-my-zsh.sh
 
@@ -83,6 +83,7 @@ alias art="php artisan"
 alias clipdir="pwd | pbcopy"
 alias lg="lazygit"
 alias xclip="xclip -selection c"
+export EDITOR="/usr/bin/nvim"
 
 # Generated for envman. Do not edit.
 [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"

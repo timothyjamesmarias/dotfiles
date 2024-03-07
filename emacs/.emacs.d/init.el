@@ -12,7 +12,7 @@
 (setq use-dialog-box nil)
 (global-auto-revert-mode 1)
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-(set-face-attribute 'default nil :family "VictorMono Nerd Font Mono" :height 170)
+(set-face-attribute 'default nil :family "Iosevka Nerd Font Mono" :height 140)
 (setq-default line-spacing 10)
 (setq redisplay-dont-pause t
       scroll-margin 4
@@ -47,23 +47,14 @@
 
 (use-package undo-tree)
 
-(use-package doom-themes
-  ;; :ensure t
-  :config
-  (setq doom-themes-enable-bold t
-        doom-themes-enable-italic t)
-  (doom-themes-visual-bell-config)
-  (load-theme 'doom-dark+ t)
-  ;; (setq doom-themes-treemacs-theme "doom-dark+")
-  ;; (doom-themes-treemacs-config)
-  ;; (doom-themes-org-config)
-  )
-
 (use-package doom-modeline
   ;; :ensure t
   :config
   (setq doom-modeline-height 40)
   :init (doom-modeline-mode 1))
+
+(use-package catppuccin-theme)
+(load-theme 'catppuccin :no-confirm)
 
 (use-package which-key
   :defer 0
@@ -302,6 +293,10 @@
   (add-to-list 'exec-path "~/go/bin")
   (setq gofmt-command "goimports"))
 
+; racket
+(use-package racket-mode)
+
+; typescript 
 (use-package typescript-mode
   :mode "\\.ts\\'"
   :hook (typescript-mode . lsp-deferred)
@@ -314,6 +309,7 @@
 (add-hook 'go-mode-hook #'lsp)
 (add-hook 'cpp-mode-hook #'lsp)
 (add-hook 'c-mode-hook #'lsp)
+(add-hook 'racket-mode-hook #'lsp)
 
 ; DAP stuff
 (use-package dap-mode
@@ -339,7 +335,7 @@
  '(custom-safe-themes
    '("60d142f405a0bd2b653e2fea70b2ac80b0a2e5d55405a57e4c59df767fe0a45c" "97ef2fe48a437ea2e734556d5acf4c08c74647c497a952c1ae8571a71369f7a7" default))
  '(package-selected-packages
-   '(perspective treemacs-tab-bar treemacs-persp treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil doom-modeline dap-mode dirvish doom-themes go-mode web-mode lsp-ivy company-box company typescript-mode lsp-mode robe forge exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
+   '(racket-language-server perspective treemacs-tab-bar treemacs-persp treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil doom-modeline dap-mode dirvish go-mode web-mode lsp-ivy company-box company typescript-mode lsp-mode robe forge exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
