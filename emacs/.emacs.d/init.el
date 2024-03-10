@@ -20,7 +20,6 @@
       scroll-conservatively 10000
       scroll-preserve-screen-position 1)
 (electric-pair-mode 1)
-(setq tab-bar-mode 1)
 
 (setq dired-dwim-target t)
 
@@ -293,6 +292,8 @@
   (add-to-list 'exec-path "~/go/bin")
   (setq gofmt-command "goimports"))
 
+(use-package templ-ts-mode)
+
 ; racket
 (use-package racket-mode)
 
@@ -315,6 +316,27 @@
 (use-package dap-mode
   :commands dap-debug)
 
+; Treesitter
+(setq treesit-language-source-alist
+ '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+   (cmake "https://github.com/uyha/tree-sitter-cmake")
+   (css "https://github.com/tree-sitter/tree-sitter-css")
+   (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+   (go "https://github.com/tree-sitter/tree-sitter-go")
+   (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
+   (templ "https://github.com/vrischmann/tree-sitter-templ")
+   (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+   (html "https://github.com/tree-sitter/tree-sitter-html")
+   (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+   (json "https://github.com/tree-sitter/tree-sitter-json")
+   (make "https://github.com/alemuller/tree-sitter-make")
+   (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+   (python "https://github.com/tree-sitter/tree-sitter-python")
+   (toml "https://github.com/tree-sitter/tree-sitter-toml")
+   (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+   (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+   (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
 ; Org mode
 (use-package org
   :defer t)
@@ -335,7 +357,7 @@
  '(custom-safe-themes
    '("60d142f405a0bd2b653e2fea70b2ac80b0a2e5d55405a57e4c59df767fe0a45c" "97ef2fe48a437ea2e734556d5acf4c08c74647c497a952c1ae8571a71369f7a7" default))
  '(package-selected-packages
-   '(racket-language-server perspective treemacs-tab-bar treemacs-persp treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil doom-modeline dap-mode dirvish go-mode web-mode lsp-ivy company-box company typescript-mode lsp-mode robe forge exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
+   '(templ-ts-mode racket-language-server perspective treemacs-tab-bar treemacs-persp treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil doom-modeline dap-mode dirvish go-mode web-mode lsp-ivy company-box company typescript-mode lsp-mode robe forge exec-path-from-shell evil-magit magit counsel-projectile projectile-rails projectile catppuccin-theme catpuccin-theme ivy-prescient counsel ivy-rich zenburn-theme undo-tree evil-commentary general all-the-icons ivy command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

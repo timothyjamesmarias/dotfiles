@@ -293,9 +293,10 @@
   (add-to-list 'exec-path "~/go/bin")
   (setq gofmt-command "goimports"))
 
+(use-package templ-ts-mode)
+
 ; racket
 (use-package racket-mode)
-(use-package racket-language-server)
 
 ; typescript 
 (use-package typescript-mode
@@ -310,6 +311,7 @@
 (add-hook 'go-mode-hook #'lsp)
 (add-hook 'cpp-mode-hook #'lsp)
 (add-hook 'c-mode-hook #'lsp)
+(add-hook 'racket-mode-hook #'lsp)
 
 ; DAP stuff
 (use-package dap-mode
