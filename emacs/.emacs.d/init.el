@@ -44,6 +44,7 @@
   (exec-path-from-shell-copy-env "SSH_AGENT_PID")
   (exec-path-from-shell-copy-env "SSH_AUTH_SOCK"))
 
+
 (use-package undo-tree)
 
 (use-package doom-modeline
@@ -75,7 +76,6 @@
          ("C-d" . ivy-reverse-i-search-kill))
   :config
   (ivy-mode 1))
-
 
 (use-package ivy-rich
   :after ivy
@@ -122,6 +122,7 @@
     "hh" '(split-window-horizontally :which-key "split horizontally")
     "nn" '(treemacs :which-key "open treemacs")
     "sf" '(evil-search :which-key "search file")
+    "ca" '(lsp-code-actions-at-point :which-key "code actions")
     ))
 
 (use-package projectile
@@ -312,6 +313,10 @@
 (add-hook 'c-mode-hook #'lsp)
 (add-hook 'racket-mode-hook #'lsp)
 
+(add-to-list 'auto-mode-alist '("\\.templ\\'" . templ-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.templ\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.templ\\'" . go-mode))
+
 ; DAP stuff
 (use-package dap-mode
   :commands dap-debug)
@@ -337,17 +342,9 @@
    (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
    (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
-; Org mode
+ Org mode
 (use-package org
   :defer t)
-
-(defun efs/display-startup-time ()
-  (message "Emacs loaded in %s with %d garbage collections."
-	   (format "%.2f seconds"
-		   (float-time
-		    (time-subtract after-init-time before-init-time)))
-	   gcs-done))
-(add-hook 'emacs-startup-hook #'efs/display-startup-time)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
