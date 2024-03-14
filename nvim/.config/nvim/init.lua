@@ -53,7 +53,7 @@ require("lazy").setup({
 					width = 70,
 				},
 			})
-      vim.g.nvim_tree_auto_close = 1
+			vim.g.nvim_tree_auto_close = 1
 			vim.keymap.set("n", "<leader>nn", "<cmd>NvimTreeToggle<CR>", { silent = true })
 			vim.keymap.set("n", "<leader>ns", "<cmd>NvimTreeFindFile<CR>", { silent = true })
 		end,
@@ -85,11 +85,15 @@ require("lazy").setup({
 					enable = true,
 				},
 			})
-			vim.filetype.add({
-				extension = {
-					templ = "templ",
-				},
-			})
+      local treesitter_parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+      treesitter_parser_config.templ = {
+        install_info = {
+          url = "https://github.com/vrischmann/tree-sitter-templ.git",
+          files = { "src/parser.c", "src/scanner.c" },
+          branch = "master",
+        },
+      }
+      vim.treesitter.language.register("templ", "templ")
 		end,
 	},
 	{
@@ -284,7 +288,12 @@ require("lazy").setup({
 			lspconfig["html"].setup({
 				on_attach = on_attach,
 				capabilities = capabilities,
-				filetypes = { "html", "eruby", "blade" },
+				filetypes = { "html", "eruby", "blade", "templ" },
+			})
+			lspconfig.htmx.setup({
+				on_attach = on_attach,
+				capabilities = capabilities,
+				filetypes = { "html", "templ" },
 			})
 			lspconfig["sqlls"].setup({
 				on_attach = on_attach,
@@ -349,7 +358,9 @@ require("lazy").setup({
 					"typescript",
 					"javascriptreact",
 					"typescriptreact",
+					"templ",
 				},
+				init_options = { userLanguages = { templ = "html" } },
 			})
 			lspconfig["cssls"].setup({
 				on_attach = on_attach,
@@ -394,6 +405,10 @@ require("lazy").setup({
 				capabilities = capabilities,
 			})
 			lspconfig["gopls"].setup({
+				on_attach = on_attach,
+				capabilities = capabilities,
+			})
+			lspconfig["templ"].setup({
 				on_attach = on_attach,
 				capabilities = capabilities,
 			})
@@ -589,6 +604,10 @@ require("lazy").setup({
 					},
 				},
 			})
+			vim.api.nvim_create_autocmd(
+				{ "BufWritePre" },
+				{ pattern = { "*.templ", "*.go" }, callback = vim.lsp.buf.format }
+			)
 			vim.keymap.set("n", "<leader>fm", "<cmd>Format<CR>", { silent = false })
 		end,
 	},
@@ -701,12 +720,17 @@ require("lazy").setup({
 		vim.cmd("au BufNewFile,BufRead *.slim setlocal filetype=slim"),
 	},
 })
+vim.filetype.add({
+	extension = {
+		templ = "templ",
+	},
+})
 
 -- options
 vim.cmd("syntax on")
 vim.cmd("au FileType netrw setl bufhidden=wipe")
 vim.api.nvim_set_var("netrw_fastbrowse", 0)
-vim.opt.clipboard:append { 'unnamed', 'unnamedplus' }
+vim.opt.clipboard:append({ "unnamed", "unnamedplus" })
 vim.opt.background = "dark"
 vim.opt.number = true
 vim.opt.relativenumber = true
