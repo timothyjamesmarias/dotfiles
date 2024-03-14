@@ -31,14 +31,14 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-	{
-		"catppuccin/nvim",
-		name = "catppuccin",
-		priority = 1000,
-		config = function()
-			vim.cmd([[colorscheme catppuccin-mocha]])
-		end,
-	},
+	-- {
+	-- 	"catppuccin/nvim",
+	-- 	name = "catppuccin",
+	-- 	priority = 1000,
+	-- 	config = function()
+	-- 		vim.cmd([[colorscheme catppuccin-mocha]])
+	-- 	end,
+	-- },
 	{
 		"nvim-tree/nvim-tree.lua",
 		dependencies = {
@@ -214,17 +214,17 @@ require("lazy").setup({
 	},
 
 	-- lazy.nvim
-	{
-		"folke/noice.nvim",
-		event = "VeryLazy",
-		opts = {
-			-- add any options here
-		},
-		dependencies = {
-			-- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
-			"MunifTanjim/nui.nvim",
-		},
-	},
+	-- {
+	-- 	"folke/noice.nvim",
+	-- 	event = "VeryLazy",
+	-- 	opts = {
+	-- 		-- add any options here
+	-- 	},
+	-- 	dependencies = {
+	-- 		-- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
+	-- 		"MunifTanjim/nui.nvim",
+	-- 	},
+	-- },
 	{
 		"williamboman/mason.nvim",
 		dependencies = {
@@ -589,9 +589,6 @@ require("lazy").setup({
 						require("formatter.filetypes.any").remove_trailing_whitespace,
 					},
 				},
-			})
-			vim.api.nvim_create_autocmd("BufWritePost", {
-				command = "Format",
 			})
 			vim.keymap.set("n", "<leader>fm", "<cmd>Format<CR>", { silent = false })
 		end,
