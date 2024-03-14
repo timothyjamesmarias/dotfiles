@@ -8,7 +8,7 @@ vim.keymap.set("n", ";", ":")
 vim.keymap.set("i", "jj", "<Esc>", { silent = true })
 vim.keymap.set("n", "<C-n>", "<cmd>bnext<CR>", { silent = true, remap = true })
 vim.keymap.set("n", "<C-p>", "<cmd>bprevious<CR>", { silent = true, remap = true })
-vim.keymap.set("n", "<leader>q", "<cmd>bd<CR>", { silent = true })
+vim.keymap.set("n", "<leader>q", "<cmd>bp<bar>sp<bar>bn<bar>bd<CR>", { silent = true })
 vim.keymap.set("n", "<leader>Q", "<cmd>q!<CR>", { silent = true })
 vim.keymap.set("n", "n", "nzzzv", { silent = true })
 vim.keymap.set("n", "N", "Nzzzv", { silent = true })
@@ -31,14 +31,13 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-	-- {
-	-- 	"catppuccin/nvim",
-	-- 	name = "catppuccin",
-	-- 	priority = 1000,
-	-- 	config = function()
-	-- 		vim.cmd([[colorscheme catppuccin-mocha]])
-	-- 	end,
-	-- },
+	{
+		"EdenEast/nightfox.nvim",
+		priority = 1000,
+		config = function()
+			vim.cmd([[colorscheme carbonfox]])
+		end,
+	},
 	{
 		"nvim-tree/nvim-tree.lua",
 		dependencies = {
@@ -48,12 +47,13 @@ require("lazy").setup({
 			local nvim_tree = require("nvim-tree")
 			nvim_tree.setup({
 				filters = {
-					dotfiles = true,
+					dotfiles = false,
 				},
 				view = {
 					width = 70,
 				},
 			})
+      vim.g.nvim_tree_auto_close = 1
 			vim.keymap.set("n", "<leader>nn", "<cmd>NvimTreeToggle<CR>", { silent = true })
 			vim.keymap.set("n", "<leader>ns", "<cmd>NvimTreeFindFile<CR>", { silent = true })
 		end,
@@ -212,7 +212,6 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>u", "<cmd>Telescope undo<CR>")
 		end,
 	},
-
 	-- lazy.nvim
 	-- {
 	-- 	"folke/noice.nvim",
