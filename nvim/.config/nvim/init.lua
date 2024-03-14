@@ -706,7 +706,7 @@ require("lazy").setup({
 vim.cmd("syntax on")
 vim.cmd("au FileType netrw setl bufhidden=wipe")
 vim.api.nvim_set_var("netrw_fastbrowse", 0)
-vim.opt.clipboard = "unnamedplus" --requires a clipboard manager like xclip
+vim.opt.clipboard:append { 'unnamed', 'unnamedplus' }
 vim.opt.background = "dark"
 vim.opt.number = true
 vim.opt.relativenumber = true
