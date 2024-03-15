@@ -85,15 +85,15 @@ require("lazy").setup({
 					enable = true,
 				},
 			})
-      local treesitter_parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-      treesitter_parser_config.templ = {
-        install_info = {
-          url = "https://github.com/vrischmann/tree-sitter-templ.git",
-          files = { "src/parser.c", "src/scanner.c" },
-          branch = "master",
-        },
-      }
-      vim.treesitter.language.register("templ", "templ")
+			local treesitter_parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+			treesitter_parser_config.templ = {
+				install_info = {
+					url = "https://github.com/vrischmann/tree-sitter-templ.git",
+					files = { "src/parser.c", "src/scanner.c" },
+					branch = "master",
+				},
+			}
+			vim.treesitter.language.register("templ", "templ")
 		end,
 	},
 	{
@@ -216,18 +216,30 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>u", "<cmd>Telescope undo<CR>")
 		end,
 	},
-	-- lazy.nvim
-	-- {
-	-- 	"folke/noice.nvim",
-	-- 	event = "VeryLazy",
-	-- 	opts = {
-	-- 		-- add any options here
-	-- 	},
-	-- 	dependencies = {
-	-- 		-- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
-	-- 		"MunifTanjim/nui.nvim",
-	-- 	},
-	-- },
+	{
+		"folke/noice.nvim",
+		event = "VeryLazy",
+		opts = {
+			-- add any options here
+		},
+		dependencies = {
+			-- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
+			"MunifTanjim/nui.nvim",
+			"rcarriga/nvim-notify",
+		},
+		config = function()
+			require("noice").setup({
+				lsp = {
+					-- override markdown rendering so that **cmp** and other plugins use **Treesitter**
+					override = {
+						["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+						["vim.lsp.util.stylize_markdown"] = true,
+						["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
+					},
+				},
+			})
+		end,
+	},
 	{
 		"williamboman/mason.nvim",
 		dependencies = {
@@ -719,7 +731,24 @@ require("lazy").setup({
 		"slim-template/vim-slim",
 		vim.cmd("au BufNewFile,BufRead *.slim setlocal filetype=slim"),
 	},
+	{
+		"NeogitOrg/neogit",
+		dependencies = {
+			"nvim-lua/plenary.nvim", -- required
+			"sindrets/diffview.nvim", -- optional - Diff integration
+
+			-- Only one of these is needed, not both.
+			"nvim-telescope/telescope.nvim", -- optional
+			"ibhagwan/fzf-lua", -- optional
+		},
+		config = function()
+			local neogit = require("neogit")
+			neogit.setup({})
+			vim.keymap.set("n", "<leader>gg", ":Neogit<CR>", {})
+		end,
+	},
 })
+
 vim.filetype.add({
 	extension = {
 		templ = "templ",
