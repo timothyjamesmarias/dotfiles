@@ -93,7 +93,25 @@ require("lazy").setup({
 					branch = "master",
 				},
 			}
+			treesitter_parser_config.blade = {
+				install_info = {
+					url = "https://github.com/EmranMR/tree-sitter-blade",
+					files = { "src/parser.c" },
+					branch = "main",
+				},
+				filetype = "blade",
+			}
 			vim.treesitter.language.register("templ", "templ")
+			vim.filetype.add({
+				extension = {
+					templ = "templ",
+				},
+			})
+			vim.filetype.add({
+				pattern = {
+					[".*%.blade%.php"] = "blade",
+				},
+			})
 		end,
 	},
 	{
@@ -193,6 +211,12 @@ require("lazy").setup({
 				"<cmd>Telescope find_files follow=true hidden=true <CR>",
 				{ silent = true }
 			)
+			vim.keymap.set(
+				"v",
+				"<leader>ff",
+				"y<ESC><cmd>Telescope find_files default_text=<c-r>0<CR>",
+				{ silent = true, noremap = true }
+			)
 			vim.keymap.set("n", "<leader>fr", builtin.oldfiles, { silent = true })
 			vim.keymap.set("n", "<leader>fg", builtin.git_commits, { silent = true })
 			vim.keymap.set("n", "<leader>fw", builtin.live_grep, { silent = true })
@@ -210,34 +234,10 @@ require("lazy").setup({
 			vim.keymap.set(
 				"v",
 				"<leader>sl",
-				"y<ESC>:Telescope grep_string default_text=<c-r>0<CR>",
+				"y<ESC><cmd>Telescope grep_string default_text=<c-r>0<CR>",
 				{ silent = true, noremap = true }
 			)
 			vim.keymap.set("n", "<leader>u", "<cmd>Telescope undo<CR>")
-		end,
-	},
-	{
-		"folke/noice.nvim",
-		event = "VeryLazy",
-		opts = {
-			-- add any options here
-		},
-		dependencies = {
-			-- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
-			"MunifTanjim/nui.nvim",
-			"rcarriga/nvim-notify",
-		},
-		config = function()
-			require("noice").setup({
-				lsp = {
-					-- override markdown rendering so that **cmp** and other plugins use **Treesitter**
-					override = {
-						["vim.lsp.util.convert_input_to_markdown_lines"] = true,
-						["vim.lsp.util.stylize_markdown"] = true,
-						["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
-					},
-				},
-			})
 		end,
 	},
 	{
@@ -302,11 +302,11 @@ require("lazy").setup({
 				capabilities = capabilities,
 				filetypes = { "html", "eruby", "blade", "templ" },
 			})
-			lspconfig.htmx.setup({
-				on_attach = on_attach,
-				capabilities = capabilities,
-				filetypes = { "html", "templ" },
-			})
+			-- lspconfig.htmx.setup({
+			-- 	on_attach = on_attach,
+			-- 	capabilities = capabilities,
+			-- 	filetypes = { "html", "templ" },
+			-- })
 			lspconfig["sqlls"].setup({
 				on_attach = on_attach,
 				capabilities = capabilities,
@@ -385,6 +385,7 @@ require("lazy").setup({
 					"eruby",
 					"blade",
 					"vue",
+					"slim",
 					"javascript",
 					"typescript",
 					"javascriptreact",
@@ -747,13 +748,31 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>gg", ":Neogit<CR>", {})
 		end,
 	},
-})
-
-vim.filetype.add({
-	extension = {
-		templ = "templ",
+	{
+		"folke/which-key.nvim",
+		event = "VeryLazy",
+		init = function()
+			vim.o.timeout = false
+			vim.o.timeoutlen = 300
+		end,
+		opts = {
+			-- your configuration comes here
+			-- or leave it empty to use the default settings
+			-- refer to the configuration section below
+		},
+	},
+	{
+		"nvim-neorg/neorg",
+		run = ":Neorg sync-parsers", -- This is the important bit!
+		config = function()
+			require("neorg").setup({
+				-- configuration here
+			})
+		end,
 	},
 })
+
+vim.keymap.set("i", "<C-e>", "<Esc>A")
 
 -- options
 vim.cmd("syntax on")

@@ -89,11 +89,6 @@ export EDITOR="/usr/bin/nvim"
 [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
 export PATH="$HOME/.config/emacs/bin/:$PATH"
 
-# bun completions
-[ -s "/Users/timmarias/.bun/_bun" ] && source "/Users/timmarias/.bun/_bun"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
+export PATH="$PATH:$HOME/go/bin"
 
 . /opt/asdf-vm/asdf.sh
