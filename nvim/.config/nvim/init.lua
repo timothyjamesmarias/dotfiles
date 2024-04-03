@@ -101,6 +101,14 @@ require("lazy").setup({
 				},
 				filetype = "blade",
 			}
+			-- treesitter_parser_config.slim = {
+			-- 	install_info = {
+			-- 		url = "https://github.com/EmranMR/tree-sitter-blade",
+			-- 		files = { "src/parser.c" },
+			-- 		branch = "main",
+			-- 	},
+			-- 	filetype = "slim",
+			-- }
 			vim.treesitter.language.register("templ", "templ")
 			vim.filetype.add({
 				extension = {
@@ -112,6 +120,11 @@ require("lazy").setup({
 					[".*%.blade%.php"] = "blade",
 				},
 			})
+			-- vim.filetype.add({
+			-- 	pattern = {
+			-- 		[".*%.slim"] = "slim",
+			-- 	},
+			-- })
 		end,
 	},
 	{
@@ -214,7 +227,7 @@ require("lazy").setup({
 			vim.keymap.set(
 				"v",
 				"<leader>ff",
-				"y<ESC><cmd>Telescope find_files default_text=<c-r>0<CR>",
+				"y<ESC><cmd>Telescope find_files follow=true hidden=true<CR>",
 				{ silent = true, noremap = true }
 			)
 			vim.keymap.set("n", "<leader>fr", builtin.oldfiles, { silent = true })
@@ -426,6 +439,10 @@ require("lazy").setup({
 				capabilities = capabilities,
 			})
 			lspconfig["pyright"].setup({
+				on_attach = on_attach,
+				capabilities = capabilities,
+			})
+			lspconfig["ocamllsp"].setup({
 				on_attach = on_attach,
 				capabilities = capabilities,
 			})
