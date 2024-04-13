@@ -39,26 +39,6 @@ require("lazy").setup({
 		end,
 	},
 	{
-		"nvim-tree/nvim-tree.lua",
-		dependencies = {
-			"nvim-tree/nvim-web-devicons",
-		},
-		config = function()
-			local nvim_tree = require("nvim-tree")
-			nvim_tree.setup({
-				filters = {
-					dotfiles = false,
-				},
-				view = {
-					width = 70,
-				},
-			})
-			vim.g.nvim_tree_auto_close = 1
-			vim.keymap.set("n", "<leader>nn", "<cmd>NvimTreeToggle<CR>", { silent = true })
-			vim.keymap.set("n", "<leader>ns", "<cmd>NvimTreeFindFile<CR>", { silent = true })
-		end,
-	},
-	{
 		"nvim-treesitter/nvim-treesitter",
 		event = { "BufReadPre", "BufNewFile" },
 		build = "<cmd>TSUpdate",
@@ -101,14 +81,6 @@ require("lazy").setup({
 				},
 				filetype = "blade",
 			}
-			-- treesitter_parser_config.slim = {
-			-- 	install_info = {
-			-- 		url = "https://github.com/EmranMR/tree-sitter-blade",
-			-- 		files = { "src/parser.c" },
-			-- 		branch = "main",
-			-- 	},
-			-- 	filetype = "slim",
-			-- }
 			vim.treesitter.language.register("templ", "templ")
 			vim.filetype.add({
 				extension = {
@@ -120,11 +92,6 @@ require("lazy").setup({
 					[".*%.blade%.php"] = "blade",
 				},
 			})
-			-- vim.filetype.add({
-			-- 	pattern = {
-			-- 		[".*%.slim"] = "slim",
-			-- 	},
-			-- })
 		end,
 	},
 	{
@@ -315,11 +282,6 @@ require("lazy").setup({
 				capabilities = capabilities,
 				filetypes = { "html", "eruby", "blade", "templ" },
 			})
-			-- lspconfig.htmx.setup({
-			-- 	on_attach = on_attach,
-			-- 	capabilities = capabilities,
-			-- 	filetypes = { "html", "templ" },
-			-- })
 			lspconfig["sqlls"].setup({
 				on_attach = on_attach,
 				capabilities = capabilities,
@@ -584,64 +546,6 @@ require("lazy").setup({
 		end,
 	},
 	{
-		"mhartington/formatter.nvim",
-		config = function()
-			local formatter = require("formatter")
-			local util = require("formatter.util")
-			formatter.setup({
-				filetype = {
-					lua = {
-						require("formatter.filetypes.lua").stylua,
-						function()
-							return {
-								exe = "stylua",
-								args = {
-									"--search-parent-directories",
-									"--stdin-filepath",
-									util.escape_path(util.get_current_buffer_file_path()),
-									"--",
-									"-",
-								},
-								stdin = true,
-							}
-						end,
-					},
-					rust = {
-						exe = "rustfmt",
-						args = {
-							"--check",
-						},
-					},
-					python = {
-						exe = "black",
-						args = {
-							"--quiet",
-							"-",
-						},
-						stdin = true,
-					},
-					ocaml = {
-						exe = "ocamlformat",
-					},
-					php = {
-						exe = "pint",
-					},
-					go = {
-						exe = "gofmt",
-					},
-					["*"] = {
-						require("formatter.filetypes.any").remove_trailing_whitespace,
-					},
-				},
-			})
-			vim.api.nvim_create_autocmd(
-				{ "BufWritePre" },
-				{ pattern = { "*.templ", "*.go" }, callback = vim.lsp.buf.format }
-			)
-			vim.keymap.set("n", "<leader>fm", "<cmd>Format<CR>", { silent = false })
-		end,
-	},
-	{
 		"rmagatti/session-lens",
 		dependencies = {
 			"rmagatti/auto-session",
@@ -681,109 +585,6 @@ require("lazy").setup({
 					last_active = "<C-\\>",
 					next = "<C-Space>",
 				},
-			})
-		end,
-	},
-	{
-		"mfussenegger/nvim-dap",
-		dependencies = {
-			"rcarriga/nvim-dap-ui",
-		},
-		enabled = true,
-		config = function()
-			local dap = require("dap")
-			local dapui = require("dapui")
-			dapui.setup()
-			dap.listeners.before.attach.dapui_config = function()
-				dapui.open()
-			end
-			dap.listeners.before.launch.dapui_config = function()
-				dapui.open()
-			end
-			dap.listeners.before.event_terminated.dapui_config = function()
-				dapui.close()
-			end
-			dap.listeners.before.event_exited.dapui_config = function()
-				dapui.close()
-			end
-			vim.keymap.set("n", "<leader>b", ":lua require('dap').toggle_breakpoint()<CR>", {})
-			vim.keymap.set("n", "<leader>dc", ":lua require('dap').continue()<CR>", {})
-			vim.keymap.set("n", "<leader>dq", ":lua require('dap').terminate()<CR>", {})
-			vim.keymap.set("n", "<leader>do", ":lua require('dap').step_over()<CR>", {})
-			vim.keymap.set("n", "<leader>dp", ":lua require('dap').pause()<CR>", {})
-			vim.keymap.set("n", "<leader>di", ":lua require('dap').step_into()<CR>", {})
-			vim.keymap.set("n", "<leader>dr", ":lua require('dap').reverse_continue()<CR>", {})
-		end,
-	},
-	{
-		"leoluz/nvim-dap-go",
-		config = function()
-			local dap_go = require("dap-go")
-			dap_go.setup()
-		end,
-	},
-	{
-		"nvim-neotest/neotest",
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-			"antoinemadec/FixCursorHold.nvim",
-			"nvim-treesitter/nvim-treesitter",
-			"nvim-neotest/neotest-go",
-		},
-		config = function()
-			local neotest = require("neotest")
-			neotest.setup({
-				adapters = {
-					require("neotest-go"),
-				},
-			})
-			vim.keymap.set("n", "<leader>tt", ":lua require('neotest').run.run()<CR>", {})
-			vim.keymap.set("n", "<leader>tl", ":lua require('neotest').run.run_last()<CR>", {})
-			vim.keymap.set("n", "<leader>tf", ":lua require('neotest').run.run(vim.fn.expand('%'))<CR>", {})
-			vim.keymap.set("n", "<leader>ta", ":lua require('neotest').run.run(vim.fn.getcwd())<CR>", {})
-			vim.keymap.set("n", "<leader>ts", ":lua require('neotest').run.stop()<CR>", {})
-			vim.keymap.set("n", "<leader>tw", ":lua require('neotest').watch.toggle()<CR>", {})
-		end,
-	},
-	{
-		"slim-template/vim-slim",
-		vim.cmd("au BufNewFile,BufRead *.slim setlocal filetype=slim"),
-	},
-	{
-		"NeogitOrg/neogit",
-		dependencies = {
-			"nvim-lua/plenary.nvim", -- required
-			"sindrets/diffview.nvim", -- optional - Diff integration
-
-			-- Only one of these is needed, not both.
-			"nvim-telescope/telescope.nvim", -- optional
-			"ibhagwan/fzf-lua", -- optional
-		},
-		config = function()
-			local neogit = require("neogit")
-			neogit.setup({})
-			vim.keymap.set("n", "<leader>gg", ":Neogit<CR>", {})
-		end,
-	},
-	{
-		"folke/which-key.nvim",
-		event = "VeryLazy",
-		init = function()
-			vim.o.timeout = false
-			vim.o.timeoutlen = 300
-		end,
-		opts = {
-			-- your configuration comes here
-			-- or leave it empty to use the default settings
-			-- refer to the configuration section below
-		},
-	},
-	{
-		"nvim-neorg/neorg",
-		run = ":Neorg sync-parsers", -- This is the important bit!
-		config = function()
-			require("neorg").setup({
-				-- configuration here
 			})
 		end,
 	},

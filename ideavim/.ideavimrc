@@ -9,7 +9,7 @@ nmap <leader>v :vsplit<CR>
 nmap <leader>h :split<CR>
 imap jj <Esc>
 set relativenumber number
-set clipboard+=unnamed
+set clipboard+=unnamedplus
 set commentary
 set surround
 set NERDTree
