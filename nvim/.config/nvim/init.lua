@@ -330,7 +330,6 @@ require("lazy").setup({
 					"typescriptreact",
 					"html",
 					"eruby",
-					"slim",
 				},
 			})
 			lspconfig["tailwindcss"].setup({
@@ -360,7 +359,6 @@ require("lazy").setup({
 					"eruby",
 					"blade",
 					"vue",
-					"slim",
 					"javascript",
 					"typescript",
 					"javascriptreact",
