@@ -13,8 +13,4 @@ vim.keymap.set("n", "<leader>vv", "<cmd>sp<CR>", { silent = true })
 vim.keymap.set("n", "<leader>sf", "/")
 
 vim.keymap.set("i", "<C-e>", "<Esc>A")
-vim.keymap.set(
-    "n",
-    "<leader>ee",
-    "oif err != nil {<CR>}<Esc>"
-)
+vim.keymap.set("n", "<leader>ee", "oif err != nil {<CR>}<Esc>")
