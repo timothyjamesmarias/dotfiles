@@ -64,8 +64,11 @@ ZSH_THEME="robbyrussell"
 
 # Would you like to use another custom folder than $ZSH/custom?
 # ZSH_CUSTOM=/path/to/new-custom-folder
+# Only changing the escape key to `jj` in insert mode, we still
+# keep using the default keybindings `^[` in other modes
+ZVM_VI_INSERT_ESCAPE_BINDKEY=jj
 
-plugins=(git ssh-agent asdf rails yarn)
+plugins=(git ssh-agent asdf rails yarn zsh-vi-mode)
 zstyle :omz:plugins:ssh-agent identities github
 
 source $ZSH/oh-my-zsh.sh
