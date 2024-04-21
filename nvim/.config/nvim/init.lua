@@ -585,6 +585,11 @@ require("lazy").setup({
 })
 
 vim.keymap.set("i", "<C-e>", "<Esc>A")
+vim.keymap.set(
+    "n",
+    "<leader>ee",
+    "oif err != nil {<CR>}<Esc>"
+)
 
 -- options
 vim.cmd("syntax on")
