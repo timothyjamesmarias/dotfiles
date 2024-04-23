@@ -83,7 +83,17 @@ alias vim="nvim"
 alias so="source ~/.zshrc"
 alias sot="tmux source ~/.tmux.conf"
 alias art="php artisan"
-alias clipdir="pwd | pbcopy"
+
+if [[ $(uname) == "Linux" ]]; then
+  if [[ $xdg_session_type == "wayland" ]]; then
+    alias clipdir="pwd | wl-copy"
+  else
+    alias clipdir="pwd | xclip"
+  fi
+else
+  alias clipdir="pwd | pbcopy"
+fi
+
 alias lg="lazygit"
 alias xclip="xclip -selection c"
 export EDITOR="/usr/bin/nvim"
