@@ -97,6 +97,7 @@ fi
 alias lg="lazygit"
 alias xclip="xclip -selection c"
 export EDITOR="/usr/bin/nvim"
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
 # Generated for envman. Do not edit.
 [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
