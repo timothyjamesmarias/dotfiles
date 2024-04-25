@@ -30,6 +30,11 @@ return {
 		local telescope = require("telescope")
 		telescope.setup({
 			defaults = {
+				mappings = {
+					n = {
+						["q"] = require("telescope.actions").close,
+					},
+				},
 				layout_config = {
 					prompt_position = "top",
 					width = 0.9,
@@ -70,24 +75,14 @@ return {
 
 		local builtin = require("telescope.builtin")
 		vim.keymap.set("n", "<leader>ff", "<cmd>Telescope find_files follow=true hidden=true<CR>", { silent = true })
-		vim.keymap.set(
-			"v",
-			"<leader>fw",
-      function ()
-        local text = vim.getVisualSelection()
-        builtin.live_grep({default_text = text})
-      end,
-			{ silent = true, noremap = true }
-		)
-		vim.keymap.set(
-			"v",
-			"<leader>ff",
-      function ()
-        local text = vim.getVisualSelection()
-        builtin.find_files({default_text = text})
-      end,
-			{ silent = true, noremap = true }
-		)
+		vim.keymap.set("v", "<leader>fw", function()
+			local text = vim.getVisualSelection()
+			builtin.live_grep({ default_text = text })
+		end, { silent = true, noremap = true })
+		vim.keymap.set("v", "<leader>ff", function()
+			local text = vim.getVisualSelection()
+			builtin.find_files({ default_text = text })
+		end, { silent = true, noremap = true })
 		vim.keymap.set("n", "<leader>fr", builtin.oldfiles, { silent = true })
 		vim.keymap.set("n", "<leader>fg", builtin.git_commits, { silent = true })
 		vim.keymap.set("n", "<leader>fw", builtin.live_grep, { silent = true })
