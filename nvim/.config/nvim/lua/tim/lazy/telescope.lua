@@ -1,3 +1,16 @@
+function vim.getVisualSelection()
+	vim.cmd('noau normal! "vy"')
+	local text = vim.fn.getreg("v")
+	vim.fn.setreg("v", {})
+
+	text = string.gsub(text, "\n", "")
+	if #text > 0 then
+		return text
+	else
+		return ""
+	end
+end
+
 return {
 	"nvim-telescope/telescope.nvim",
 	tag = "0.1.3",
@@ -56,11 +69,23 @@ return {
 		telescope.load_extension("ui-select")
 
 		local builtin = require("telescope.builtin")
-		vim.keymap.set("n", "<leader>ff", "<cmd>Telescope find_files follow=true hidden=true <CR>", { silent = true })
+		vim.keymap.set("n", "<leader>ff", "<cmd>Telescope find_files follow=true hidden=true<CR>", { silent = true })
+		vim.keymap.set(
+			"v",
+			"<leader>fw",
+      function ()
+        local text = vim.getVisualSelection()
+        builtin.live_grep({default_text = text})
+      end,
+			{ silent = true, noremap = true }
+		)
 		vim.keymap.set(
 			"v",
 			"<leader>ff",
-			"y<ESC><cmd>Telescope find_files follow=true hidden=true<CR>",
+      function ()
+        local text = vim.getVisualSelection()
+        builtin.find_files({default_text = text})
+      end,
 			{ silent = true, noremap = true }
 		)
 		vim.keymap.set("n", "<leader>fr", builtin.oldfiles, { silent = true })
