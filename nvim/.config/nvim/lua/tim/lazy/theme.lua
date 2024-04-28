@@ -1,10 +1,10 @@
 return {
-	"mcchrish/zenbones.nvim",
+	"folke/tokyonight.nvim",
 	dependencies = {
 		"rktjmp/lush.nvim",
 	},
 	priority = 1000,
 	config = function()
-		vim.cmd([[colorscheme duckbones]])
+		vim.cmd([[colorscheme tokyonight-night]])
 	end,
 }
