@@ -68,7 +68,13 @@ ZSH_THEME="robbyrussell"
 # keep using the default keybindings `^[` in other modes
 ZVM_VI_INSERT_ESCAPE_BINDKEY=jj
 
-plugins=(git ssh-agent asdf rails yarn zsh-vi-mode)
+plugins=(
+  git 
+  ssh-agent 
+  asdf 
+  zsh-vi-mode
+  zsh-autosuggestions
+)
 zstyle :omz:plugins:ssh-agent identities github
 
 source $ZSH/oh-my-zsh.sh
@@ -96,12 +102,13 @@ fi
 
 alias lg="lazygit"
 alias xclip="xclip -selection c"
+alias ch="cheatsheet"
 export EDITOR="/usr/bin/nvim"
 
-# Generated for envman. Do not edit.
-[ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
-export PATH="$HOME/.config/emacs/bin/:$PATH"
+bindkey -s ^b "tmux-sessionizer\n"
 
 export PATH="$PATH:$HOME/go/bin"
+export PATH="$PATH:$HOME/.local/scripts"
+chmod +x "$HOME/.local/scripts"
 
 . /opt/asdf-vm/asdf.sh
