@@ -104,6 +104,7 @@ alias lg="lazygit"
 alias xclip="xclip -selection c"
 alias ch="cheatsheet"
 export EDITOR="/usr/bin/nvim"
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
 bindkey -s ^b "tmux-sessionizer\n"
 
