@@ -42,7 +42,12 @@ return {
 					exe = "pint",
 				},
 				go = {
+					require("formatter.filetypes.go").gofmt,
 					exe = "gofmt",
+					-- args = {
+					-- 	"-w",
+					-- 	"-s",
+					-- },
 				},
 				["*"] = {
 					require("formatter.filetypes.any").remove_trailing_whitespace,
