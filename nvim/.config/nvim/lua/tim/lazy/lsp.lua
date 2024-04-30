@@ -115,27 +115,6 @@ return {
 				"css",
 			},
 		})
-		lspconfig["cssmodules_ls"].setup({
-			on_attach = on_attach,
-			capabilities = capabilities,
-			filetypes = {
-				"html",
-				"css",
-				"scss",
-				"less",
-				"eruby",
-				"slim",
-				"blade",
-				"vue",
-				"javascript",
-				"typescript",
-				"javascriptreact",
-				"typescriptreact",
-			},
-			init_options = {
-        camelCase = 'dashes',
-      },
-		})
 		lspconfig["bashls"].setup({
 			on_attach = on_attach,
 			capabilities = capabilities,
