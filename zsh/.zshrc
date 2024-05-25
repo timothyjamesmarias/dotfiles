@@ -73,7 +73,6 @@ plugins=(
   ssh-agent 
   asdf 
   zsh-vi-mode
-  zsh-autosuggestions
 )
 zstyle :omz:plugins:ssh-agent identities github
 
@@ -105,11 +104,19 @@ alias xclip="xclip -selection c"
 alias ch="cheatsheet"
 export EDITOR="/usr/bin/nvim"
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+eval "$(fzf --zsh)"
 
-bindkey -s ^b "tmux-sessionizer\n"
 
 export PATH="$PATH:$HOME/go/bin"
 export PATH="$PATH:$HOME/.local/scripts"
 chmod +x "$HOME/.local/scripts"
 
-. /opt/asdf-vm/asdf.sh
+if [[ $(uname) == "Linux" ]]; then
+  . /opt/asdf-vm/asdf.sh
+fi
+
+if [[ $(uname) == "Darwin" ]]; then
+  source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
+bindkey '^I' autosuggest-accept
+bindkey -s ^b "tmux-sessionizer\n"

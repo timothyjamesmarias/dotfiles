@@ -90,6 +90,7 @@ return {
 		vim.keymap.set("n", "<leader>fp", builtin.pickers, { silent = true })
 		vim.keymap.set("n", "<leader>fcc", builtin.commands, { silent = true })
 		vim.keymap.set("n", "<leader>fca", builtin.autocommands, { silent = true })
+		vim.keymap.set("n", "<leader>fj", builtin.jumplist, { silent = true })
 		vim.keymap.set("n", "<leader>fb", builtin.buffers, { silent = true })
 		vim.keymap.set("n", "<leader>fh", builtin.help_tags, { silent = true })
 		vim.keymap.set("n", "<leader>sp", builtin.spell_suggest, { silent = true })
