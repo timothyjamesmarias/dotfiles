@@ -41,6 +41,9 @@ return {
 				php = {
 					exe = "pint",
 				},
+        ruby = {
+          exe = "bin/standardrb --fix"
+        },
 				go = {
 					require("formatter.filetypes.go").gofmt,
 					exe = "gofmt",

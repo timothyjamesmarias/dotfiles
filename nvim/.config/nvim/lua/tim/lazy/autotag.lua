@@ -3,17 +3,19 @@ return {
 	dependencies = "nvim-treesitter/nvim-treesitter",
 	config = function()
 		require("nvim-ts-autotag").setup({
-			filetypes = {
-				"html",
-				"xml",
-				"embedded_template",
-				"eruby",
-				"php",
-				"js",
-				"ts",
-				"jsx",
-				"tsx",
-				"vue",
+			autotag = {
+				filetypes = {
+					"html",
+					"xml",
+					"embedded_template",
+					"eruby",
+					"php",
+					"js",
+					"ts",
+					"jsx",
+					"tsx",
+					"vue",
+				},
 			},
 		})
 	end,

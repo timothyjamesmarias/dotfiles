@@ -88,6 +88,7 @@ alias vim="nvim"
 alias so="source ~/.zshrc"
 alias sot="tmux source ~/.tmux.conf"
 alias art="php artisan"
+alias rails="bin/rails"
 
 if [[ $(uname) == "Linux" ]]; then
   if [[ $xdg_session_type == "wayland" ]]; then
