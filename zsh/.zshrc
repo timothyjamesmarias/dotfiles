@@ -120,4 +120,4 @@ if [[ $(uname) == "Darwin" ]]; then
   source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 fi
 bindkey '^I' autosuggest-accept
-bindkey -s ^b "tmux-sessionizer\n"
+# bindkey -s ^b "tmux-sessionizer\n"
