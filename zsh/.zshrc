@@ -89,6 +89,7 @@ alias so="source ~/.zshrc"
 alias sot="tmux source ~/.tmux.conf"
 alias art="php artisan"
 alias rails="bin/rails"
+alias ts="tmux-sessionizer"
 
 if [[ $(uname) == "Linux" ]]; then
   if [[ $xdg_session_type == "wayland" ]]; then
@@ -109,6 +110,7 @@ eval "$(fzf --zsh)"
 
 
 export PATH="$PATH:$HOME/go/bin"
+export PATH="$PATH:$HOME/.config/emacs/bin"
 export PATH="$PATH:$HOME/.local/scripts"
 chmod +x "$HOME/.local/scripts"
 

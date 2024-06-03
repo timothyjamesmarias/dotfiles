@@ -22,5 +22,4 @@ vim.keymap.set("n", "<leader>x", ":! chmod +x %<CR>")
 vim.keymap.set("n", "<leader>nn", "<cmd>Explore<CR>")
 vim.keymap.set("n", "<leader>ns", "<cmd>Explore %:p:h<CR>")
 
-vim.keymap.set("n", "<C-b>", ":! tmux neww tmux-sessionizer<CR>", { silent = true })
 

@@ -1,3 +1,0 @@
-(dap-register-debug-template
- "Debug Server"
- (list :type "go"))
