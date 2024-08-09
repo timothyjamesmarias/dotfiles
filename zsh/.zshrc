@@ -72,7 +72,7 @@ plugins=(
   git 
   ssh-agent 
   asdf 
-  zsh-vi-mode
+  # zsh-vi-mode
 )
 zstyle :omz:plugins:ssh-agent identities github
 
@@ -118,8 +118,8 @@ if [[ $(uname) == "Linux" ]]; then
   . /opt/asdf-vm/asdf.sh
 fi
 
-if [[ $(uname) == "Darwin" ]]; then
-  source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-fi
-bindkey '^I' autosuggest-accept
+# if [[ $(uname) == "Darwin" ]]; then
+#   source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+# fi
+# bindkey '^I' autosuggest-accept
 # bindkey -s ^b "tmux-sessionizer\n"
