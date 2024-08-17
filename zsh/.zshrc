@@ -70,9 +70,9 @@ ZVM_VI_INSERT_ESCAPE_BINDKEY=jj
 
 plugins=(
   git 
-  ssh-agent 
+  ssh-agent
+  rails
   asdf 
-  # zsh-vi-mode
 )
 zstyle :omz:plugins:ssh-agent identities github
 
@@ -114,9 +114,9 @@ export PATH="$PATH:$HOME/.config/emacs/bin"
 export PATH="$PATH:$HOME/.local/scripts"
 chmod +x "$HOME/.local/scripts"
 
-if [[ $(uname) == "Linux" ]]; then
-  . /opt/asdf-vm/asdf.sh
-fi
+# if [[ $(uname) == "Linux" ]]; then
+#   . /opt/asdf-vm/asdf.sh
+# fi
 
 # if [[ $(uname) == "Darwin" ]]; then
 #   source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh

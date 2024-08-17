@@ -76,3 +76,11 @@
 
 (setq-default evil-escape-key-sequence "jj")
 (add-hook 'window-setup-hook 'toggle-frame-maximized t)
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
+(add-to-list 'auto-mode-alist '("\\.templ\\'" . javascript-mode))
+(add-to-list 'auto-mode-alist '("\\.templ\\'" . templ-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.templ\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.templ\\'" . go-mode))
+
+(map! :after projectile
+      :map evil-normal-state-map "SPC p n"  #'+default/search-project)
