@@ -76,4 +76,6 @@
 
 (setq-default evil-escape-key-sequence "jj")
 (add-hook 'window-setup-hook 'toggle-frame-maximized t)
-(after! exec-path-from-shell 'exec-path-from-shell-initialize)
+(setq exec-path-from-shell-check-startup-files nil)
+(exec-path-from-shell-initialize)
+(exec-path-from-shell-copy-env "SSH_AUTH_SOCK")
