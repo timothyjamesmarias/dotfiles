@@ -76,3 +76,4 @@
 
 (setq-default evil-escape-key-sequence "jj")
 (add-hook 'window-setup-hook 'toggle-frame-maximized t)
+(after! exec-path-from-shell 'exec-path-from-shell-initialize)

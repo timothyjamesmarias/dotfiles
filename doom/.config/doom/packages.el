@@ -49,4 +49,4 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;; (unpin! t)
 
-(package! templ-ts-mode)
+(package! exec-path-from-shell)
