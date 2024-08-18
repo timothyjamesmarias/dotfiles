@@ -79,3 +79,4 @@
 (setq exec-path-from-shell-check-startup-files nil)
 (exec-path-from-shell-initialize)
 (exec-path-from-shell-copy-env "SSH_AUTH_SOCK")
+(add-to-list 'auto-mode-alist '("\\.slim\\'" . slim-mode))
