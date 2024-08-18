@@ -1,1 +1,1 @@
-(put 'projectile-grep 'disabled nil)
+; (put 'projectile-grep 'disabled nil)
