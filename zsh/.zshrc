@@ -88,7 +88,7 @@ alias vim="nvim"
 alias so="source ~/.zshrc"
 alias sot="tmux source ~/.tmux.conf"
 alias art="php artisan"
-alias rails="bin/rails"
+# alias rails="bin/rails"
 alias ts="tmux-sessionizer"
 
 if [[ $(uname) == "Linux" ]]; then
