@@ -88,7 +88,6 @@ return {
 				"javascriptreact",
 				"typescriptreact",
 				"html",
-				"eruby",
 			},
 		})
 		lspconfig["tailwindcss"].setup({
@@ -131,10 +130,10 @@ return {
 			on_attach = on_attach,
 			capabilities = capabilities,
 		})
-		lspconfig["solargraph"].setup({
-			on_attach = on_attach,
-			capabilities = capabilities,
-		})
+		-- lspconfig["solargraph"].setup({
+		-- 	on_attach = on_attach,
+		-- 	capabilities = capabilities,
+		-- })
 		lspconfig["rust_analyzer"].setup({
 			on_attach = on_attach,
 			capabilities = capabilities,
@@ -156,6 +155,10 @@ return {
 			capabilities = capabilities,
 		})
 		lspconfig["ocamllsp"].setup({
+			on_attach = on_attach,
+			capabilities = capabilities,
+		})
+		lspconfig["ruby_ls"].setup({
 			on_attach = on_attach,
 			capabilities = capabilities,
 		})
