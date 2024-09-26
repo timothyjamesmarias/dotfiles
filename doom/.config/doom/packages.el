@@ -50,4 +50,4 @@
 ;; (unpin! t)
 
 (package! exec-path-from-shell)
-(package! slim-mode)
+(package! kaolin-themes)
