@@ -19,8 +19,6 @@ let g:NERDTRreeMapActivateNode = 'l'
 let g:NERDTreeMAPJumpParent = 'h'
 nmap <c-p> <Action>(PreviousTab)
 nmap <c-n> <Action>(NextTab)
-nmap <c-l> <Action>(NextSplitter)
-nmap <c-h> <Action>(NextSplitter)
 nmap <leader>sf <Action>(Find)
 nmap <leader>ff <Action>(SearchEverywhere)
 nmap <leader>fw <Action>(FindInPath)
@@ -28,3 +26,7 @@ nmap <leader>ee <Action>(RunAnything)
 nmap <leader>rn <Action>(RenameElement)
 nmap <leader>rp <Action>(Replace)
 nmap ; :
+nmap <leader>wl <c-w>l
+nmap <leader>wh <c-w>h
+nmap <leader>wj <c-w>j
+nmap <leader>wk <c-w>k
