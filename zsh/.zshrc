@@ -123,3 +123,7 @@ chmod +x "$HOME/.local/scripts"
 # fi
 # bindkey '^I' autosuggest-accept
 # bindkey -s ^b "tmux-sessionizer\n"
+
+
+# Load Angular CLI autocompletion.
+source <(ng completion script)
