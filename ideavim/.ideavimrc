@@ -14,7 +14,7 @@ set commentary
 set surround
 set NERDTree
 nmap <leader>nn :NERDTreeToggle<CR>
-nmap <leader>ns :NERDTreed<CR>
+nmap <leader>ns :NERDTreeFind<CR>
 let g:NERDTRreeMapActivateNode = 'l'
 let g:NERDTreeMAPJumpParent = 'h'
 nmap <c-p> <Action>(PreviousTab)
