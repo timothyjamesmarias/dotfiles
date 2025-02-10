@@ -21,8 +21,8 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
 ;;
-(setq doom-font (font-spec :size 14 :family "Berkeley Mono"))
-(setq-default line-spacing 8)
+(setq doom-font (font-spec :size 14))
+(setq-default line-spacing 10)
 (setq fancy-splash-image (expand-file-name "emacs-e-template.svg" doom-user-dir))
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
@@ -32,7 +32,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-dark+)
+(setq doom-theme 'ef-bio)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -83,3 +83,4 @@
 (global-auto-revert-mode t)
 (setq lsp-warn-no-matched-clients nil)
 (remove-hook 'ruby-mode-hook #'rubocop-mode)
+(setq treemacs-width 60)
