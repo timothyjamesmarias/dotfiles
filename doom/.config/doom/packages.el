@@ -52,3 +52,4 @@
 (package! exec-path-from-shell)
 (package! kaolin-themes)
 (package! ef-themes)
+(package! copilot-chat)
