@@ -32,7 +32,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
+(setq doom-theme 'ef-dark)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -83,6 +83,6 @@
 (global-auto-revert-mode t)
 (setq lsp-warn-no-matched-clients nil)
 (remove-hook 'ruby-mode-hook #'rubocop-mode)
-(setq treemacs-width 40)
+(setq treemacs-width 60)
 ;; (setq lsp-intelephense-storage-path "~/.config/intelephense") ;; Set storage path
 ;; (setq lsp-intelephense-licence-key )
