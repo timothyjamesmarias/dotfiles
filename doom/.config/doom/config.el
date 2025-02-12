@@ -84,3 +84,5 @@
 (setq lsp-warn-no-matched-clients nil)
 (remove-hook 'ruby-mode-hook #'rubocop-mode)
 (setq treemacs-width 40)
+;; (setq lsp-intelephense-storage-path "~/.config/intelephense") ;; Set storage path
+;; (setq lsp-intelephense-licence-key )
