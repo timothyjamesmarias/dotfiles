@@ -112,6 +112,7 @@ eval "$(fzf --zsh)"
 export PATH="$PATH:$HOME/go/bin"
 export PATH="$PATH:$HOME/.config/emacs/bin"
 export PATH="$PATH:$HOME/.local/scripts"
+export PATH="$PATH:/Users/timmarias/.composer/vendor/bin"
 chmod +x "$HOME/.local/scripts"
 
 # if [[ $(uname) == "Linux" ]]; then
@@ -126,4 +127,4 @@ chmod +x "$HOME/.local/scripts"
 
 
 # Load Angular CLI autocompletion.
-source <(ng completion script)
+# source <(ng completion script)
