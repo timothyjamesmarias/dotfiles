@@ -31,3 +31,4 @@ nmap <leader>wl <c-w>l
 nmap <leader>wh <c-w>h
 nmap <leader>wj <c-w>j
 nmap <leader>wk <c-w>k
+imap <C-e> <Esc>A
