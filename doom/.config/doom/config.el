@@ -21,7 +21,7 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
 ;;
-(setq doom-font (font-spec :size 14 :family "JetbrainsMono Nerd Font Mono"))
+(setq doom-font (font-spec :family "JetbrainsMono Nerd Font Mono" :size 14))
 (setq-default line-spacing 10)
 (setq fancy-splash-image (expand-file-name "emacs-e-template.svg" doom-user-dir))
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them

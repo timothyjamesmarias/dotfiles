@@ -34,3 +34,4 @@ nmap <leader>wk <c-w>k
 imap <C-e> <Esc>A
 nmap <leader>t :action ActivateTerminalToolWindow<CR>
 nmap <leader>ot :action ActivateTerminalToolWindow<CR>
+nmap <leader>rc :g/^\s*#/d<CR>

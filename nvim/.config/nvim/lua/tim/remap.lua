@@ -14,10 +14,8 @@ vim.keymap.set("n", "<leader>vv", "<cmd>sp<CR>", { silent = true })
 vim.keymap.set("n", "<leader>sf", "/")
 
 vim.keymap.set("i", "<C-e>", "<Esc>A")
-vim.keymap.set("n", "<leader>er", "oif err != nil {<CR>}<Esc>")
 vim.keymap.set("n", "<leader>cm", ":!")
 vim.keymap.set("n", "<leader>ee", ":e ")
-vim.keymap.set("n", "<leader>x", ":! chmod +x %<CR>")
 
 vim.keymap.set("n", "<leader>nn", "<cmd>Explore<CR>")
 vim.keymap.set("n", "<leader>ns", "<cmd>Explore %:p:h<CR>")
