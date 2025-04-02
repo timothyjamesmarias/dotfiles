@@ -28,5 +28,11 @@ vim.opt.scrolloff = 8
 vim.opt.hlsearch = false
 vim.opt.incsearch = true
 vim.opt.termguicolors = true
-vim.opt.tags = 'tags'
+vim.opt.tags = './tags,tags'
 
+vim.api.nvim_create_autocmd("BufWritePost", {
+  pattern = {"*.rb", "*.js", "*.css", "*.scss", "*.slim", "*.erb"},
+  callback = function()
+    vim.fn.jobstart("ctags -R --languages=Ruby,JavaScript,CSS --exclude=.git --exclude=log", {detach = true})
+  end,
+})
