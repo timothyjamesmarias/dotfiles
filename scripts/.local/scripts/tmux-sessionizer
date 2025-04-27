@@ -4,11 +4,11 @@
 session=$(find ~ ~/projects -mindepth 1 -maxdepth 1 -type d | fzf)
 session_name=$(basename "$session" | tr . _)
 
-# Check if the session already exists
+# Check if tmux is running
 if ! tmux has-session -t "$session_name" 2>/dev/null; then
-  # Start a new tmux session with Zsh as a login shell
+  # Start tmux if it's not already running
   tmux new-session -s "$session_name" -c "$session" -d "exec /bin/zsh --login"
 fi
 
-# Switch to the newly created session
+# Attach to tmux session
 tmux switch-client -t "$session_name"

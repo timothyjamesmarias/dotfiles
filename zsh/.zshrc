@@ -21,12 +21,12 @@ alias art="php artisan"
 # alias rails="bin/rails"
 alias ts="tmux-sessionizer"
 
-# Automatically start tmux with a login shell if not already inside tmux
-if command -v tmux &> /dev/null; then
-  if [[ -z "$TMUX" ]]; then
-    tmux new-session -d -s mysession "exec /bin/zsh --login" || tmux attach-session -t mysession
-  fi
-fi
+# # Automatically start tmux with a login shell if not already inside tmux
+# if command -v tmux &> /dev/null; then
+#   if [[ -z "$TMUX" ]]; then
+#     tmux new-session -d -s default "exec /bin/zsh --login" || tmux attach-session -t default
+#   fi
+# fi
 
 if [[ $(uname) == "Linux" ]]; then
   if [[ $xdg_session_type == "wayland" ]]; then
