@@ -1,0 +1,25 @@
+# Set a better prompt
+settings set prompt "(lldb) "
+
+# Turn on auto-indentation and colors if terminal supports
+settings set frame-format "frame #${frame.index}: ${function.name} at ${file.basename}:${line}\n"
+settings set stop-disassembly-count 0
+settings set stop-line-count-before 5
+settings set stop-line-count-after 5
+
+# Enable auto-suggestion of types
+settings set target.prefer-dynamic-value run-target
+
+# Useful aliases
+command alias b breakpoint set --name
+command alias r run
+command alias c continue
+command alias n next
+command alias s step
+command alias bt thread backtrace
+
+# Always show thread & frame index
+settings set thread-format "thread #${thread.index}: tid = ${thread.id}, ${thread.name}, ${queue}, stop reason = ${stop-reason}\n"
+
+# Show variables nicely
+settings set target.display-runtime-support-values true

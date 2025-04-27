@@ -130,10 +130,6 @@ return {
 			on_attach = on_attach,
 			capabilities = capabilities,
 		})
-		-- lspconfig["solargraph"].setup({
-		-- 	on_attach = on_attach,
-		-- 	capabilities = capabilities,
-		-- })
 		lspconfig["rust_analyzer"].setup({
 			on_attach = on_attach,
 			capabilities = capabilities,
