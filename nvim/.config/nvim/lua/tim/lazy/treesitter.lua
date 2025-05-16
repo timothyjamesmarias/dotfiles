@@ -1,13 +1,12 @@
 return {
 	"nvim-treesitter/nvim-treesitter",
 	event = { "BufReadPre", "BufNewFile" },
-	build = "<cmd>TSUpdate",
+	build = ":TSUpdate",
 	dependencies = {
 		"windwp/nvim-ts-autotag",
 		"JoosepAlviste/nvim-ts-context-commentstring",
 		"EmranMR/tree-sitter-blade",
 		"RRethy/nvim-treesitter-endwise",
-		"vrischmann/tree-sitter-templ",
 	},
 	config = function()
 		local treesitter = require("nvim-treesitter.configs")
@@ -15,16 +14,15 @@ return {
 			highlight = { enable = true, additional_vim_regex_highlighting = false },
 			modules = {},
 			indent = { enable = true },
-			autotag = { enable = true },
 			ensure_installed = "all",
-      ignore_install = { "wing" },
+			ignore_install = { "wing" },
 			auto_install = true,
-			context_commentstring = {
-				enable = true,
-			},
 			endwise = {
 				enable = true,
 			},
 		})
+
+    require("nvim-ts-autotag").setup()
+    require("ts_context_commentstring").setup({})
 	end,
 }

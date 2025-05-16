@@ -22,7 +22,6 @@ return {
 			build = "make",
 		},
 		"nvim-treesitter/nvim-treesitter",
-		"stevearc/aerial.nvim",
 		"debugloop/telescope-undo.nvim",
 		"nvim-telescope/telescope-ui-select.nvim",
 	},
@@ -33,6 +32,9 @@ return {
 				mappings = {
 					n = {
 						["q"] = require("telescope.actions").close,
+					},
+					i = {
+						["<C-l>"] = require("telescope.actions").close,
 					},
 				},
 				layout_config = {
@@ -55,7 +57,6 @@ return {
 					override_file_sorter = true,
 					case_mode = "smart_case",
 				},
-				aerial = {},
 				undo = {},
 				file_browser = {},
 				ui_select = {
@@ -69,7 +70,6 @@ return {
 		})
 		telescope.load_extension("fzf")
 		telescope.load_extension("file_browser")
-		telescope.load_extension("aerial")
 		telescope.load_extension("undo")
 		telescope.load_extension("ui-select")
 
@@ -95,8 +95,8 @@ return {
 		vim.keymap.set("n", "<leader>fh", builtin.help_tags, { silent = true })
 		vim.keymap.set("n", "<leader>sp", builtin.spell_suggest, { silent = true })
 		vim.keymap.set("n", "<leader>fn", "<cmd>Telescope file_browser<CR>", { silent = true, noremap = true })
-		vim.keymap.set("n", "<leader>fa", "<cmd>Telescope aerial<CR>", { silent = true, noremap = true })
 		vim.keymap.set("n", "<leader>tg", builtin.tagstack, { silent = true })
+		vim.keymap.set("n", "<leader>tt", builtin.tags, { silent = true })
 		vim.keymap.set("n", "<leader>sl", builtin.grep_string, { silent = true, noremap = true })
 		vim.keymap.set(
 			"v",

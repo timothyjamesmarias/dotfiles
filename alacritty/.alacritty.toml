@@ -2,18 +2,18 @@
 TERM = "xterm-256color"
 
 [font]
-size = 16
+size = 17
 
 [font.normal]
-family = "MonoLisa"
+family = "IosevkaTerm Nerd Font Mono"
 style = "Regular"
 
 [font.bold]
-family = "MonoLisa"
+family = "IosevkaTerm Nerd Font Mono"
 style = "Bold"
 
 [font.italic]
-family = "MonoLisa"
+family = "IosevkaTerm Nerd Font Mono"
 style = "Italic"
 
 [font.glyph_offset]

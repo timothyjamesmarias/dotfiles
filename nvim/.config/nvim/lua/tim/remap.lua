@@ -17,7 +17,9 @@ vim.keymap.set("i", "<C-e>", "<Esc>A")
 vim.keymap.set("n", "<leader>cm", ":!")
 vim.keymap.set("n", "<leader>ee", ":e ")
 
-vim.keymap.set("n", "<leader>nn", "<cmd>Explore<CR>")
-vim.keymap.set("n", "<leader>ns", "<cmd>Explore %:p:h<CR>")
-
-
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "copilot-chat", -- Change to your actual Copilot Chat filetype
+  callback = function()
+    vim.api.nvim_buf_set_keymap(0, "n", "<leader>w", ":CopilotChatSave", { noremap = true, silent = true })
+  end,
+})

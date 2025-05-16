@@ -27,34 +27,6 @@ return {
 						"--check",
 					},
 				},
-				python = {
-					exe = "black",
-					args = {
-						"--quiet",
-						"-",
-					},
-					stdin = true,
-				},
-				ocaml = {
-					exe = "ocamlformat",
-				},
-				php = {
-					exe = "pint",
-				},
-        ruby = {
-          exe = "bin/standardrb --fix"
-        },
-				go = {
-					require("formatter.filetypes.go").gofmt,
-					exe = "gofmt",
-					-- args = {
-					-- 	"-w",
-					-- 	"-s",
-					-- },
-				},
-				["*"] = {
-					require("formatter.filetypes.any").remove_trailing_whitespace,
-				},
 			},
 		})
 		vim.keymap.set("n", "<leader>fm", "<cmd>Format<CR>", { silent = false })

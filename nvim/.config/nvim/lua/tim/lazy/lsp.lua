@@ -9,18 +9,14 @@ return {
 		"hrsh7th/cmp-path",
 		"hrsh7th/cmp-nvim-lua",
 		"hrsh7th/cmp-nvim-lsp-signature-help",
-		"saadparwaiz1/cmp_luasnip",
-		"L3MON4D3/LuaSnip",
 		"onsails/lspkind-nvim",
 		"nvim-telescope/telescope.nvim",
-		"rafamadriz/friendly-snippets",
 	},
 	config = function()
 		local lspconfig = require("lspconfig")
 		local capabilities = require("cmp_nvim_lsp").default_capabilities()
 		local cmp = require("cmp")
 		local lspkind = require("lspkind")
-		local luasnip = require("luasnip")
 
 		local on_attach = function()
 			vim.keymap.set("n", "gr", "<cmd>Telescope lsp_references<CR>")
@@ -79,7 +75,7 @@ return {
 			capabilities = capabilities,
 			filetypes = { "vue" },
 		})
-		lspconfig["tsserver"].setup({
+		lspconfig["ts_ls"].setup({
 			on_attach = on_attach,
 			capabilities = capabilities,
 			filetypes = {
@@ -118,10 +114,6 @@ return {
 			on_attach = on_attach,
 			capabilities = capabilities,
 		})
-		lspconfig["dockerls"].setup({
-			on_attach = on_attach,
-			capabilities = capabilities,
-		})
 		lspconfig["marksman"].setup({
 			on_attach = on_attach,
 			capabilities = capabilities,
@@ -138,33 +130,11 @@ return {
 			on_attach = on_attach,
 			capabilities = capabilities,
 		})
-		lspconfig["templ"].setup({
+		lspconfig["ruby_lsp"].setup({
 			on_attach = on_attach,
 			capabilities = capabilities,
 		})
-		lspconfig["zls"].setup({
-			on_attach = on_attach,
-			capabilities = capabilities,
-		})
-		lspconfig["pyright"].setup({
-			on_attach = on_attach,
-			capabilities = capabilities,
-		})
-		lspconfig["ocamllsp"].setup({
-			on_attach = on_attach,
-			capabilities = capabilities,
-		})
-		lspconfig["ruby_ls"].setup({
-			on_attach = on_attach,
-			capabilities = capabilities,
-		})
-
 		cmp.setup({
-			snippet = {
-				expand = function(args)
-					require("luasnip").lsp_expand(args.body)
-				end,
-			},
 			formatting = {
 				format = lspkind.cmp_format(),
 			},
@@ -172,8 +142,6 @@ return {
 				["<C-n>"] = cmp.mapping(function(fallback)
 					if cmp.visible() then
 						cmp.select_next_item()
-					elseif luasnip.expand_or_jumpable() then
-						luasnip.expand_or_jump()
 					else
 						fallback()
 					end
@@ -181,8 +149,6 @@ return {
 				["<C-p>"] = cmp.mapping(function(fallback)
 					if cmp.visible() then
 						cmp.select_prev_item()
-					elseif luasnip.jumpable(-1) then
-						luasnip.jump(-1)
 					else
 						fallback()
 					end
@@ -194,7 +160,6 @@ return {
 				{ name = "nvim_lsp_signature_help" },
 				{ name = "buffer" },
 				{ name = "path" },
-				{ name = "luasnip" },
 			},
 			experimental = {
 				native_menu = false,

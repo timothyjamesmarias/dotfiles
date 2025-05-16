@@ -20,3 +20,8 @@
 # Also process inline CSS in Slim and ERB style blocks
 --regex-css=/^[ \t]*\.([A-Za-z0-9_-]+)/\1/c,class,classes/
 --regex-css=/^[ \t]*#([A-Za-z0-9_-]+)/\1/i,id,ids/
+
+--languages=Ruby,Slim,SCSS
+--exclude=.git
+--exclude=log
+--exclude=tmp
