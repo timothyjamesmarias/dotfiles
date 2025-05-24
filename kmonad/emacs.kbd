@@ -1,0 +1,21 @@
+(defcfg
+  input  (device-file "/dev/input/by-id/usb-Keychron_Keychron_Q10-event-kbd")
+  output (uinput-sink "kmonad-virtual-keyboard")
+  fallthrough true
+  allow-cmd false
+)
+
+(defsrc
+  esc f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12
+  grave 1 2 3 4 5 6 7 8 9 0 minus equal bspc
+  tab q w e r t y u i o p lsqrbrkt rsqrbrkt backslash
+  caps a s d f g h j k l semicolon quote ret
+  lshift z x c v b n m comma dot slash rshift
+  lctrl lmeta lalt space ralt rmeta menu rctrl
+  up down left right
+)
+
+(deflayer main
+  C-n down
+  C-p up
+)

@@ -18,6 +18,7 @@ alias vim="nvim"
 alias so="source ~/.zshrc"
 alias sot="tmux source ~/.tmux.conf"
 alias art="php artisan"
+alias cl="clear"
 # alias rails="bin/rails"
 alias ts="tmux-sessionizer"
 
@@ -50,6 +51,7 @@ export PATH="$PATH:$HOME/go/bin"
 export PATH="$PATH:$HOME/.config/emacs/bin"
 export PATH="$PATH:$HOME/.local/scripts"
 export PATH="$PATH:/Users/timmarias/.composer/vendor/bin"
+export PATH=$HOME/.local/bin:$PATH
 chmod +x "$HOME/.local/scripts"
 
 # if [[ $(uname) == "Linux" ]]; then
