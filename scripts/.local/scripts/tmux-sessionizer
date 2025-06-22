@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Choose session directory
-session=$(find ~ ~/projects -mindepth 1 -maxdepth 1 -type d | fzf)
+session=$(find ~ ~/projects -mindepth 1 -maxdepth 2 -type d | fzf)
 session_name=$(basename "$session" | tr . _)
 
 # Check if tmux is running

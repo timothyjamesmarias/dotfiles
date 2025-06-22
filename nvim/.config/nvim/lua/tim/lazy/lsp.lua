@@ -19,15 +19,8 @@ return {
 		local lspkind = require("lspkind")
 
 		local on_attach = function()
-			vim.keymap.set("n", "gr", "<cmd>Telescope lsp_references<CR>")
-			vim.keymap.set("n", "gD", vim.lsp.buf.declaration)
-			vim.keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>")
-			vim.keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>")
-			vim.keymap.set("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>")
 			vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action)
 			vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename)
-			vim.keymap.set("n", "<leader>en", vim.diagnostic.goto_prev)
-			vim.keymap.set("n", "<leader>ep", vim.diagnostic.goto_next)
 			vim.keymap.set("n", "K", vim.lsp.buf.hover)
 			vim.keymap.set("n", "<leader>rs", "<cmd>LspRestart<CR>")
 		end

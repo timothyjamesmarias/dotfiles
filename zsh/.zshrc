@@ -18,6 +18,8 @@ alias vim="nvim"
 alias so="source ~/.zshrc"
 alias sot="tmux source ~/.tmux.conf"
 alias art="php artisan"
+alias cl="clear"
+alias urb="./urbit -w $URBIT_ID -k ~/urbit.key"
 # alias rails="bin/rails"
 alias ts="tmux-sessionizer"
 
@@ -43,13 +45,14 @@ alias xclip="xclip -selection c"
 alias ch="cheatsheet"
 export EDITOR="/usr/bin/nvim"
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+export OBSIDIAN_USER="Timothy Marias"
 eval "$(fzf --zsh)"
-
+source "$HOME/.env"
 
 export PATH="$PATH:$HOME/go/bin"
 export PATH="$PATH:$HOME/.config/emacs/bin"
 export PATH="$PATH:$HOME/.local/scripts"
-export PATH="$PATH:/Users/timmarias/.composer/vendor/bin"
+export PATH="$PATH:$HOME/.composer/vendor/bin"
 chmod +x "$HOME/.local/scripts"
 
 # if [[ $(uname) == "Linux" ]]; then
@@ -62,3 +65,6 @@ chmod +x "$HOME/.local/scripts"
 # bindkey '^I' autosuggest-accept
 # bindkey -s ^b "tmux-sessionizer\n"
 
+
+# Created by `pipx` on 2025-05-19 00:24:08
+export PATH="$PATH:$HOME/.local/bin"

@@ -18,8 +18,24 @@ vim.keymap.set("n", "<leader>cm", ":!")
 vim.keymap.set("n", "<leader>ee", ":e ")
 
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = "copilot-chat", -- Change to your actual Copilot Chat filetype
-  callback = function()
-    vim.api.nvim_buf_set_keymap(0, "n", "<leader>w", ":CopilotChatSave", { noremap = true, silent = true })
-  end,
+	pattern = "copilot-chat", -- Change to your actual Copilot Chat filetype
+	callback = function()
+		vim.api.nvim_buf_set_keymap(0, "n", "<leader>w", ":CopilotChatSave", { noremap = true, silent = true })
+	end,
 })
+
+vim.keymap.set("n", "gd", function()
+  local params = vim.lsp.util.make_position_params()
+
+  vim.lsp.buf_request(0, "textDocument/definition", params, function(err, result)
+    if not err and result and vim.tbl_count(result) > 0 then
+      vim.lsp.util.jump_to_location(result[1], "utf-8")
+    else
+      require("tim.dwim_definition").dwim_definition()
+    end
+  end)
+end, { desc = "Fast jump to definition or fallback DWIM" })
+
+vim.keymap.set("n", "gr", function()
+  require("my.dwim_definition").dwim_definition()
+end, { desc = "Smart find related resources (DWIM)" })
