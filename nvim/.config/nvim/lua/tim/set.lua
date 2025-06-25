@@ -30,7 +30,6 @@ vim.opt.incsearch = true
 vim.opt.termguicolors = true
 vim.opt.tags = './tags,tags'
 vim.g.skip_ts_context_commentstring_module = true
-vim.g.copilot_enabled = false
 vim.opt.splitright = true
 
 vim.api.nvim_create_autocmd("BufWritePost", {
@@ -39,3 +38,14 @@ vim.api.nvim_create_autocmd("BufWritePost", {
     vim.fn.jobstart({"ctags", "-R", "-f", "tags", "--options=.ctags", "."})
   end,
 })
+
+vim.wo.wrap = false
+
+-- 🪄 Defer theme loading until plugins are ready
+local theme_path = vim.fn.stdpath("config") .. "/lua/tim/theme.lua"
+vim.schedule(function()
+  local ok, result = pcall(dofile, theme_path)
+  if not ok then
+    vim.notify("Theme failed to load: " .. result, vim.log.levels.ERROR)
+  end
+end)

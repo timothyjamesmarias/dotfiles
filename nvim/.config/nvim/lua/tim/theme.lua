@@ -1,0 +1,1 @@
+/Users/timmarias/dotfiles/themes/rose-pine-moon/nvim.lua

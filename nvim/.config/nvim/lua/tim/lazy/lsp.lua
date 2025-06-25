@@ -103,14 +103,6 @@ return {
 				"css",
 			},
 		})
-		lspconfig["bashls"].setup({
-			on_attach = on_attach,
-			capabilities = capabilities,
-		})
-		lspconfig["marksman"].setup({
-			on_attach = on_attach,
-			capabilities = capabilities,
-		})
 		lspconfig["intelephense"].setup({
 			on_attach = on_attach,
 			capabilities = capabilities,
