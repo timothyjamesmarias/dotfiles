@@ -41,6 +41,9 @@ alias lg="lazygit"
 alias xclip="xclip -selection c"
 alias ch="cheatsheet"
 export EDITOR="/usr/bin/nvim"
+# # assign a listening socket for nvim for each terminal, using the terminal pid
+export NVIM_LISTEN_ADDRESS="/tmp/nvim-$$.sock"
+echo "$NVIM_LISTEN_ADDRESS" >> ~/.cache/nvim_socket
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 export OBSIDIAN_USER="Timothy Marias"
 eval "$(fzf --zsh)"

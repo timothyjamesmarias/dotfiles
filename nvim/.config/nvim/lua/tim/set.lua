@@ -49,3 +49,19 @@ vim.schedule(function()
     vim.notify("Theme failed to load: " .. result, vim.log.levels.ERROR)
   end
 end)
+
+local socket_path = vim.fn.expand("~/.cache/nvim_socket")
+
+-- Ensure the ~/.cache directory exists
+vim.fn.mkdir(vim.fn.fnamemodify(socket_path, ":h"), "p")
+
+-- -- Write the socket path
+-- if vim.env.NVIM_LISTEN_ADDRESS then
+--   local f = io.open(socket_path, "w")
+--   if f then
+--     f:write(vim.env.NVIM_LISTEN_ADDRESS)
+--     f:close()
+--   else
+--     vim.notify("⚠️ Failed to write NVIM socket path", vim.log.levels.WARN)
+--   end
+-- end

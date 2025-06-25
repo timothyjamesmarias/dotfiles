@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+THEMES=(main moon dawn)
+CHOICE=$(printf "%s\n" "${THEMES[@]}" | fzf --prompt="🎨 Pick a theme: ")
+
+if [[ -n "$CHOICE" ]]; then
+  atelier theme "$CHOICE"
+  tmux display-message "🎨 Theme set to $CHOICE"
+
+  # Broadcast theme to all running Neovim sockets
+  if [[ -f ~/.cache/nvim_sockets ]]; then
+    grep -v '^$' ~/.cache/nvim_sockets | while read -r SOCKET; do
+      if [[ -S "$SOCKET" ]]; then
+        nvim --server "$SOCKET" --remote-send "<Esc>:colorscheme rose-pine-${CHOICE}<CR>"
+      fi
+  done
+
+    # Prune dead sockets (no longer exist)
+    grep -v '^$' ~/.cache/nvim_sockets | while read -r SOCKET; do
+      [[ -S "$SOCKET" ]] && echo "$SOCKET"
+    done > ~/.cache/nvim_sockets.tmp && mv ~/.cache/nvim_sockets.tmp ~/.cache/nvim_sockets
+  fi
+else
+  echo "No theme selected. Exiting."
+fi
