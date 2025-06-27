@@ -26,6 +26,8 @@ alias sart="sail artisan"
 alias ts="tmux-sessionizer"
 alias cl="clear"
 alias k="kubectl"
+alias index="find . -type f | grep -vE 'node_modules|target|.git'"
+alias ff="index | fzf | xargs nvim"
 
 if [[ $(uname) == "Linux" ]]; then
   if [[ $xdg_session_type == "wayland" ]]; then

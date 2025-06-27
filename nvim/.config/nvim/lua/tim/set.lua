@@ -2,6 +2,9 @@ vim.cmd("syntax on")
 vim.cmd("au FileType netrw setl bufhidden=wipe")
 vim.api.nvim_set_var("netrw_fastbrowse", 0)
 vim.opt.clipboard:append({ "unnamed", "unnamedplus" })
+vim.opt.path:append("**")
+vim.opt.wildmenu = true
+vim.opt.wildmode = { "longest:full", "full" }
 vim.opt.background = "dark"
 vim.opt.number = true
 vim.opt.relativenumber = true
@@ -52,8 +55,6 @@ end)
 
 local socket_path = vim.fn.expand("~/.cache/nvim_socket")
 
--- Ensure the ~/.cache directory exists
-vim.fn.mkdir(vim.fn.fnamemodify(socket_path, ":h"), "p")
 
 -- -- Write the socket path
 -- if vim.env.NVIM_LISTEN_ADDRESS then
@@ -65,3 +66,6 @@ vim.fn.mkdir(vim.fn.fnamemodify(socket_path, ":h"), "p")
 --     vim.notify("⚠️ Failed to write NVIM socket path", vim.log.levels.WARN)
 --   end
 -- end
+-- Ensure the ~/.cache directory exists
+vim.fn.mkdir(vim.fn.fnamemodify(socket_path, ":h"), "p")
+
