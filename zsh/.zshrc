@@ -18,9 +18,6 @@ alias vim="nvim"
 alias so="source ~/.zshrc"
 alias sot="tmux source ~/.tmux.conf"
 alias art="php artisan"
-alias cl="clear"
-alias urb="./urbit -w $URBIT_ID -k ~/urbit.key"
-# alias rails="bin/rails"
 alias sail='[ -f vendor/bin/sail ] && bash vendor/bin/sail'
 alias sart="sail artisan"
 alias ts="tmux-sessionizer"
@@ -28,6 +25,15 @@ alias cl="clear"
 alias k="kubectl"
 alias index="find . -type f | grep -vE 'node_modules|target|.git'"
 alias ff="index | fzf | xargs nvim"
+alias ffa="index | fzf -m | xargs nvim"
+alias fd="find . -type d | grep -vE 'node_modules|target|.git' | fzf"
+alias cdd='cd "$(fd --type d --hidden --exclude .git --exclude node_modules --max-depth 6 ~ | fzf --preview "tree -C -L 2 {}")"'
+alias pj='cd "$(fd . ~/projects ~/work ~/repos -mindepth 1 -maxdepth 2 -type d | fzf)"'
+alias t="tree -L 2 -I 'node_modules|.git|target|dist|*.lock|*.cache'"
+alias grepjs="rg --glob '**/*.js' --glob '**/*.ts' --glob '!node_modules'"
+alias grepcss="rg --glob '**/*.scss' --glob '**/*.css' --glob '!node_modules'"
+alias re="cat ~/.recentfiles | fzf | xargs nvim"
+alias rgf="rg --no-heading --line-number --color=always . | fzf --ansi | awk -F':' '{print $1, $2}'"
 
 if [[ $(uname) == "Linux" ]]; then
   if [[ $xdg_session_type == "wayland" ]]; then
