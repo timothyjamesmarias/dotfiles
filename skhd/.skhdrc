@@ -1,4 +1,0 @@
-# Use ctrl + alt + 1/2/3 to switch themes
-ctrl + alt - 1 : ~/.local/.scripts/switch-theme main
-ctrl + alt - 2 : ~/.local/.scripts/switch-theme moon
-ctrl + alt - 3 : ~/.local/.scripts/switch-theme dawn
