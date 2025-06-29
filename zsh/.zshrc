@@ -1,11 +1,3 @@
-# --- Prompt styles ---
-autoload -Uz vcs_info
-precmd() { vcs_info }
-
-setopt prompt_subst
-RPROMPT='%F{magenta}${vcs_info_msg_0_}%f'
-PROMPT='%F{yellow}%~%f %# '
-
 # --- Language and shell options ---
 export LANG=en_US.UTF-8
 export EDITOR="/usr/bin/nvim"
@@ -14,16 +6,13 @@ export OBSIDIAN_USER="Timothy Marias"
 
 # --- vi mode with status ---
 bindkey -v
-zle-keymap-select() {
-  RPROMPT="${KEYMAP/vicmd/%F{red}[NORMAL]%f}"
-  zle reset-prompt
-}
-zle-line-init() {
-  zle -K viins
-  RPROMPT=""
-}
-zle -N zle-keymap-select
-zle -N zle-line-init
+
+# --- Prompt styles ---
+autoload -Uz vcs_info
+precmd() { vcs_info }
+
+setopt prompt_subst
+PROMPT='%F{yellow}%~%F{magenta}${vcs_info_msg_0_}%f %# '
 
 # --- GitHub SSH Agent Setup ---
 #
@@ -50,7 +39,7 @@ alias k="kubectl"
 alias lg="lazygit"
 alias xclip="xclip -selection c"
 alias ch="cheatsheet"
-alias bi="HOMEBREW_NO_AUTO_UPDATE=1 brew install"
+alias bi="brew install"
 
 # --- File + Project Search Utilities ---
 alias index="find . -type f | grep -vE 'node_modules|target|.git'"
@@ -63,14 +52,64 @@ alias t="tree -L 2 -I 'node_modules|.git|target|dist|*.lock|*.cache'"
 alias gjs="rg --glob '**/*.js' --glob '**/*.ts' --glob '!node_modules'"
 alias gcss="rg --glob '**/*.scss' --glob '**/*.css' --glob '!node_modules'"
 alias re="cat ~/.recentfiles | fzf | xargs nvim"
-alias rgf="rg --no-heading --line-number --color=always . | fzf --ansi | awk -F':' '{print $1, $2}'"
+alias rgf="rg --no-heading --line-number --color=always . \
+  | fzf --ansi \
+  | awk -F':' '{printf \"nvim +%s %s\\n\", \$2, \$1}' \
+  | sh"
 alias nfw="rgf | xargs nvim"
 alias yy="yazi"
 alias del="find . -type f | fzf -m --preview 'bat --style=numbers --color=always {}' | xargs -o rm -i"
+alias deld="find . -type d | fzf -m --preview 'bat --style=numbers --color=always {}' | xargs -o rm -rf -i"
+alias deldf="find . -type d | fzf -m --preview 'bat --style=numbers --color=always {}' | xargs -o rm -rf"
+
+cf() {
+  local dir
+  dir=$(find . -type d -not -path '*/.git/*' -not -path '*/node_modules/*' -not -path '*/target/*' \
+    | fzf --preview "tree -C -L 2 {}") || return
+
+  read "filename?Enter new file name (relative to $dir): "
+  [[ -z "$filename" ]] && echo "Cancelled." && return
+
+  local filepath="$dir/$filename"
+  mkdir -p "$(dirname "$filepath")"
+  touch "$filepath"
+  nvim "$filepath"
+}
+
+alias cf="cf"
 
 # --- Git aliases and Utilities ---
+
+# Fuzzy switch to git branch
+git_checkout() {
+  local branch
+  branch=$(git branch --all | grep -v HEAD | sed 's/.* //' | fzf) && git checkout "$branch"
+}
+
+# Fuzzy stage files
+git_stage() {
+  git status --short | fzf -m | awk '{print $2}' | xargs git add
+}
+
+# Fuzzy reset files
+git_unstage() {
+  git diff --cached --name-only | fzf -m | xargs git reset HEAD --
+}
+
+# Fuzzy commit from selected files
+git_commit_fzf() {
+  git_stage
+  echo "Enter commit message:"
+  read msg
+  git commit -m "$msg"
+}
+
+# Fuzzy view commits
+git_log_fzf() {
+  git log --oneline --graph --decorate --all | fzf --no-sort --reverse --height=40%
+}
+
 alias gs='git status -sb'
-alias ga='git add'
 alias gc='git commit -v'
 alias gca='git commit -v --amend'
 alias gl='git log --oneline --graph --decorate'
@@ -86,6 +125,12 @@ alias grs='git restore --staged'
 alias gcp='git cherry-pick'
 alias gsw='git switch'
 alias gpr='gh pr create --web'
+
+alias gcb="git_checkout"
+alias ga="git_stage"
+alias gu="git_unstage"
+alias gcmsg="git_commit_fzf"
+alias glog="git_log_fzf"
 
 alias gcf="git log --oneline | fzf | cut -d ' ' -f1 | xargs git checkout"
 
@@ -109,6 +154,9 @@ chmod +x "$HOME/.local/scripts"
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.local/scripts:$HOME/.composer/vendor/bin:/opt/homebrew/bin:$PATH"
 export PATH="$PATH:$HOME/.asdf/bin:$HOME/.asdf/shims:$HOME/go/bin"
 export ASDF_DATA_DIR=/Users/tim/.asdf
+
+# --- Make Homebrew not shit ---
+HOMEBREW_NO_AUTO_UPDATE=1
 
 # --- History Navigation ---
 bindkey '^P' up-history

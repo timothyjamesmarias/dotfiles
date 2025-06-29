@@ -1,4 +1,5 @@
 local tmux = require("tim.tmux_util")
+local sessions = require("tim.sessions")
 
 vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>w", "<cmd>w<CR>")
@@ -30,3 +31,11 @@ function FZF_in_terminal()
 end
 
 vim.keymap.set("n", "<leader>ff", FZF_in_terminal, { desc = "FZF in terminal (same Neovim session)" })
+
+-- sessions mappings
+vim.keymap.set("n", "<leader>ss", sessions.save, { desc = "Save session" })
+vim.keymap.set("n", "<leader>sr", sessions.load, { desc = "Restore session" })
+
+-- git stuff
+vim.keymap.set("n", "<leader>gcb", "<cmd>!tmux split-window -v 'gcb'<CR>")
+vim.keymap.set("n", "<leader>gl", "<cmd>!tmux split-window -v 'glog'<CR>")
