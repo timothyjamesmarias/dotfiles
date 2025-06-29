@@ -27,17 +27,7 @@ return {
 			sections = {
 				lualine_a = { "mode" },
 				lualine_b = { "branch", "diagnostics" },
-				lualine_c = {
-					"filename",
-					{
-						"buffers",
-						mode = 2,
-						symbols = {
-							modified = " ●",
-							directory = "",
-						},
-					},
-				},
+				lualine_c = { "filename" },
 				lualine_x = { "searchcount" },
 				lualine_y = { "progress" },
 				lualine_z = { "location" },
