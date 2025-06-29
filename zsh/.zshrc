@@ -1,3 +1,11 @@
+# --- Prompt styles ---
+autoload -Uz vcs_info
+precmd() { vcs_info }
+
+setopt prompt_subst
+RPROMPT='%F{magenta}${vcs_info_msg_0_}%f'
+PROMPT='%F{yellow}%~%f %# '
+
 # --- Language and shell options ---
 export LANG=en_US.UTF-8
 export EDITOR="/usr/bin/nvim"
@@ -36,6 +44,7 @@ alias k="kubectl"
 alias lg="lazygit"
 alias xclip="xclip -selection c"
 alias ch="cheatsheet"
+alias bi="HOMEBREW_NO_AUTO_UPDATE=1 brew install"
 
 # --- File + Project Search Utilities ---
 alias index="find . -type f | grep -vE 'node_modules|target|.git'"
@@ -45,10 +54,34 @@ alias fd="find . -type d | grep -vE 'node_modules|target|.git' | fzf"
 alias cdd='cd "$(fd --type d --hidden --exclude .git --exclude node_modules --max-depth 6 ~ | fzf --preview "tree -C -L 2 {}")"'
 alias pj='cd "$(fd . ~/projects ~/work ~/repos -mindepth 1 -maxdepth 2 -type d | fzf)"'
 alias t="tree -L 2 -I 'node_modules|.git|target|dist|*.lock|*.cache'"
-alias grepjs="rg --glob '**/*.js' --glob '**/*.ts' --glob '!node_modules'"
-alias grepcss="rg --glob '**/*.scss' --glob '**/*.css' --glob '!node_modules'"
+alias gjs="rg --glob '**/*.js' --glob '**/*.ts' --glob '!node_modules'"
+alias gcss="rg --glob '**/*.scss' --glob '**/*.css' --glob '!node_modules'"
 alias re="cat ~/.recentfiles | fzf | xargs nvim"
 alias rgf="rg --no-heading --line-number --color=always . | fzf --ansi | awk -F':' '{print $1, $2}'"
+alias nfw="rgf | xargs nvim"
+alias yy="yazi"
+alias del="find . -type f | fzf -m --preview 'bat --style=numbers --color=always {}' | xargs -o rm -i"
+
+# --- Git aliases and Utilities ---
+alias gs='git status -sb'
+alias ga='git add'
+alias gc='git commit -v'
+alias gca='git commit -v --amend'
+alias gl='git log --oneline --graph --decorate'
+alias gp='git push'
+alias gpo='git push origin'
+alias gpf='git push --force-with-lease'
+alias gco='git checkout'
+alias gb='git branch -vv'
+alias gd='git diff'
+alias gds='git diff --staged'
+alias gr='git restore'
+alias grs='git restore --staged'
+alias gcp='git cherry-pick'
+alias gsw='git switch'
+alias gpr='gh pr create --web'
+
+alias gcf="git log --oneline | fzf | cut -d ' ' -f1 | xargs git checkout"
 
 # --- Clipboard alias (cross-platform) ---
 if [[ $(uname) == "Linux" ]]; then
@@ -74,6 +107,10 @@ export ASDF_DATA_DIR=/Users/tim/.asdf
 # --- History Navigation ---
 bindkey '^P' up-history
 bindkey '^N' down-history
+
+# --- Keybindings ---
+# bindkey -s '^g' 'git status\n'
+# bindkey -s '^h' 'ff\n'
 
 # --- FZF integration ---
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

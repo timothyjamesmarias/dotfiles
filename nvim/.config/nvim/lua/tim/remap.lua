@@ -1,3 +1,5 @@
+local tmux = require("tim.tmux_util")
+
 vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>w", "<cmd>w<CR>")
 vim.keymap.set("n", ";", ":")
@@ -12,30 +14,19 @@ vim.keymap.set("n", "N", "Nzzzv", { silent = true })
 vim.keymap.set("n", "<leader>hh", "<cmd>vsp<CR>", { silent = true })
 vim.keymap.set("n", "<leader>vv", "<cmd>sp<CR>", { silent = true })
 vim.keymap.set("n", "<leader>sf", "/")
-
 vim.keymap.set("i", "<C-e>", "<Esc>A")
 vim.keymap.set("n", "<leader>cm", ":!")
 vim.keymap.set("n", "<leader>ee", ":e ")
+vim.keymap.set("n", "<leader>eb", ":Ebuf ")
 
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = "copilot-chat", -- Change to your actual Copilot Chat filetype
-	callback = function()
-		vim.api.nvim_buf_set_keymap(0, "n", "<leader>w", ":CopilotChatSave", { noremap = true, silent = true })
-	end,
-})
+vim.keymap.set("n", "<leader>lg", function()
+  tmux.send_to_other_pane("lazygit")
+end, { desc = "Open lazygit in other pane" })
 
-vim.keymap.set("n", "gd", function()
-  local params = vim.lsp.util.make_position_params()
+function FZF_in_terminal()
+  vim.cmd("botright 15split | terminal")
+  local cmd = "find . -type f | grep -vE 'node_modules|target|.git' | fzf | xargs -r nvim"
+  vim.fn.chansend(vim.b.terminal_job_id, cmd .. "\n")
+end
 
-  vim.lsp.buf_request(0, "textDocument/definition", params, function(err, result)
-    if not err and result and vim.tbl_count(result) > 0 then
-      vim.lsp.util.jump_to_location(result[1], "utf-8")
-    else
-      require("tim.dwim_definition").dwim_definition()
-    end
-  end)
-end, { desc = "Fast jump to definition or fallback DWIM" })
-
-vim.keymap.set("n", "gr", function()
-  require("my.dwim_definition").dwim_definition()
-end, { desc = "Smart find related resources (DWIM)" })
+vim.keymap.set("n", "<leader>ff", FZF_in_terminal, { desc = "FZF in terminal (same Neovim session)" })

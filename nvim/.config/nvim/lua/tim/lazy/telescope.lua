@@ -1,14 +1,17 @@
 function vim.getVisualSelection()
-	vim.cmd('noau normal! "vy"')
-	local text = vim.fn.getreg("v")
-	vim.fn.setreg("v", {})
-
-	text = string.gsub(text, "\n", "")
-	if #text > 0 then
-		return text
-	else
+	local _, ls_row, ls_col, _ = unpack(vim.fn.getpos("v"))
+	local _, le_row, le_col, _ = unpack(vim.fn.getpos("."))
+	if ls_row > le_row or (ls_row == le_row and ls_col > le_col) then
+		ls_row, le_row = le_row, ls_row
+		ls_col, le_col = le_col, ls_col
+	end
+	local lines = vim.fn.getline(ls_row, le_row)
+	if #lines == 0 then
 		return ""
 	end
+	lines[1] = string.sub(lines[1], ls_col)
+	lines[#lines] = string.sub(lines[#lines], 1, le_col)
+	return table.concat(lines, " ")
 end
 
 return {
@@ -68,17 +71,18 @@ return {
 				},
 			},
 		})
-		telescope.load_extension("fzf")
-		telescope.load_extension("file_browser")
-		telescope.load_extension("undo")
-		telescope.load_extension("ui-select")
+
+		pcall(telescope.load_extension, "fzf")
+		pcall(telescope.load_extension, "undo")
+		pcall(telescope.load_extension, "file_browser")
+		pcall(telescope.load_extension, "ui-select")
 
 		local builtin = require("telescope.builtin")
 		vim.keymap.set("n", "<leader>ff", "<cmd>Telescope find_files follow=true hidden=true<CR>", { silent = true })
 		vim.keymap.set("v", "<leader>fw", function()
 			local text = vim.getVisualSelection()
-			builtin.live_grep({ default_text = text })
-		end, { silent = true, noremap = true })
+			require("telescope.builtin").live_grep({ default_text = text })
+		end)
 		vim.keymap.set("v", "<leader>ff", function()
 			local text = vim.getVisualSelection()
 			builtin.find_files({ default_text = text })
@@ -87,23 +91,39 @@ return {
 		vim.keymap.set("n", "<leader>fg", builtin.git_commits, { silent = true })
 		vim.keymap.set("n", "<leader>fw", builtin.live_grep, { silent = true })
 		vim.keymap.set("n", "<leader>fk", builtin.keymaps, { silent = true })
-		vim.keymap.set("n", "<leader>fp", builtin.pickers, { silent = true })
 		vim.keymap.set("n", "<leader>fcc", builtin.commands, { silent = true })
 		vim.keymap.set("n", "<leader>fca", builtin.autocommands, { silent = true })
 		vim.keymap.set("n", "<leader>fj", builtin.jumplist, { silent = true })
 		vim.keymap.set("n", "<leader>fb", builtin.buffers, { silent = true })
 		vim.keymap.set("n", "<leader>fh", builtin.help_tags, { silent = true })
 		vim.keymap.set("n", "<leader>sp", builtin.spell_suggest, { silent = true })
-		vim.keymap.set("n", "<leader>fn", "<cmd>Telescope file_browser<CR>", { silent = true, noremap = true })
+		vim.keymap.set("n", "<leader>fn", function()
+			require("telescope").extensions.file_browser.file_browser({
+				path = "%:p:h",
+				select_buffer = true,
+				grouped = true,
+				hidden = true,
+				previewer = false,
+				layout_config = { height = 0.5 },
+			})
+		end, { noremap = true, silent = true })
+		vim.keymap.set("n", "<leader>fp", function()
+			local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
+			require("telescope").extensions.file_browser.file_browser({
+				path = git_root,
+				grouped = true,
+				hidden = true,
+				previewer = false,
+				layout_config = { height = 0.5 },
+			})
+		end, { noremap = true, silent = true })
 		vim.keymap.set("n", "<leader>tg", builtin.tagstack, { silent = true })
 		vim.keymap.set("n", "<leader>tt", builtin.tags, { silent = true })
 		vim.keymap.set("n", "<leader>sl", builtin.grep_string, { silent = true, noremap = true })
-		vim.keymap.set(
-			"v",
-			"<leader>sl",
-			"y<ESC><cmd>Telescope grep_string default_text=<c-r>0<CR>",
-			{ silent = true, noremap = true }
-		)
+		vim.keymap.set("v", "<leader>sl", function()
+			local text = vim.getVisualSelection()
+			builtin.grep_string({ search = text })
+		end, { silent = true, noremap = true })
 		vim.keymap.set("n", "<leader>u", "<cmd>Telescope undo<CR>")
 	end,
 }

@@ -32,17 +32,13 @@ return {
 					{
 						"buffers",
 						mode = 2,
-						{
-							mode = 2,
-							symbols = {
-								modified = " ●",
-								alternate_file = "#",
-								directory = "",
-							},
+						symbols = {
+							modified = " ●",
+							directory = "",
 						},
 					},
 				},
-				lualine_x = { "searchcount", "fileformat", "filetype" },
+				lualine_x = { "searchcount" },
 				lualine_y = { "progress" },
 				lualine_z = { "location" },
 			},
