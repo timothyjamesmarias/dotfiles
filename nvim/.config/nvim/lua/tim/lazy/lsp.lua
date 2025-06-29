@@ -63,37 +63,14 @@ return {
 				},
 			},
 		})
-		lspconfig["volar"].setup({
-			on_attach = on_attach,
-			capabilities = capabilities,
-			filetypes = { "vue" },
-		})
 		lspconfig["ts_ls"].setup({
 			on_attach = on_attach,
 			capabilities = capabilities,
 			filetypes = {
 				"javascript",
 				"typescript",
-				"javascriptreact",
-				"typescriptreact",
 				"html",
 			},
-		})
-		lspconfig["tailwindcss"].setup({
-			on_attach = on_attach,
-			capabilities = capabilities,
-			filetypes = {
-				"html",
-				"eruby",
-				"blade",
-				"vue",
-				"javascript",
-				"typescript",
-				"javascriptreact",
-				"typescriptreact",
-				"templ",
-			},
-			init_options = { userLanguages = { templ = "html" } },
 		})
 		lspconfig["cssls"].setup({
 			on_attach = on_attach,
