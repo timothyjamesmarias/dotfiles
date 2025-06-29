@@ -3,5 +3,11 @@
 	email = timothyjamesmarias@gmail.com
 [core]
 	autocrlf = input
-[alias]
-  mergetool = "!nvim -c DiffviewOpen"
+  editor = nvim
+  pager = delta
+[delta]
+  navigate = true
+  line-numbers = true
+  syntax-theme = base16
+[merge]
+  conflictstyle = diff3
