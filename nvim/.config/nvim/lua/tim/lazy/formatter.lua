@@ -22,10 +22,12 @@ return {
 					end,
 				},
 				rust = {
-					exe = "rustfmt",
-					args = {
-						"--check",
-					},
+					function()
+						return {
+							exe = "rustfmt",
+							stdin = true,
+						}
+					end,
 				},
 			},
 		})
