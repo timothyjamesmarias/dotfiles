@@ -208,8 +208,7 @@ bindkey '^P' up-history
 bindkey '^N' down-history
 
 # --- Keybindings ---
-# bindkey -s '^g' 'git status\n'
-# bindkey -s '^h' 'ff\n'
+bindkey -s '^n' 'nvim\n'
 
 # --- FZF integration ---
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
