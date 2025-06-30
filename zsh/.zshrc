@@ -154,9 +154,8 @@ echo "$NVIM_LISTEN_ADDRESS" >> ~/.cache/nvim_socket
 chmod +x "$HOME/.local/scripts"
 
 # --- Path ---
-export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.local/scripts:$HOME/.composer/vendor/bin:/opt/homebrew/bin:$PATH"
-export PATH="$PATH:$HOME/.asdf/bin:$HOME/.asdf/shims:$HOME/go/bin"
-export ASDF_DATA_DIR=/Users/tim/.asdf
+export PATH="$HOME/.asdf/shims:$HOME/.asdf/bin:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.local/scripts:$HOME/.composer/vendor/bin:/opt/homebrew/bin:$HOME/go/bin:$PATH"
+export ASDF_DATA_DIR=/Users/timmarias/.asdf
 
 # --- Make Homebrew not shit ---
 HOMEBREW_NO_AUTO_UPDATE=1
