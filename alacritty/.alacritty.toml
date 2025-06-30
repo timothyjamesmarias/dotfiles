@@ -34,3 +34,6 @@ args = ["--login", "-c", "~/.local/scripts/atelier-launch.sh"]
 [window.padding]
 x = 0
 y = 0
+
+[window]
+option_as_alt = 'Both'
