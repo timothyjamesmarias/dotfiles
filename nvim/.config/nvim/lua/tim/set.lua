@@ -57,3 +57,14 @@ local socket_path = vim.fn.expand("~/.cache/nvim_socket")
 
 vim.fn.mkdir(vim.fn.fnamemodify(socket_path, ":h"), "p")
 
+function GitBranch()
+  local handle = io.popen("git rev-parse --abbrev-ref HEAD 2>/dev/null")
+  if handle then
+    local result = handle:read("*l")
+    handle:close()
+    return result or ""
+  end
+  return ""
+end
+
+vim.o.statusline = "%f %m%r %=%{v:lua.GitBranch()} %l:%c [%p%%]"
