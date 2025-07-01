@@ -88,23 +88,54 @@ alias bi="brew install"
 alias index="find . -type f | grep -vE 'node_modules|target|.git'"
 alias ff="index | fzf | xargs nvim"
 alias ffa="index | fzf -m | xargs nvim"
-alias fd="find . -type d | grep -vE 'node_modules|target|.git' | fzf"
 alias cdd='cd "$(find . -type d | grep -vE "node_modules|target|.git" | fzf --preview "tree -C -L 2 {}")"'
-alias pj='cd "$(fd . ~/projects ~/work ~/repos -mindepth 1 -maxdepth 2 -type d | fzf)"'
 alias t="tree -L 2 -I 'node_modules|.git|target|dist|*.lock|*.cache'"
-alias gjs="rg --glob '**/*.js' --glob '**/*.ts' --glob '!node_modules'"
-alias gcss="rg --glob '**/*.scss' --glob '**/*.css' --glob '!node_modules'"
 alias re="cat ~/.recentfiles | fzf | xargs nvim"
-alias rgf="rg --no-heading --line-number --color=always . \
-  | fzf --ansi \
-  | awk -F':' '{printf \"nvim +%s %s\\n\", \$2, \$1}' \
-  | sh"
-alias nfw="rgf | xargs nvim"
 alias yy="yazi"
 alias del="find . -type f | fzf -m --preview 'bat --style=numbers --color=always {}' | xargs -o rm -i"
 alias deld="find . -type d | fzf -m --preview 'bat --style=numbers --color=always {}' | xargs -o rm -rf -i"
 alias deldf="find . -type d | fzf -m --preview 'bat --style=numbers --color=always {}' | xargs -o rm -rf"
 alias ls='ls -G'
+
+rgnvim() {
+  rg --no-heading --line-number --color=always "$@" \
+    | fzf --ansi \
+    | awk -F':' '{printf "nvim +%s %s\n", $2, $1}' \
+    | sh
+}
+
+alias rgf='rgnvim .'
+alias gjs='rgnvim --glob="**/*.js" --glob="**/*.ts" --glob="!node_modules" .'
+alias gcss='rgnvim --glob="**/*.scss" --glob="**/*.css" --glob="!node_modules" .'
+alias grb='rgnvim --glob="**/*.rb" --glob="**/*.css" --glob="!node_modules" .'
+alias gerb='rgnvim --glob="**/*.erb" --glob="**/*.css" --glob="!node_modules" .'
+
+unalias fjs 2>/dev/null
+fjs() {
+  rg --no-heading --line-number --color=always \
+    --glob '**/*.js' \
+    --glob '**/*.ts' \
+    --glob '!node_modules' \
+    . \
+  | fzf --ansi \
+  | awk -F':' '{printf "nvim +%s %s\n", $2, $1}' \
+  | sh
+}
+alias fjs="fjs"
+
+unalias fcss 2>/dev/null
+fcss() {
+  rg --no-heading --line-number --color=always \
+    --glob '**/*.css' \
+    --glob '**/*.scss' \
+    --glob '!node_modules' \
+    . \
+  | fzf --ansi \
+  | awk -F':' '{printf "nvim +%s %s\n", $2, $1}' \
+  | sh
+}
+alias fcss="fcss"
+
 
 # unalias the command to get it to work
 unalias cf 2>/dev/null
