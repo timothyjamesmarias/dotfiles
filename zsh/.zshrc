@@ -212,6 +212,41 @@ alias glog="git_log_fzf"
 
 alias gcf="git log --oneline | fzf | cut -d ' ' -f1 | xargs git checkout"
 
+view_in_github_fzf() {
+  local root
+  root=$(git rev-parse --show-toplevel) || return
+
+  local file
+  file=$(git ls-files | fzf --prompt="Select file to view on GitHub: ") || return
+
+  local rel_path="$file"
+  local branch=$(git rev-parse --abbrev-ref HEAD)
+  local repo_url=$(gh repo view --json url -q .url)
+
+  # Ask for optional line number (or range)
+  echo -n "Enter start line (or leave empty): "
+  read start_line
+  echo -n "Enter end line (optional): "
+  read end_line
+
+  local line_part=""
+  if [[ -n "$start_line" ]]; then
+    line_part="#L$start_line"
+    [[ -n "$end_line" && "$end_line" != "$start_line" ]] && line_part="#L$start_line-L$end_line"
+  fi
+
+  # Construct and open the URL
+  local url="$repo_url/blob/$branch/$rel_path$line_part"
+  echo "Opening: $url"
+  if command -v open >/dev/null; then
+    open "$url" # macOS
+  else
+    xdg-open "$url" # Linux
+  fi
+}
+
+alias ghviewf='view_in_github_fzf'
+
 # --- Clipboard alias (cross-platform) ---
 if [[ $(uname) == "Linux" ]]; then
   if [[ $XDG_SESSION_TYPE == "wayland" ]]; then
@@ -222,6 +257,8 @@ if [[ $(uname) == "Linux" ]]; then
 else
   alias clipdir="pwd | pbcopy"
 fi
+
+bindkey -s '^[c' 'clipdir\n'
 
 # --- Rust dev aliases ---
 alias rr="cargo run"
