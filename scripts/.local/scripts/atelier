@@ -12,7 +12,7 @@ if [[ "$1" == "--boot" ]]; then
 fi
 
 ACTION="$1"
-THEME="${2:-moon}"
+THEME="${2:-main}"
 
 DOTFILES="$HOME/dotfiles"
 THEME_DIR="$DOTFILES/themes/rose-pine-$THEME"

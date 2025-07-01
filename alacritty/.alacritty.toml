@@ -1,4 +1,4 @@
-general.import = ["~/dotfiles/themes/rose-pine-moon.toml"]
+general.import = ["~/dotfiles/themes/rose-pine-main.toml"]
 
 [env]
 TERM = "xterm-256color"

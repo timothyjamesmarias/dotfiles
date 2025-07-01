@@ -1,7 +1,7 @@
-vim.cmd.colorscheme("rose-pine-moon")
+vim.cmd.colorscheme("rose-pine-main")
 
 require("rose-pine").setup({
-  variant = "moon",
-  dark_variant = "moon",
+  variant = "main",
+  dark_variant = "main",
   disable_background = false,
 })
