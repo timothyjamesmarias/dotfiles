@@ -25,7 +25,6 @@ return {
 			build = "make",
 		},
 		"nvim-treesitter/nvim-treesitter",
-		"debugloop/telescope-undo.nvim",
 		"nvim-telescope/telescope-ui-select.nvim",
 	},
 	config = function()
@@ -60,7 +59,6 @@ return {
 					override_file_sorter = true,
 					case_mode = "smart_case",
 				},
-				undo = {},
 				file_browser = {},
 				ui_select = {
 					require("telescope.themes").get_cursor({
@@ -73,7 +71,6 @@ return {
 		})
 
 		pcall(telescope.load_extension, "fzf")
-		pcall(telescope.load_extension, "undo")
 		pcall(telescope.load_extension, "file_browser")
 		pcall(telescope.load_extension, "ui-select")
 
@@ -124,6 +121,5 @@ return {
 			local text = vim.getVisualSelection()
 			builtin.grep_string({ search = text })
 		end, { silent = true, noremap = true })
-		vim.keymap.set("n", "<leader>u", "<cmd>Telescope undo<CR>")
 	end,
 }
