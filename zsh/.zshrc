@@ -155,6 +155,14 @@ cf() {
 
 alias cf="cf"
 
+unalias finder
+open_in_finder() {
+  local target
+  target=$(fd . --type f --type d --hidden --exclude .git --exclude node_modules | fzf --prompt="Open in Finder > " ) [ -n "target "] && open "$target"
+}
+
+alias finder="open_in_finder"
+
 # --- Git aliases and Utilities ---
 
 # Fuzzy switch to git branch
