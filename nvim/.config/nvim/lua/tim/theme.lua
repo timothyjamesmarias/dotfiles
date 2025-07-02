@@ -1,1 +1,1 @@
-/Users/tim/dotfiles/themes/rose-pine-main/nvim.lua
+/Users/timmarias/dotfiles/themes/rose-pine-main/nvim.lua

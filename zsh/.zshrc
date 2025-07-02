@@ -155,7 +155,7 @@ cf() {
 
 alias cf="cf"
 
-unalias finder
+unalias finder 2>/dev/null
 open_in_finder() {
   local target
   target=$(fd . --type f --type d --hidden --exclude .git --exclude node_modules | fzf --prompt="Open in Finder > " ) [ -n "target "] && open "$target"

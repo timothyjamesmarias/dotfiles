@@ -45,13 +45,13 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 vim.wo.wrap = false
 
 -- 🪄 Defer theme loading until plugins are ready
-local theme_path = vim.fn.stdpath("config") .. "/lua/tim/theme.lua"
-vim.schedule(function()
-  local ok, result = pcall(dofile, theme_path)
-  if not ok then
-    vim.notify("Theme failed to load: " .. result, vim.log.levels.ERROR)
-  end
-end)
+-- local theme_path = vim.fn.stdpath("config") .. "/lua/tim/theme.lua"
+-- vim.schedule(function()
+--   local ok, result = pcall(dofile, theme_path)
+--   if not ok then
+--     vim.notify("Theme failed to load: " .. result, vim.log.levels.ERROR)
+--   end
+-- end)
 
 local socket_path = vim.fn.expand("~/.cache/nvim_socket")
 
