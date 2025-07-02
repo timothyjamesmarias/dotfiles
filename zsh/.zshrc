@@ -110,7 +110,6 @@ alias gcss='rgnvim --glob="**/*.scss" --glob="**/*.css" --glob="!node_modules" .
 alias grb='rgnvim --glob="**/*.rb" --glob="**/*.css" --glob="!node_modules" .'
 alias gerb='rgnvim --glob="**/*.erb" --glob="**/*.css" --glob="!node_modules" .'
 
-unalias fjs 2>/dev/null
 fjs() {
   rg --no-heading --line-number --color=always \
     --glob '**/*.js' \
@@ -121,9 +120,7 @@ fjs() {
   | awk -F':' '{printf "nvim +%s %s\n", $2, $1}' \
   | sh
 }
-alias fjs="fjs"
 
-unalias fcss 2>/dev/null
 fcss() {
   rg --no-heading --line-number --color=always \
     --glob '**/*.css' \
@@ -134,11 +131,7 @@ fcss() {
   | awk -F':' '{printf "nvim +%s %s\n", $2, $1}' \
   | sh
 }
-alias fcss="fcss"
 
-
-# unalias the command to get it to work
-unalias cf 2>/dev/null
 cf() {
   local dir
   dir=$(find . -type d -not -path '*/.git/*' -not -path '*/node_modules/*' -not -path '*/target/*' \
@@ -153,15 +146,10 @@ cf() {
   nvim "$filepath"
 }
 
-alias cf="cf"
-
-unalias finder 2>/dev/null
-open_in_finder() {
+finder() {
   local target
   target=$(fd . --type f --type d --hidden --exclude .git --exclude node_modules | fzf --prompt="Open in Finder > " ) [ -n "target "] && open "$target"
 }
-
-alias finder="open_in_finder"
 
 # --- Git aliases and Utilities ---
 
