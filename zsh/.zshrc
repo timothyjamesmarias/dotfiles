@@ -48,7 +48,7 @@ precmd() {
 setopt prompt_subst
 
 # Combined prompt (Vi mode + path + git branch)
-PROMPT='${VI_MODE} %F{yellow}%~%F{magenta}${vcs_info_msg_0_}%f %# '
+PROMPT='${VI_MODE} %F{yellow}%~%F{magenta}${vcs_info_msg_0_}%f > '
 
 # Optional: avoid showing `[N]` on startup
 function zle-line-init {
