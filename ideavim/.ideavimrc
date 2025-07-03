@@ -27,10 +27,10 @@ nmap <leader>ee <Action>(RunAnything)
 nmap <leader>rn <Action>(RenameElement)
 nmap <leader>rp <Action>(Replace)
 nmap ; :
-nmap <leader>wl <c-w>l
-nmap <leader>wh <c-w>h
-nmap <leader>wj <c-w>j
-nmap <leader>wk <c-w>k
+nmap <C-l> <c-w>l
+nmap <C-h> <c-w>h
+nmap <C-j> <c-w>j
+nmap <C-k> <c-w>k
 imap <C-e> <Esc>A
 nmap <leader>t :action ActivateTerminalToolWindow<CR>
 nmap <leader>ot :action ActivateTerminalToolWindow<CR>
