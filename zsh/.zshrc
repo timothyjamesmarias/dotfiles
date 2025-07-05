@@ -275,6 +275,38 @@ alias rch="cargo check --all-targets --all-features"
 alias rbench="cargo bench"
 alias rclean="cargo clean"
 
+# --- OpenAI Codex aliases ---
+
+# 🔍 Ask Codex for general help
+alias cx="codex"
+
+# 🧠 Explain the selected code block
+alias cex="codex explain"
+
+# ✍️  Edit a file in-place using natural language
+alias cedit="codex edit"
+
+# 🗂️  Edit an entire directory of code
+alias cdir="codex edit-dir"
+
+# 📜 Write a new script from a prompt
+alias cwrite="codex write"
+
+# 🎛️ Use Codex interactively (REPL-style)
+alias crepl="codex repl"
+
+# 🕵️ Describe what a CLI command does
+alias cdesc="codex explain-cmd"
+
+# Write from stdin
+alias cxp='codex write -'
+
+# 🧪 Run `codex` with a natural prompt in quotes
+cxq() { codex "$@"; }
+
+# 📁 Edit with directory context (inferred by `git`)
+alias cg="codex edit-dir $(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+
 # --- Shell Behavior ---
 export NVIM_LISTEN_ADDRESS="/tmp/nvim-$$.sock"
 echo "$NVIM_LISTEN_ADDRESS" >> ~/.cache/nvim_socket
