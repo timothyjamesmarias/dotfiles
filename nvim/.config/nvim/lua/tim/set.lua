@@ -68,3 +68,6 @@ function GitBranch()
 end
 
 vim.o.statusline = "%f %m%r %=%{v:lua.GitBranch()} %l:%c [%p%%]"
+
+-- for ruby instance and class variables
+vim.opt.iskeyword:append("@")

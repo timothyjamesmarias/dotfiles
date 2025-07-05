@@ -129,7 +129,7 @@ return {
 			})
 		end, { noremap = true, silent = true })
 		vim.keymap.set("n", "<leader>tg", builtin.tagstack, { silent = true })
-		vim.keymap.set("n", "<leader>tt", builtin.tags, { silent = true })
+		vim.keymap.set("n", "<leader>ts", builtin.tags, { silent = true })
 		vim.keymap.set("n", "<leader>sl", builtin.grep_string, { silent = true, noremap = true })
 		vim.keymap.set("v", "<leader>sl", function()
 			local text = vim.getVisualSelection()
