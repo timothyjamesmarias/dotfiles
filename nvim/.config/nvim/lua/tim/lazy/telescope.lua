@@ -31,6 +31,7 @@ return {
 		local telescope = require("telescope")
 		telescope.setup({
 			defaults = {
+				preview = true,
 				mappings = {
 					n = {
 						["q"] = require("telescope.actions").close,
@@ -78,7 +79,13 @@ return {
 		vim.keymap.set("n", "<leader>ff", "<cmd>Telescope find_files follow=true hidden=true<CR>", { silent = true })
 		vim.keymap.set("v", "<leader>fw", function()
 			local text = vim.getVisualSelection()
-			require("telescope.builtin").live_grep({ default_text = text })
+			require("telescope.builtin").live_grep({
+				default_text = text,
+				cwd = vim.fn.systemlist("git rev-parse --show-toplevel")[1] or vim.loop.cwd(),
+				additional_args = function()
+					return { "--hidden", "--glob", "!.git/" }
+				end,
+			})
 		end)
 		vim.keymap.set("v", "<leader>ff", function()
 			local text = vim.getVisualSelection()
@@ -86,7 +93,14 @@ return {
 		end, { silent = true, noremap = true })
 		vim.keymap.set("n", "<leader>fr", builtin.oldfiles, { silent = true })
 		vim.keymap.set("n", "<leader>fg", builtin.git_commits, { silent = true })
-		vim.keymap.set("n", "<leader>fw", builtin.live_grep, { silent = true })
+		vim.keymap.set("n", "<leader>fw", function()
+			require("telescope.builtin").live_grep({
+				cwd = vim.fn.systemlist("git rev-parse --show-toplevel")[1] or vim.loop.cwd(),
+				additional_args = function()
+					return { "--hidden", "--glob", "!.git/" }
+				end,
+			})
+		end, { silent = true })
 		vim.keymap.set("n", "<leader>fk", builtin.keymaps, { silent = true })
 		vim.keymap.set("n", "<leader>fcc", builtin.commands, { silent = true })
 		vim.keymap.set("n", "<leader>fca", builtin.autocommands, { silent = true })
