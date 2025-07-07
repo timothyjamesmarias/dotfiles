@@ -36,3 +36,4 @@ nmap <leader>t :action ActivateTerminalToolWindow<CR>
 nmap <leader>ot :action ActivateTerminalToolWindow<CR>
 nmap <leader>rc :g/^\s*#/d<CR>
 nnoremap <leader>i bi
+nmap <leader>re <Action>(GotoRelated)
