@@ -7,7 +7,6 @@ nmap <leader>w :w<CR>
 nmap <leader>q :q<CR>
 nmap <leader>v :vsplit<CR>
 nmap <leader>h :split<CR>
-imap jj <Esc>
 set relativenumber number
 set clipboard+=unnamedplus
 set commentary
