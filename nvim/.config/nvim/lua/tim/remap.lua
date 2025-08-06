@@ -4,8 +4,6 @@ local sessions = require("tim.sessions")
 vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>w", "<cmd>w<CR>")
 vim.keymap.set("n", ";", ":")
-vim.keymap.set("i", "jj", "<Esc>", { silent = true })
-vim.keymap.set("c", "jj", "<Esc>", { silent = true })
 vim.keymap.set("n", "<leader>q", "<cmd>bp<bar>sp<bar>bn<bar>bd<CR>", { silent = true })
 vim.keymap.set("n", "<leader>Q", "<cmd>q!<CR>", { silent = true })
 vim.keymap.set("n", "n", "nzzzv", { silent = true })
