@@ -17,6 +17,7 @@ vim.keymap.set("i", "<C-e>", "<Esc>A")
 vim.keymap.set("n", "<leader>cm", ":!")
 vim.keymap.set("n", "<leader>ee", ":e ")
 vim.keymap.set("n", "<leader>eb", ":Ebuf ")
+vim.keymap.set("i", "<C-l>", "<C-o>l")
 
 vim.keymap.set("n", "<leader>lg", function()
 	tmux.send_to_other_pane("lazygit")
