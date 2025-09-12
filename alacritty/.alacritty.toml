@@ -1,20 +1,8 @@
 [env]
-TERM = "xterm-256color"
+# TERM = "xterm-256color"
 
 [font]
 size = 17
-
-[font.normal]
-family = "IosevkaTerm Nerd Font Mono"
-style = "Regular"
-
-[font.bold]
-family = "IosevkaTerm Nerd Font Mono"
-style = "Bold"
-
-[font.italic]
-family = "IosevkaTerm Nerd Font Mono"
-style = "Italic"
 
 [font.glyph_offset]
 x = 0
