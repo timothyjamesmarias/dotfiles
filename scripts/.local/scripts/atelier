@@ -15,14 +15,10 @@ ACTION="$1"
 THEME="${2:-main}"
 
 DOTFILES="$HOME/dotfiles"
-THEME_DIR="$DOTFILES/themes/rose-pine-$THEME"
 ALACRITTY_CONFIG="$DOTFILES/alacritty/.alacritty.toml"
 
 function apply_theme() {
   echo "🎨 Applying theme: $THEME"
-
-  # Update Neovim theme symlink
-  ln -sf "$THEME_DIR/nvim.lua" "$DOTFILES/nvim/.config/nvim/lua/tim/theme.lua"
 
   # Update Alacritty import
   if [[ "$OSTYPE" == "darwin"* ]]; then
