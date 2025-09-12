@@ -1,4 +1,5 @@
 vim.cmd("syntax on")
+vim.cmd("colorscheme slate")
 vim.cmd("au FileType netrw setl bufhidden=wipe")
 vim.api.nvim_set_var("netrw_fastbrowse", 0)
 vim.opt.clipboard:append({ "unnamed", "unnamedplus" })
