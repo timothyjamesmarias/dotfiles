@@ -1,5 +1,5 @@
 vim.cmd("syntax on")
-vim.cmd("colorscheme slate")
+vim.cmd("colorscheme habamax")
 vim.cmd("au FileType netrw setl bufhidden=wipe")
 vim.api.nvim_set_var("netrw_fastbrowse", 0)
 vim.opt.clipboard:append({ "unnamed", "unnamedplus" })
@@ -44,19 +44,6 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 })
 
 vim.wo.wrap = false
-
--- 🪄 Defer theme loading until plugins are ready
--- local theme_path = vim.fn.stdpath("config") .. "/lua/tim/theme.lua"
--- vim.schedule(function()
---   local ok, result = pcall(dofile, theme_path)
---   if not ok then
---     vim.notify("Theme failed to load: " .. result, vim.log.levels.ERROR)
---   end
--- end)
-
-local socket_path = vim.fn.expand("~/.cache/nvim_socket")
-
-vim.fn.mkdir(vim.fn.fnamemodify(socket_path, ":h"), "p")
 
 function GitBranch()
   local handle = io.popen("git rev-parse --abbrev-ref HEAD 2>/dev/null")
