@@ -1,27 +1,18 @@
---langdef=javascript
---exclude=*.min.js
---exclude=*.min.css
---exclude=*.map
---exclude=.backup
---exclude=.sass-cache
---exclude=vendors
---exclude=.git
---exclude=node_modules
+--languages=+Ruby,+PHP,+HTML,+CSS,+JavaScript,+Sass
 
-# Define CSS for Slim and ERB
---langdef=slimcss
---langmap=slimcss:.slim
---regex-slimcss=/class=[\"']([^\"']+)[\"']/\1/c,class,classes/
+# Rails Slim
+--langmap=Ruby:.rb.rake.rakefile.gemspec.ru
+--langmap=HTML:+.erb.slim.haml
+--langmap=PHP:+.php.inc.module.theme.install
+--langmap=Sass:+.scss.sass
 
---langdef=erbcss
---langmap=erbcss:.erb
---regex-erbcss=/class=[\"']([^\"']+)[\"']/\1/c,class,classes/
+# Index CSS class and ID selectors
+--regex-css=/\.([A-Za-z0-9_-]+)/\1/c,class/
+--regex-css=/#([A-Za-z0-9_-]+)/\1/i,id/
 
-# Also process inline CSS in Slim and ERB style blocks
---regex-css=/^[ \t]*\.([A-Za-z0-9_-]+)/\1/c,class,classes/
---regex-css=/^[ \t]*#([A-Za-z0-9_-]+)/\1/i,id,ids/
+# ERB and Slim: try to catch embedded ruby methods
+--regex-ruby=/\<%=\s*([A-Za-z0-9_!?]+)\s*%>/\1/m,erb_method/
+--regex-ruby=/\#\{\s*([A-Za-z0-9_!?]+)\s*\}/\1/m,interpolation/
 
---languages=Ruby,Slim,SCSS
---exclude=.git
---exclude=log
---exclude=tmp
+# PHP blade templates
+--regex-php=/@([a-zA-Z_]+)/\1/b,blade_directive/
