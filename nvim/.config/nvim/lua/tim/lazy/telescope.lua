@@ -36,7 +36,6 @@ return {
 						["q"] = require("telescope.actions").close,
 					},
 					i = {
-						["<C-l>"] = require("telescope.actions").close,
 					},
 				},
 				layout_config = {
@@ -75,12 +74,12 @@ return {
 		pcall(telescope.load_extension, "ui-select")
 
 		local builtin = require("telescope.builtin")
-		vim.keymap.set("n", "<leader>ff", "<cmd>Telescope find_files follow=true hidden=true<CR>", { silent = true })
+		vim.keymap.set("n", "<leader>fs", "<cmd>Telescope find_files follow=true hidden=true<CR>", { silent = true })
 		vim.keymap.set("v", "<leader>fw", function()
 			local text = vim.getVisualSelection()
 			require("telescope.builtin").live_grep({ default_text = text })
 		end)
-		vim.keymap.set("v", "<leader>ff", function()
+		vim.keymap.set("v", "<leader>fs", function()
 			local text = vim.getVisualSelection()
 			builtin.find_files({ default_text = text })
 		end, { silent = true, noremap = true })
@@ -114,8 +113,8 @@ return {
 				layout_config = { height = 0.5 },
 			})
 		end, { noremap = true, silent = true })
-		vim.keymap.set("n", "<leader>tg", builtin.tagstack, { silent = true })
-		vim.keymap.set("n", "<leader>tt", builtin.tags, { silent = true })
+		vim.keymap.set("n", "<leader>ts", builtin.tagstack, { silent = true })
+		vim.keymap.set("n", "<leader>tg", builtin.tags, { silent = true })
 		vim.keymap.set("n", "<leader>sl", builtin.grep_string, { silent = true, noremap = true })
 		vim.keymap.set("v", "<leader>sl", function()
 			local text = vim.getVisualSelection()
