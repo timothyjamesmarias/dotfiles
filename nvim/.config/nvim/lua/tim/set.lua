@@ -36,12 +36,12 @@ vim.opt.tags = './tags,tags'
 vim.g.skip_ts_context_commentstring_module = true
 vim.opt.splitright = true
 
-vim.api.nvim_create_autocmd("BufWritePost", {
-  pattern = { "*.rb", "*.slim", "*.scss", "*.css", "*.js", "*.ts" },
-  callback = function()
-    vim.fn.jobstart({"ctags", "-R", "-f", "tags", "--options=.ctags", "."})
-  end,
-})
+-- vim.api.nvim_create_autocmd("BufWritePost", {
+--   pattern = { "*.rb", "*.slim", "*.scss", "*.css", "*.js", "*.ts" },
+--   callback = function()
+--     vim.fn.jobstart({"ctags", "-R", "-f", "tags", "--options=.ctags", "."})
+--   end,
+-- })
 
 vim.wo.wrap = false
 
