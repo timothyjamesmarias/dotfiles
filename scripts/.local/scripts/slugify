@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+# slugify files
+slugify() {
+  local input="$1"
+  # transliterate to ASCII
+  local s="$(iconv -t ascii//translit <<< "$input")"
+  # lowercase
+  s="$(echo "$s" | tr '[:upper:]' '[:lower:]')"
+  # replace non-alphanumeric with hyphens
+  s="$(echo "$s" | sed -E 's/[^a-z0-9]+/-/g')"
+  # trim leading/trailing hyphens
+  s="$(echo "$s" | sed -E 's/^-+|-+$//g')"
+  echo "$s"
+}
+
+for f in "$@"; do
+  [ -f "$f" ] || continue  # skip if not a regular file
+  dir="$(dirname "$f")"
+  base="$(basename "$f")"
+  name="${base%.*}"
+  ext="${base##*.}"
+
+  # handle files with no extension
+  if [ "$name" = "$ext" ]; then
+    new="$(slugify "$name")"
+  else
+    new="$(slugify "$name").$ext"
+  fi
+
+  # avoid overwriting existing file with the same name
+  if [ -e "$dir/$new" ] && [ "$f" != "$dir/$new" ]; then
+    echo "⚠️  Skipping '$f' → '$new' (target exists)"
+  else
+    echo "Renaming: '$f' → '$new'"
+    mv "$f" "$dir/$new"
+  fi
+done
+
