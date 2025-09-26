@@ -14,7 +14,7 @@ y = 16
 
 [terminal.shell]
 program = "/bin/zsh"
-args = ["--login", "-c", "~/.local/scripts/atelier-launch.sh"]
+args = ["--login", "-c", "~/.local/scripts/env-launch.sh"]
 
 [window.padding]
 x = 0
