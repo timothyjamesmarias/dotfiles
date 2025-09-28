@@ -1,0 +1,65 @@
+#!/bin/bash
+set -e
+
+# Special boot entry point for Alacritty
+if [[ "$1" == "--boot" ]]; then
+  if ! tmux has-session -t default 2>/dev/null; then
+    "$0" start
+  fi
+
+  exec tmux attach-session -t default
+  exit
+fi
+
+ACTION="$1"
+THEME="${2:-main}"
+
+DOTFILES="$HOME/dotfiles"
+ALACRITTY_CONFIG="$DOTFILES/alacritty/.alacritty.toml"
+
+function apply_theme() {
+  echo "🎨 Applying theme: $THEME"
+
+  # Update Alacritty import
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' "s|rose-pine-[a-z]*|rose-pine-${THEME}|" "$ALACRITTY_CONFIG"
+  else
+    sed -i "s|rose-pine-[a-z]*|rose-pine-${THEME}|" "$ALACRITTY_CONFIG"
+  fi
+
+  # Tmux variant
+  tmux set -g @rose_pine_variant "$THEME" 2>/dev/null || true
+  tmux source-file "$DOTFILES/tmux/.tmux.conf" 2>/dev/null || true
+}
+
+function start_session() {
+  # Kill old session if needed
+  if tmux has-session -t default 2>/dev/null; then
+    echo "⚠️  Existing atelier session found. Killing..."
+    tmux kill-session -t default
+  fi
+
+  echo "🚀 Launching new default session..."
+
+  if ! tmux has-session -t default 2>/dev/null; then
+    tmux new-session -d -s default -n code || {
+      echo "❌ Failed to create tmux session" >> ~/.default.log
+      exit 1
+    }
+
+    # Run the sessionizer to open a project
+    tmux send-keys -t default "tmux-sessionizer" C-m
+  
+    sleep 0.2  # give it a little time to spin up
+  else
+    echo "✅ default session already exists" >> ~/.default.log
+  fi
+
+  # Welcome message
+  tmux display-message "Welcome to the default 🛠️ Theme: $THEME"
+
+  # Attach
+  tmux attach-session -t default
+}
+
+start_session
