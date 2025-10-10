@@ -17,7 +17,18 @@ return {
 
 		require("mason").setup()
 		require("mason-lspconfig").setup({
-			ensure_installed = { "lua_ls", "ruby_lsp", "ts_ls", "html", "cssls" },
+			ensure_installed = {
+				"lua_ls",
+				"ruby_lsp",
+				"ts_ls",
+				"html",
+				"cssls",
+				"vue_ls",
+				"kotlin_lsp",
+				"jdtls",
+				"sqlls",
+				"rust_analyzer",
+			},
 			automatic_installation = true,
 		})
 
@@ -46,8 +57,10 @@ return {
 		lsp_setup("sqlls", { filetypes = { "sql", "mysql", "pgsql" } })
 		lsp_setup("intelephense")
 		lsp_setup("rust_analyzer")
-		lsp_setup("gopls")
 		lsp_setup("ruby_lsp")
+		lsp_setup("kotlin_lsp")
+		lsp_setup("jdtls")
+		lsp_setup("vue_ls")
 
 		-- Completion config
 		local cmp = require("cmp")
