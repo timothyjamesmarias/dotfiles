@@ -1,5 +1,4 @@
 vim.cmd("syntax on")
-vim.cmd("colorscheme habamax")
 vim.cmd("au FileType netrw setl bufhidden=wipe")
 vim.api.nvim_set_var("netrw_fastbrowse", 0)
 vim.opt.clipboard:append({ "unnamed", "unnamedplus" })
@@ -35,6 +34,7 @@ vim.opt.termguicolors = true
 vim.opt.tags = './tags,tags'
 vim.g.skip_ts_context_commentstring_module = true
 vim.opt.splitright = true
+vim.wo.wrap = false
 
 -- vim.api.nvim_create_autocmd("BufWritePost", {
 --   pattern = { "*.rb", "*.slim", "*.scss", "*.css", "*.js", "*.ts" },
@@ -42,8 +42,6 @@ vim.opt.splitright = true
 --     vim.fn.jobstart({"ctags", "-R", "-f", "tags", "--options=.ctags", "."})
 --   end,
 -- })
-
-vim.wo.wrap = false
 
 function GitBranch()
   local handle = io.popen("git rev-parse --abbrev-ref HEAD 2>/dev/null")
