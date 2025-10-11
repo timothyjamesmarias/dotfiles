@@ -24,7 +24,7 @@ return {
 				"html",
 				"cssls",
 				"vue_ls",
-				"kotlin_lsp",
+				"kotlin_language_server",
 				"jdtls",
 				"sqlls",
 				"rust_analyzer",
@@ -55,12 +55,23 @@ return {
 		})
 		lsp_setup("clangd", { filetypes = { "c", "cpp" } })
 		lsp_setup("sqlls", { filetypes = { "sql", "mysql", "pgsql" } })
-		lsp_setup("intelephense")
+		lsp_setup("intelephense", {
+			init_options = {
+				licenceKey = "00DRGKX774NA9NM",
+			},
+		})
 		lsp_setup("rust_analyzer")
 		lsp_setup("ruby_lsp")
-		lsp_setup("kotlin_lsp")
+		lsp_setup("kotlin_language_server")
 		lsp_setup("jdtls")
-		lsp_setup("vue_ls")
+		lsp_setup("volar")
+
+		-- Herb LSP (if you’ve installed @herb-tools/language-server)
+		-- npm i -g @herb-tools/language-server
+		-- If Mason doesn’t manage it, just start it via lspconfig:
+		if lspconfig.herb_ls then
+			lsp_setup("herb_ls", { filetypes = { "eruby" } })
+		end
 
 		-- Completion config
 		local cmp = require("cmp")
@@ -75,9 +86,7 @@ return {
 				{ name = "nvim_lsp" },
 				{ name = "path" },
 			},
-			experimental = {
-				ghost_text = true,
-			},
+			experimental = { ghost_text = true },
 		})
 	end,
 }
