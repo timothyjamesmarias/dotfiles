@@ -31,6 +31,5 @@ return {
 				},
 			},
 		})
-		vim.keymap.set("n", "<leader>fm", "<cmd>Format<CR>", { silent = false })
 	end,
 }
