@@ -120,13 +120,6 @@ return {
 		lsp_setup("jdtls")
 		lsp_setup("volar")
 
-		-- Herb LSP (if you’ve installed @herb-tools/language-server)
-		-- npm i -g @herb-tools/language-server
-		-- If Mason doesn’t manage it, just start it via lspconfig:
-		if lspconfig.herb_ls then
-			lsp_setup("herb_ls", { filetypes = { "eruby" } })
-		end
-
 		-- Completion config
 		local cmp = require("cmp")
 		cmp.setup({
