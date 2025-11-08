@@ -83,6 +83,13 @@
 (global-auto-revert-mode t)
 (setq lsp-warn-no-matched-clients nil)
 (remove-hook 'ruby-mode-hook #'rubocop-mode)
-(setq treemacs-width 60)
-;; (setq lsp-intelephense-storage-path "~/.config/intelephense") ;; Set storage path
-;; (setq lsp-intelephense-licence-key )
+(setq treemacs-width 40)
+
+;; Claude Code configuration
+(after! claude-code
+  (setq claude-code-terminal-backend 'vterm)
+  (claude-code-mode 1)
+  (map! :leader
+        :prefix ("o c" . "claude-code")
+        :desc "Start claude-code" "s" #'claude-code
+        :desc "Claude code menu" "c" #'claude-code-menu))

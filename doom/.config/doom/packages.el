@@ -52,4 +52,9 @@
 (package! exec-path-from-shell)
 (package! kaolin-themes)
 (package! ef-themes)
-(package! copilot-chat)
+
+;; claude-code and dependencies
+(package! inheritenv
+  :recipe (:host github :repo "purcell/inheritenv"))
+(package! claude-code
+  :recipe (:host github :repo "stevemolitor/claude-code.el"))
