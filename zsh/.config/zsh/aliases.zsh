@@ -15,6 +15,8 @@ alias ch="cheatsheet"
 alias bi="brew install"
 alias yy="yazi"
 alias ls='ls -G'
+alias cj='curl -s -H "Content-Type: application/json"'
+alias png="ping google.com"
 
 # --- Clipboard alias (cross-platform) ---
 if [[ $(uname) == "Linux" ]]; then

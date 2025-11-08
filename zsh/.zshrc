@@ -11,7 +11,7 @@ echo "$NVIM_LISTEN_ADDRESS" >> ~/.cache/nvim_socket
 chmod +x "$HOME/.local/scripts"
 
 # --- Path ---
-export PATH="$HOME/.asdf/shims:$HOME/.asdf/bin:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.local/scripts:$HOME/.composer/vendor/bin:/opt/homebrew/bin:$HOME/go/bin:$PATH"
+export PATH="$HOME/.asdf/shims:$HOME/.asdf/bin:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.local/scripts:$HOME/.composer/vendor/bin:/opt/homebrew/bin:$HOME/go/bin:$HOME/.config/emacs/bin:$PATH"
 export ASDF_DATA_DIR=/Users/$(whoami)/.asdf
 
 # --- Homebrew configuration ---
@@ -38,3 +38,11 @@ source "$ZSHCONFIG/utils.zsh"       # Utility functions
 # --- SDKMAN (must be at end) ---
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+
+# Load Angular CLI autocompletion.
+source <(ng completion script)
+
+
+# Load Angular CLI autocompletion.
+source <(ng completion script)
