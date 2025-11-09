@@ -20,27 +20,27 @@ vim.keymap.set("n", "<C-p>", "<cmd>bprevious<CR>", { silent = true, remap = true
 vim.keymap.set("n", "<leader>ls", "<cmd>ls<CR>", { silent = true, remap = true })
 
 vim.api.nvim_create_user_command("MapBufferKeys", function()
-  -- Clear previous mappings
-  for i = 1, 9 do
-    pcall(vim.keymap.del, "n", "<leader>b" .. i)
-  end
+	-- Clear previous mappings
+	for i = 1, 9 do
+		pcall(vim.keymap.del, "n", "<leader>b" .. i)
+	end
 
-  -- Fetch currently listed buffers
-  local buffers = vim.fn.getbufinfo({ buflisted = 1 })
+	-- Fetch currently listed buffers
+	local buffers = vim.fn.getbufinfo({ buflisted = 1 })
 
-  -- Set keymaps dynamically
-  for i = 1, math.min(#buffers, 9) do
-    local bufnr = buffers[i].bufnr
-    vim.keymap.set("n", "<leader>b" .. i, function()
-      vim.cmd("buffer " .. bufnr)
-    end, { desc = "Go to buffer " .. bufnr })
-  end
+	-- Set keymaps dynamically
+	for i = 1, math.min(#buffers, 9) do
+		local bufnr = buffers[i].bufnr
+		vim.keymap.set("n", "<leader>b" .. i, function()
+			vim.cmd("buffer " .. bufnr)
+		end, { desc = "Go to buffer " .. bufnr })
+	end
 end, {})
 
 vim.api.nvim_create_autocmd({ "BufAdd", "BufDelete" }, {
-  callback = function()
-    vim.cmd("MapBufferKeys")
-  end,
+	callback = function()
+		vim.cmd("MapBufferKeys")
+	end,
 })
 
 -- Telescope keymaps
@@ -69,16 +69,36 @@ vim.keymap.set("v", "<leader>fs", function()
 	local text = vim.getVisualSelection()
 	require("telescope.builtin").find_files({ default_text = text })
 end, { silent = true, noremap = true })
-vim.keymap.set("n", "<leader>fr", function() require("telescope.builtin").oldfiles() end, { silent = true })
-vim.keymap.set("n", "<leader>fg", function() require("telescope.builtin").git_commits() end, { silent = true })
-vim.keymap.set("n", "<leader>fw", function() require("telescope.builtin").live_grep() end, { silent = true })
-vim.keymap.set("n", "<leader>fk", function() require("telescope.builtin").keymaps() end, { silent = true })
-vim.keymap.set("n", "<leader>fcc", function() require("telescope.builtin").commands() end, { silent = true })
-vim.keymap.set("n", "<leader>fca", function() require("telescope.builtin").autocommands() end, { silent = true })
-vim.keymap.set("n", "<leader>fj", function() require("telescope.builtin").jumplist() end, { silent = true })
-vim.keymap.set("n", "<leader>fb", function() require("telescope.builtin").buffers() end, { silent = true })
-vim.keymap.set("n", "<leader>fh", function() require("telescope.builtin").help_tags() end, { silent = true })
-vim.keymap.set("n", "<leader>sp", function() require("telescope.builtin").spell_suggest() end, { silent = true })
+vim.keymap.set("n", "<leader>fr", function()
+	require("telescope.builtin").oldfiles()
+end, { silent = true })
+vim.keymap.set("n", "<leader>fg", function()
+	require("telescope.builtin").git_commits()
+end, { silent = true })
+vim.keymap.set("n", "<leader>fw", function()
+	require("telescope.builtin").live_grep()
+end, { silent = true })
+vim.keymap.set("n", "<leader>fk", function()
+	require("telescope.builtin").keymaps()
+end, { silent = true })
+vim.keymap.set("n", "<leader>fcc", function()
+	require("telescope.builtin").commands()
+end, { silent = true })
+vim.keymap.set("n", "<leader>fca", function()
+	require("telescope.builtin").autocommands()
+end, { silent = true })
+vim.keymap.set("n", "<leader>fj", function()
+	require("telescope.builtin").jumplist()
+end, { silent = true })
+vim.keymap.set("n", "<leader>fb", function()
+	require("telescope.builtin").buffers()
+end, { silent = true })
+vim.keymap.set("n", "<leader>fh", function()
+	require("telescope.builtin").help_tags()
+end, { silent = true })
+vim.keymap.set("n", "<leader>sp", function()
+	require("telescope.builtin").spell_suggest()
+end, { silent = true })
 vim.keymap.set("n", "<leader>fn", function()
 	require("telescope").extensions.file_browser.file_browser({
 		path = "%:p:h",
@@ -99,9 +119,15 @@ vim.keymap.set("n", "<leader>fp", function()
 		layout_config = { height = 0.5 },
 	})
 end, { noremap = true, silent = true })
-vim.keymap.set("n", "<leader>ts", function() require("telescope.builtin").tagstack() end, { silent = true })
-vim.keymap.set("n", "<leader>tg", function() require("telescope.builtin").tags() end, { silent = true })
-vim.keymap.set("n", "<leader>sl", function() require("telescope.builtin").grep_string() end, { silent = true, noremap = true })
+vim.keymap.set("n", "<leader>ts", function()
+	require("telescope.builtin").tagstack()
+end, { silent = true })
+vim.keymap.set("n", "<leader>tg", function()
+	require("telescope.builtin").tags()
+end, { silent = true })
+vim.keymap.set("n", "<leader>sl", function()
+	require("telescope.builtin").grep_string()
+end, { silent = true, noremap = true })
 vim.keymap.set("v", "<leader>sl", function()
 	local text = vim.getVisualSelection()
 	require("telescope.builtin").grep_string({ search = text })
