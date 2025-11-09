@@ -40,6 +40,7 @@ vim.keymap.set("n", "<leader>cm", ":!", { desc = "Run shell command" })
 vim.keymap.set("n", "<leader>ee", ":e ", { desc = "Edit file" })
 vim.keymap.set("n", "<leader>eb", ":Ebuf ", { desc = "Edit buffer" })
 vim.keymap.set("i", "<C-l>", "<C-o>l", { desc = "Move right one character (insert mode)" })
+vim.keymap.set("n", "<leader>z", "<cmd>ZenMode<CR>", { silent = true, desc = "Toggle Zen Mode" })
 
 -- navigation
 vim.keymap.set("n", "<C-n>", "<cmd>bnext<CR>", { silent = true, remap = true, desc = "Next buffer" })
