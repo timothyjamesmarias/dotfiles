@@ -7,31 +7,11 @@ return {
 		"hrsh7th/cmp-nvim-lsp",
 		"onsails/lspkind-nvim",
 		"nvim-telescope/telescope.nvim",
-		"mason-org/mason.nvim",
-		"mason-org/mason-lspconfig.nvim",
 	},
 	config = function()
 		local lspconfig = require("lspconfig")
 		local capabilities = require("cmp_nvim_lsp").default_capabilities()
 		local lspkind = require("lspkind")
-
-		require("mason").setup()
-		require("mason-lspconfig").setup({
-			ensure_installed = {
-				"lua_ls",
-				"ruby_lsp",
-				"ts_ls",
-				"herb_ls",
-				"html",
-				"cssls",
-				"vue_ls",
-				"kotlin_language_server",
-				"jdtls",
-				"sqlls",
-				"rust_analyzer",
-			},
-			automatic_installation = true,
-		})
 
 		-- LSP keymaps
 		local function setup_lsp_keymaps(bufnr)
