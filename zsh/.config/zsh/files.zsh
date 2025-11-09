@@ -12,17 +12,23 @@ alias deldf="find . -type d | fzf -m --preview 'bat --style=numbers --color=alwa
 
 # Ripgrep + nvim integration
 rgnvim() {
-  rg --no-heading --line-number --color=always "$@" \
-    | fzf --ansi \
+  if [ -z "$1" ]; then
+    echo "Usage: rgnvim <search_pattern> [additional rg options]"
+    return 1
+  fi
+
+  rg --no-heading --line-number --color=always --hidden --glob='!.git' "$@" \
+    | fzf --ansi --preview 'echo {}' \
     | awk -F':' '{printf "nvim +%s %s\n", $2, $1}' \
     | sh
 }
 
-alias rgf='rgnvim .'
-alias gjs='rgnvim --glob="**/*.js" --glob="**/*.ts" --glob="!node_modules" .'
-alias gcss='rgnvim --glob="**/*.scss" --glob="**/*.css" --glob="!node_modules" .'
-alias grb='rgnvim --glob="**/*.rb" --glob="**/*.css" --glob="!node_modules" .'
-alias gerb='rgnvim --glob="**/*.erb" --glob="**/*.css" --glob="!node_modules" .'
+# Interactive search - prompts for pattern
+alias rgf='rgnvim'
+alias gjs='rgnvim --type js --type ts'
+alias gcss='rgnvim --type css --type scss'
+alias grb='rgnvim --type ruby'
+alias gerb='rgnvim --glob="**/*.erb"'
 
 # Search JS/TS files
 fjs() {

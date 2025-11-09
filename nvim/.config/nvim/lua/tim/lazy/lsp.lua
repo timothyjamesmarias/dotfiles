@@ -13,62 +13,8 @@ return {
 		local capabilities = require("cmp_nvim_lsp").default_capabilities()
 		local lspkind = require("lspkind")
 
-		-- LSP keymaps
-		local function setup_lsp_keymaps(bufnr)
-			local opts = { buffer = bufnr, silent = true, noremap = true }
-			local telescope_builtin = require("telescope.builtin")
-
-			-- Navigation (using Telescope for better UX)
-			vim.keymap.set("n", "<leader>ld", telescope_builtin.lsp_definitions, opts)
-			vim.keymap.set("n", "<leader>lD", vim.lsp.buf.declaration, opts)
-			vim.keymap.set("n", "<leader>li", telescope_builtin.lsp_implementations, opts)
-			vim.keymap.set("n", "<leader>lt", telescope_builtin.lsp_type_definitions, opts)
-			vim.keymap.set("n", "<leader>lr", telescope_builtin.lsp_references, opts)
-
-			-- Documentation
-			vim.keymap.set("n", "<leader>lh", vim.lsp.buf.hover, opts)
-			vim.keymap.set("n", "<leader>ls", vim.lsp.buf.signature_help, opts)
-
-			-- Code actions
-			vim.keymap.set("n", "<leader>la", vim.lsp.buf.code_action, opts)
-			vim.keymap.set("n", "<leader>ln", vim.lsp.buf.rename, opts)
-			-- Use formatter.nvim instead of LSP formatting
-			vim.keymap.set("n", "<leader>lf", "<cmd>Format<CR>", opts)
-
-			-- Diagnostics (using Telescope for diagnostics lists)
-			vim.keymap.set("n", "<leader>le", vim.diagnostic.open_float, opts)
-			vim.keymap.set("n", "<leader>lq", telescope_builtin.diagnostics, opts)
-			vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
-			vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
-
-			-- Workspace
-			vim.keymap.set("n", "<leader>lwa", vim.lsp.buf.add_workspace_folder, opts)
-			vim.keymap.set("n", "<leader>lwr", vim.lsp.buf.remove_workspace_folder, opts)
-			vim.keymap.set("n", "<leader>lwl", function()
-				print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-			end, opts)
-
-			-- Document symbols (using Telescope)
-			vim.keymap.set("n", "<leader>lo", telescope_builtin.lsp_document_symbols, opts)
-			vim.keymap.set("n", "<leader>lO", telescope_builtin.lsp_workspace_symbols, opts)
-
-			-- Incoming/Outgoing calls
-			vim.keymap.set("n", "<leader>lci", telescope_builtin.lsp_incoming_calls, opts)
-			vim.keymap.set("n", "<leader>lco", telescope_builtin.lsp_outgoing_calls, opts)
-
-			-- LSP control
-			vim.keymap.set("n", "<leader>lR", "<cmd>LspRestart<CR>", opts)
-			vim.keymap.set("n", "<leader>lI", "<cmd>LspInfo<CR>", opts)
-		end
-
 		local function lsp_setup(server, opts)
 			lspconfig[server].setup(vim.tbl_deep_extend("force", {
-				on_attach = function(client, bufnr)
-					setup_lsp_keymaps(bufnr)
-					if on_attach then
-						on_attach(client, bufnr)
-					end
-				end,
 				capabilities = capabilities,
 			}, opts or {}))
 		end
