@@ -12,3 +12,6 @@
   syntax-theme = base16
 [merge]
   conflictstyle = diff3
+	tool = nvimdiff
+[mergetool "nvimdiff"]
+	cmd = nvim -d \"$LOCAL\" \"$MERGED\" \"$REMOTE\"
