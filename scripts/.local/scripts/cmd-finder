@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+# cmd-finder - Fuzzy search through all zsh aliases, functions, and commands
+# Prints the selected command to terminal for execution
+
+# Configuration
+ZSHCONFIG="${ZSHCONFIG:-$HOME/.config/zsh}"
+TEMP_FILE=$(mktemp)
+
+# Colors for output
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+RESET='\033[0m'
+
+# Function to extract aliases from a file
+extract_aliases() {
+  local file="$1"
+  local category="$2"
+
+  grep -E "^alias [a-zA-Z0-9_-]+=" "$file" 2>/dev/null | while IFS= read -r line; do
+    local name=$(echo "$line" | sed -E "s/^alias ([^=]+)=.*/\1/")
+    local cmd=$(echo "$line" | sed -E "s/^alias [^=]+=(['\"]?)(.+)\1$/\2/" | sed "s/^'//" | sed "s/'$//")
+    echo -e "${category}\t${name}\t${cmd}"
+  done
+}
+
+# Function to extract functions from a file
+extract_functions() {
+  local file="$1"
+  local category="$2"
+
+  # Match function definitions: name() { ... } or function name { ... }
+  grep -E "^[a-zA-Z0-9_-]+\(\)|^function [a-zA-Z0-9_-]+" "$file" 2>/dev/null | while IFS= read -r line; do
+    local name=$(echo "$line" | sed -E "s/^function ([a-zA-Z0-9_-]+).*/\1/" | sed -E "s/^([a-zA-Z0-9_-]+)\(\).*/\1/")
+
+    # Try to extract a brief description from comments above the function
+    local linenum=$(grep -n "^${name}()\|^function ${name}" "$file" | head -1 | cut -d: -f1)
+    local desc=""
+
+    if [ -n "$linenum" ]; then
+      # Look for comment on previous line
+      desc=$(sed -n "$((linenum-1))p" "$file" | grep -E "^#" | sed 's/^# *//' | sed 's/^--- *//' || echo "function")
+    fi
+
+    [ -z "$desc" ] && desc="function"
+    echo -e "${category}\t${name}\t${desc}"
+  done
+}
+
+# Build the command list
+{
+  # Extract from all zsh config files
+  if [ -d "$ZSHCONFIG" ]; then
+    extract_aliases "$ZSHCONFIG/aliases.zsh" "alias"
+    extract_aliases "$ZSHCONFIG/files.zsh" "files"
+    extract_aliases "$ZSHCONFIG/git.zsh" "git"
+    extract_aliases "$ZSHCONFIG/gradle.zsh" "gradle"
+    extract_aliases "$ZSHCONFIG/rust.zsh" "rust"
+    extract_aliases "$ZSHCONFIG/utils.zsh" "utils"
+
+    extract_functions "$ZSHCONFIG/files.zsh" "files"
+    extract_functions "$ZSHCONFIG/git.zsh" "git"
+    extract_functions "$ZSHCONFIG/gradle.zsh" "gradle"
+    extract_functions "$ZSHCONFIG/utils.zsh" "utils"
+  fi
+} > "$TEMP_FILE"
+
+# Use fzf to select a command
+selected=$(cat "$TEMP_FILE" | \
+  awk -F'\t' '{printf "%-12s %-20s %s\n", $1, $2, $3}' | \
+  fzf --ansi \
+      --height=80% \
+      --layout=reverse \
+      --border \
+      --prompt="⚡ Command > " \
+      --preview-window=down:3:wrap \
+      --preview 'echo -e "'\''${CYAN}Category:${RESET} {1}\n${GREEN}Command:${RESET}  {2}\n${YELLOW}Details:${RESET}  {3..}'\'' | sed "s/\x1b\[[0-9;]*m//g"' \
+      --header="Search commands and aliases (Ctrl-C to cancel)" \
+      --bind='ctrl-y:execute-silent(echo -n {2} | pbcopy)+abort')
+
+# Clean up temp file
+rm -f "$TEMP_FILE"
+
+# If something was selected, extract the command name and print it
+if [ -n "$selected" ]; then
+  # Extract just the command name (second column)
+  cmd=$(echo "$selected" | awk '{print $2}')
+
+  # Print the command to stdout (will be captured by zsh widget)
+  echo -n "$cmd"
+fi

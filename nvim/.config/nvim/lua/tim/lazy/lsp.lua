@@ -42,9 +42,16 @@ return {
 		})
 		lsp_setup("rust_analyzer")
 		lsp_setup("ruby_lsp")
-		lsp_setup("kotlin_language_server")
 		lsp_setup("jdtls")
 		lsp_setup("volar")
+
+		-- JetBrains Kotlin LSP (kotlin-lsp from homebrew)
+		lspconfig.kotlin_language_server.setup({
+			capabilities = capabilities,
+			cmd = { "kotlin-lsp", "--stdio" },
+			root_dir = lspconfig.util.root_pattern("settings.gradle", "settings.gradle.kts", "build.gradle", "build.gradle.kts", ".git"),
+			filetypes = { "kotlin" },
+		})
 
 		-- Completion config
 		local cmp = require("cmp")
