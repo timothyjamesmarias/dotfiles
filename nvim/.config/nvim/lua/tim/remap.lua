@@ -1,23 +1,50 @@
+-- ============================================================================
+-- Keymap Organization
+-- ============================================================================
+-- <leader>w/q/Q     - Basic file operations (save, close, quit)
+-- <leader>h/v       - Window splits
+-- <leader>e*        - Edit/open files
+-- <leader>s*        - Search operations
+-- <leader>f*        - Find (Telescope) - file finding, grep, git, etc.
+-- <leader>t*        - Tags (ctags navigation)
+-- <leader>b*        - Buffer operations (navigation, switching)
+-- <leader>l*        - LSP operations (definitions, references, diagnostics, etc.)
+-- <leader>p*        - Project/Framework commands (context-aware based on filetype)
+--                     * Rails: alternate, related, model, view, controller, generate, test, console
+--                     * Laravel: artisan, routes, related/model
+--                     * Gradle/Kotlin: build, test, run, clean, dev server
+-- <leader>g*        - Git operations (via gitsigns or other git plugins)
+-- <leader>cm        - Run shell command
+-- <C-n/p>           - Buffer navigation (next/previous)
+-- n/N               - Search navigation (centered)
+-- ;                 - Command mode
+-- ============================================================================
+
 vim.g.mapleader = " "
-vim.keymap.set("n", "<leader>w", "<cmd>w<CR>")
-vim.keymap.set("n", ";", ":")
-vim.keymap.set("n", "<leader>q", "<cmd>bp<bar>sp<bar>bn<bar>bd<CR>", { silent = true })
-vim.keymap.set("n", "<leader>Q", "<cmd>q!<CR>", { silent = true })
-vim.keymap.set("n", "n", "nzzzv", { silent = true })
-vim.keymap.set("n", "N", "Nzzzv", { silent = true })
-vim.keymap.set("n", "<leader>hh", "<cmd>vsp<CR>", { silent = true })
-vim.keymap.set("n", "<leader>vv", "<cmd>sp<CR>", { silent = true })
-vim.keymap.set("n", "<leader>sf", "/")
-vim.keymap.set("i", "<C-e>", "<C-o>A")
-vim.keymap.set("n", "<leader>cm", ":!")
-vim.keymap.set("n", "<leader>ee", ":e ")
-vim.keymap.set("n", "<leader>eb", ":Ebuf ")
-vim.keymap.set("i", "<C-l>", "<C-o>l")
+vim.keymap.set("n", "<leader>w", "<cmd>w<CR>", { desc = "Save file" })
+vim.keymap.set("n", ";", ":", { desc = "Enter command mode" })
+vim.keymap.set(
+	"n",
+	"<leader>q",
+	"<cmd>bp<bar>sp<bar>bn<bar>bd<CR>",
+	{ silent = true, desc = "Close buffer without closing window" }
+)
+vim.keymap.set("n", "<leader>Q", "<cmd>q!<CR>", { silent = true, desc = "Force quit without saving" })
+vim.keymap.set("n", "n", "nzzzv", { silent = true, desc = "Next search result (centered)" })
+vim.keymap.set("n", "N", "Nzzzv", { silent = true, desc = "Previous search result (centered)" })
+vim.keymap.set("n", "<leader>hh", "<cmd>vsp<CR>", { silent = true, desc = "Vertical split" })
+vim.keymap.set("n", "<leader>vv", "<cmd>sp<CR>", { silent = true, desc = "Horizontal split" })
+vim.keymap.set("n", "<leader>sf", "/", { desc = "Search in file" })
+vim.keymap.set("i", "<C-e>", "<C-o>A", { desc = "Jump to end of line (insert mode)" })
+vim.keymap.set("n", "<leader>cm", ":!", { desc = "Run shell command" })
+vim.keymap.set("n", "<leader>ee", ":e ", { desc = "Edit file" })
+vim.keymap.set("n", "<leader>eb", ":Ebuf ", { desc = "Edit buffer" })
+vim.keymap.set("i", "<C-l>", "<C-o>l", { desc = "Move right one character (insert mode)" })
 
 -- navigation
-vim.keymap.set("n", "<C-n>", "<cmd>bnext<CR>", { silent = true, remap = true })
-vim.keymap.set("n", "<C-p>", "<cmd>bprevious<CR>", { silent = true, remap = true })
-vim.keymap.set("n", "<leader>ls", "<cmd>ls<CR>", { silent = true, remap = true })
+vim.keymap.set("n", "<C-n>", "<cmd>bnext<CR>", { silent = true, remap = true, desc = "Next buffer" })
+vim.keymap.set("n", "<C-p>", "<cmd>bprevious<CR>", { silent = true, remap = true, desc = "Previous buffer" })
+vim.keymap.set("n", "<leader>ls", "<cmd>ls<CR>", { silent = true, remap = true, desc = "List buffers" })
 
 vim.api.nvim_create_user_command("MapBufferKeys", function()
 	-- Clear previous mappings
@@ -60,45 +87,50 @@ function vim.getVisualSelection()
 	return table.concat(lines, " ")
 end
 
-vim.keymap.set("n", "<leader>fs", "<cmd>Telescope find_files follow=true hidden=true<CR>", { silent = true })
+vim.keymap.set(
+	"n",
+	"<leader>fs",
+	"<cmd>Telescope find_files follow=true hidden=true<CR>",
+	{ silent = true, desc = "Find files" }
+)
 vim.keymap.set("v", "<leader>fw", function()
 	local text = vim.getVisualSelection()
 	require("telescope.builtin").live_grep({ default_text = text })
-end)
+end, { desc = "Live grep with selection" })
 vim.keymap.set("v", "<leader>fs", function()
 	local text = vim.getVisualSelection()
 	require("telescope.builtin").find_files({ default_text = text })
-end, { silent = true, noremap = true })
+end, { silent = true, noremap = true, desc = "Find files with selection" })
 vim.keymap.set("n", "<leader>fr", function()
 	require("telescope.builtin").oldfiles()
-end, { silent = true })
+end, { silent = true, desc = "Recent files" })
 vim.keymap.set("n", "<leader>fg", function()
 	require("telescope.builtin").git_commits()
-end, { silent = true })
+end, { silent = true, desc = "Git commits" })
 vim.keymap.set("n", "<leader>fw", function()
 	require("telescope.builtin").live_grep()
-end, { silent = true })
+end, { silent = true, desc = "Live grep" })
 vim.keymap.set("n", "<leader>fk", function()
 	require("telescope.builtin").keymaps()
-end, { silent = true })
+end, { silent = true, desc = "Find keymaps" })
 vim.keymap.set("n", "<leader>fcc", function()
 	require("telescope.builtin").commands()
-end, { silent = true })
+end, { silent = true, desc = "Find commands" })
 vim.keymap.set("n", "<leader>fca", function()
 	require("telescope.builtin").autocommands()
-end, { silent = true })
+end, { silent = true, desc = "Find autocommands" })
 vim.keymap.set("n", "<leader>fj", function()
 	require("telescope.builtin").jumplist()
-end, { silent = true })
+end, { silent = true, desc = "Jumplist" })
 vim.keymap.set("n", "<leader>fb", function()
 	require("telescope.builtin").buffers()
-end, { silent = true })
+end, { silent = true, desc = "Find buffers" })
 vim.keymap.set("n", "<leader>fh", function()
 	require("telescope.builtin").help_tags()
-end, { silent = true })
+end, { silent = true, desc = "Help tags" })
 vim.keymap.set("n", "<leader>sp", function()
 	require("telescope.builtin").spell_suggest()
-end, { silent = true })
+end, { silent = true, desc = "Spell suggestions" })
 vim.keymap.set("n", "<leader>fn", function()
 	require("telescope").extensions.file_browser.file_browser({
 		path = "%:p:h",
@@ -108,7 +140,7 @@ vim.keymap.set("n", "<leader>fn", function()
 		previewer = false,
 		layout_config = { height = 0.5 },
 	})
-end, { noremap = true, silent = true })
+end, { noremap = true, silent = true, desc = "File browser (current dir)" })
 vim.keymap.set("n", "<leader>fp", function()
 	local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
 	require("telescope").extensions.file_browser.file_browser({
@@ -118,20 +150,20 @@ vim.keymap.set("n", "<leader>fp", function()
 		previewer = false,
 		layout_config = { height = 0.5 },
 	})
-end, { noremap = true, silent = true })
+end, { noremap = true, silent = true, desc = "File browser (project root)" })
 vim.keymap.set("n", "<leader>ts", function()
 	require("telescope.builtin").tagstack()
-end, { silent = true })
+end, { silent = true, desc = "Tag stack" })
 vim.keymap.set("n", "<leader>tg", function()
 	require("telescope.builtin").tags()
-end, { silent = true })
+end, { silent = true, desc = "Find tags" })
 vim.keymap.set("n", "<leader>sl", function()
 	require("telescope.builtin").grep_string()
-end, { silent = true, noremap = true })
+end, { silent = true, noremap = true, desc = "Grep string under cursor" })
 vim.keymap.set("v", "<leader>sl", function()
 	local text = vim.getVisualSelection()
 	require("telescope.builtin").grep_string({ search = text })
-end, { silent = true, noremap = true })
+end, { silent = true, noremap = true, desc = "Grep visual selection" })
 
 -- LSP keymaps (set on LSP attach)
 vim.api.nvim_create_autocmd("LspAttach", {
@@ -141,69 +173,219 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		local telescope_builtin = require("telescope.builtin")
 
 		-- Navigation (using Telescope for better UX)
-		vim.keymap.set("n", "<leader>ld", telescope_builtin.lsp_definitions, opts)
-		vim.keymap.set("n", "<leader>lD", vim.lsp.buf.declaration, opts)
-		vim.keymap.set("n", "<leader>li", telescope_builtin.lsp_implementations, opts)
-		vim.keymap.set("n", "<leader>lt", telescope_builtin.lsp_type_definitions, opts)
-		vim.keymap.set("n", "<leader>lr", telescope_builtin.lsp_references, opts)
+		vim.keymap.set(
+			"n",
+			"<leader>ld",
+			telescope_builtin.lsp_definitions,
+			vim.tbl_extend("force", opts, { desc = "Go to definition" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>lD",
+			vim.lsp.buf.declaration,
+			vim.tbl_extend("force", opts, { desc = "Go to declaration" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>li",
+			telescope_builtin.lsp_implementations,
+			vim.tbl_extend("force", opts, { desc = "Go to implementation" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>lt",
+			telescope_builtin.lsp_type_definitions,
+			vim.tbl_extend("force", opts, { desc = "Go to type definition" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>lr",
+			telescope_builtin.lsp_references,
+			vim.tbl_extend("force", opts, { desc = "Find references" })
+		)
 
 		-- Documentation
-		vim.keymap.set("n", "<leader>lh", vim.lsp.buf.hover, opts)
-		vim.keymap.set("n", "<leader>ls", vim.lsp.buf.signature_help, opts)
+		vim.keymap.set(
+			"n",
+			"<leader>lh",
+			vim.lsp.buf.hover,
+			vim.tbl_extend("force", opts, { desc = "Hover documentation" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>ls",
+			vim.lsp.buf.signature_help,
+			vim.tbl_extend("force", opts, { desc = "Signature help" })
+		)
 
 		-- Code actions
-		vim.keymap.set("n", "<leader>la", vim.lsp.buf.code_action, opts)
-		vim.keymap.set("n", "<leader>ln", vim.lsp.buf.rename, opts)
+		vim.keymap.set(
+			"n",
+			"<leader>la",
+			vim.lsp.buf.code_action,
+			vim.tbl_extend("force", opts, { desc = "Code action" })
+		)
+		vim.keymap.set("n", "<leader>ln", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename symbol" }))
 		-- Use formatter.nvim instead of LSP formatting
-		vim.keymap.set("n", "<leader>lf", "<cmd>Format<CR>", opts)
+		vim.keymap.set("n", "<leader>lf", "<cmd>Format<CR>", vim.tbl_extend("force", opts, { desc = "Format buffer" }))
 
 		-- Diagnostics (using Telescope for diagnostics lists)
-		vim.keymap.set("n", "<leader>le", vim.diagnostic.open_float, opts)
-		vim.keymap.set("n", "<leader>lq", telescope_builtin.diagnostics, opts)
-		vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
-		vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+		vim.keymap.set(
+			"n",
+			"<leader>le",
+			vim.diagnostic.open_float,
+			vim.tbl_extend("force", opts, { desc = "Show diagnostic" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>lq",
+			telescope_builtin.diagnostics,
+			vim.tbl_extend("force", opts, { desc = "List diagnostics" })
+		)
+		vim.keymap.set(
+			"n",
+			"[d",
+			vim.diagnostic.goto_prev,
+			vim.tbl_extend("force", opts, { desc = "Previous diagnostic" })
+		)
+		vim.keymap.set("n", "]d", vim.diagnostic.goto_next, vim.tbl_extend("force", opts, { desc = "Next diagnostic" }))
 
 		-- Workspace
-		vim.keymap.set("n", "<leader>lwa", vim.lsp.buf.add_workspace_folder, opts)
-		vim.keymap.set("n", "<leader>lwr", vim.lsp.buf.remove_workspace_folder, opts)
+		vim.keymap.set(
+			"n",
+			"<leader>lwa",
+			vim.lsp.buf.add_workspace_folder,
+			vim.tbl_extend("force", opts, { desc = "Add workspace folder" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>lwr",
+			vim.lsp.buf.remove_workspace_folder,
+			vim.tbl_extend("force", opts, { desc = "Remove workspace folder" })
+		)
 		vim.keymap.set("n", "<leader>lwl", function()
 			print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-		end, opts)
+		end, vim.tbl_extend("force", opts, { desc = "List workspace folders" }))
 
 		-- Document symbols (using Telescope)
-		vim.keymap.set("n", "<leader>lo", telescope_builtin.lsp_document_symbols, opts)
-		vim.keymap.set("n", "<leader>lO", telescope_builtin.lsp_workspace_symbols, opts)
+		vim.keymap.set(
+			"n",
+			"<leader>lo",
+			telescope_builtin.lsp_document_symbols,
+			vim.tbl_extend("force", opts, { desc = "Document symbols" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>lO",
+			telescope_builtin.lsp_workspace_symbols,
+			vim.tbl_extend("force", opts, { desc = "Workspace symbols" })
+		)
 
 		-- Incoming/Outgoing calls
-		vim.keymap.set("n", "<leader>lci", telescope_builtin.lsp_incoming_calls, opts)
-		vim.keymap.set("n", "<leader>lco", telescope_builtin.lsp_outgoing_calls, opts)
+		vim.keymap.set(
+			"n",
+			"<leader>lci",
+			telescope_builtin.lsp_incoming_calls,
+			vim.tbl_extend("force", opts, { desc = "Incoming calls" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>lco",
+			telescope_builtin.lsp_outgoing_calls,
+			vim.tbl_extend("force", opts, { desc = "Outgoing calls" })
+		)
 
 		-- LSP control
-		vim.keymap.set("n", "<leader>lR", "<cmd>LspRestart<CR>", opts)
-		vim.keymap.set("n", "<leader>lI", "<cmd>LspInfo<CR>", opts)
+		vim.keymap.set(
+			"n",
+			"<leader>lR",
+			"<cmd>LspRestart<CR>",
+			vim.tbl_extend("force", opts, { desc = "Restart LSP" })
+		)
+		vim.keymap.set("n", "<leader>lI", "<cmd>LspInfo<CR>", vim.tbl_extend("force", opts, { desc = "LSP info" }))
 	end,
 })
 
--- Kotlin/Java Gradle keymaps (set on filetype)
+-- Ruby/Rails Project keymaps (set on filetype)
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "ruby", "eruby", "slim" },
+	callback = function()
+		local opts = { buffer = true, silent = true, noremap = true }
+
+		-- Project commands (Rails)
+		vim.keymap.set("n", "<leader>pa", ":A<CR>", vim.tbl_extend("force", opts, { desc = "Project: Alternate file" }))
+		vim.keymap.set("n", "<leader>pr", ":R<CR>", vim.tbl_extend("force", opts, { desc = "Project: Related file" }))
+		vim.keymap.set("n", "<leader>pm", ":Emodel<CR>", vim.tbl_extend("force", opts, { desc = "Project: Model" }))
+		vim.keymap.set("n", "<leader>pv", ":Eview<CR>", vim.tbl_extend("force", opts, { desc = "Project: View" }))
+		vim.keymap.set(
+			"n",
+			"<leader>pc",
+			":Econtroller<CR>",
+			vim.tbl_extend("force", opts, { desc = "Project: Controller" })
+		)
+		vim.keymap.set("n", "<leader>pg", ":Generate ", vim.tbl_extend("force", opts, { desc = "Project: Generate" }))
+		vim.keymap.set("n", "<leader>pt", ":Rails<CR>", vim.tbl_extend("force", opts, { desc = "Project: Test/Run" }))
+		vim.keymap.set(
+			"n",
+			"<leader>pT",
+			":.Rails<CR>",
+			vim.tbl_extend("force", opts, { desc = "Project: Test current" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>ps",
+			":Rails console<CR>",
+			vim.tbl_extend("force", opts, { desc = "Project: Console (Rails)" })
+		)
+	end,
+})
+
+-- Kotlin/Java Project keymaps (set on filetype)
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "kotlin", "java" },
 	callback = function()
 		local opts = { buffer = true, silent = true, noremap = true }
 
-		-- Gradle integration keymaps
-		vim.keymap.set("n", "<leader>gb", ":!./gradlew build<CR>", opts)
-		vim.keymap.set("n", "<leader>gt", ":!./gradlew test<CR>", opts)
-		vim.keymap.set("n", "<leader>gr", ":!./gradlew run<CR>", opts)
-		vim.keymap.set("n", "<leader>gc", ":!./gradlew clean<CR>", opts)
-		vim.keymap.set("n", "<leader>gd", ":!./gradlew bootRun<CR>", opts)
-
-		-- Quick compile check (no tests)
-		vim.keymap.set("n", "<leader>gq", ":!./gradlew build -x test<CR>", opts)
-
-		-- Run specific test under cursor (requires custom function)
-		vim.keymap.set("n", "<leader>gT", function()
+		-- Project commands (Gradle)
+		vim.keymap.set(
+			"n",
+			"<leader>pb",
+			":!./gradlew build<CR>",
+			vim.tbl_extend("force", opts, { desc = "Project: Build" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>pt",
+			":!./gradlew test<CR>",
+			vim.tbl_extend("force", opts, { desc = "Project: Test" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>pr",
+			":!./gradlew run<CR>",
+			vim.tbl_extend("force", opts, { desc = "Project: Run" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>pc",
+			":!./gradlew clean<CR>",
+			vim.tbl_extend("force", opts, { desc = "Project: Clean" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>pd",
+			":!./gradlew bootRun<CR>",
+			vim.tbl_extend("force", opts, { desc = "Project: Dev server (bootRun)" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>pq",
+			":!./gradlew build -x test<CR>",
+			vim.tbl_extend("force", opts, { desc = "Project: Quick build (skip tests)" })
+		)
+		vim.keymap.set("n", "<leader>pT", function()
 			local class_name = vim.fn.expand("%:t:r")
 			vim.cmd("!./gradlew test --tests " .. class_name)
-		end, opts)
+		end, vim.tbl_extend("force", opts, { desc = "Project: Test current class" }))
 	end,
 })
