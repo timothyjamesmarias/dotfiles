@@ -1,5 +1,7 @@
 # ~/.zshrc - Main entrypoint for zsh configuration
 # This file sources modular configuration files from ~/.config/zsh/
+autoload -Uz compinit
+compinit
 
 # --- Basic environment setup ---
 export LANG=en_US.UTF-8
