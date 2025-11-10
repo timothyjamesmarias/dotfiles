@@ -71,7 +71,10 @@ vim.api.nvim_create_autocmd({ "BufAdd", "BufDelete" }, {
 	end,
 })
 
--- Telescope keymaps
+-- Telescope and file keymaps
+vim.keymap.set("n", "<leader>fo", "<cmd>!open -R %<CR>", { silent = true, desc = "Open current file in finder" })
+vim.keymap.set("n", "<leader>fO", "<cmd>!open %<CR>", { silent = true, desc = "Open current file with the default program" })
+
 function vim.getVisualSelection()
 	local _, ls_row, ls_col, _ = unpack(vim.fn.getpos("v"))
 	local _, le_row, le_col, _ = unpack(vim.fn.getpos("."))
