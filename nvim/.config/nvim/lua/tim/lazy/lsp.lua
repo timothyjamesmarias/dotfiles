@@ -9,21 +9,21 @@ return {
 		"nvim-telescope/telescope.nvim",
 	},
 	config = function()
-		local lspconfig = require("lspconfig")
 		local capabilities = require("cmp_nvim_lsp").default_capabilities()
 		local lspkind = require("lspkind")
 
-		local function lsp_setup(server, opts)
-			lspconfig[server].setup(vim.tbl_deep_extend("force", {
+		-- Helper function to create LSP configs
+		local function make_config(opts)
+			return vim.tbl_deep_extend("force", {
 				capabilities = capabilities,
-			}, opts or {}))
+			}, opts or {})
 		end
 
-		-- LSP servers
-		lsp_setup("html", { filetypes = { "html", "eruby", "blade" } })
-		lsp_setup("cssls", { filetypes = { "html", "css", "scss" } })
-		lsp_setup("ts_ls", { filetypes = { "javascript", "typescript", "html" } })
-		lsp_setup("lua_ls", {
+		-- LSP servers using new vim.lsp.config API
+		vim.lsp.config.html = make_config({ filetypes = { "html", "eruby", "blade" } })
+		vim.lsp.config.cssls = make_config({ filetypes = { "html", "css", "scss" } })
+		vim.lsp.config.ts_ls = make_config({ filetypes = { "javascript", "typescript", "html" } })
+		vim.lsp.config.lua_ls = make_config({
 			settings = {
 				Lua = {
 					runtime = { version = "LuaJIT" },
@@ -33,24 +33,39 @@ return {
 				},
 			},
 		})
-		lsp_setup("clangd", { filetypes = { "c", "cpp" } })
-		lsp_setup("sqlls", { filetypes = { "sql", "mysql", "pgsql" } })
-		lsp_setup("intelephense", {
+		vim.lsp.config.clangd = make_config({ filetypes = { "c", "cpp" } })
+		vim.lsp.config.sqlls = make_config({ filetypes = { "sql", "mysql", "pgsql" } })
+		vim.lsp.config.intelephense = make_config({
 			init_options = {
 				licenceKey = "00DRGKX774NA9NM",
 			},
 		})
-		lsp_setup("rust_analyzer")
-		lsp_setup("ruby_lsp")
-		lsp_setup("jdtls")
-		lsp_setup("volar")
+		vim.lsp.config.rust_analyzer = make_config({})
+		vim.lsp.config.ruby_lsp = make_config({})
+		vim.lsp.config.jdtls = make_config({})
+		vim.lsp.config.vue_ls = make_config({})
 
 		-- JetBrains Kotlin LSP (kotlin-lsp from homebrew)
-		lspconfig.kotlin_language_server.setup({
-			capabilities = capabilities,
+		vim.lsp.config.kotlin_language_server = make_config({
 			cmd = { "kotlin-lsp", "--stdio" },
-			root_dir = lspconfig.util.root_pattern("settings.gradle", "settings.gradle.kts", "build.gradle", "build.gradle.kts", ".git"),
+			root_markers = { "settings.gradle", "settings.gradle.kts", "build.gradle", "build.gradle.kts", ".git" },
 			filetypes = { "kotlin" },
+		})
+
+		-- Enable LSP servers
+		vim.lsp.enable({
+			"html",
+			"cssls",
+			"ts_ls",
+			"lua_ls",
+			"clangd",
+			"sqlls",
+			"intelephense",
+			"rust_analyzer",
+			"ruby_lsp",
+			"jdtls",
+			"vue_ls",
+			"kotlin_language_server",
 		})
 
 		-- Completion config
