@@ -4,7 +4,10 @@ return {
 		window = {
 			backdrop = 1,
 			width = 120,
-			options = {},
+			options = {
+			wrap = true,
+			linebreak = true,
+		},
 		},
 		plugins = {
 			options = {
