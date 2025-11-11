@@ -8,8 +8,6 @@ export LANG=en_US.UTF-8
 export EDITOR="nvim"
 
 # --- Shell behavior ---
-export NVIM_LISTEN_ADDRESS="/tmp/nvim-$$.sock"
-echo "$NVIM_LISTEN_ADDRESS" >> ~/.cache/nvim_socket
 chmod +x "$HOME/.local/scripts"
 
 # --- Path ---
