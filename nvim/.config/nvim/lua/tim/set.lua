@@ -16,8 +16,8 @@ vim.opt.updatetime = 1000
 vim.opt.completeopt = { "menuone", "longest", "preview" }
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
-vim.opt.shell = '/bin/zsh'
-vim.opt.shellcmdflag = '-ic'  -- -i makes it interactive, -c runs the command
+-- vim.opt.shell = '/bin/zsh'
+-- vim.opt.shellcmdflag = '-ic'  -- -i makes it interactive, -c runs the command
 
 vim.opt.tabstop = 2
 vim.opt.softtabstop = 2
