@@ -74,6 +74,16 @@ vim.api.nvim_create_autocmd({ "BufAdd", "BufDelete" }, {
 -- Telescope and file keymaps
 vim.keymap.set("n", "<leader>fo", "<cmd>!open -R %<CR>", { silent = true, desc = "Open current file in finder" })
 vim.keymap.set("n", "<leader>fO", "<cmd>!open %<CR>", { silent = true, desc = "Open current file with the default program" })
+vim.keymap.set("n", "<leader>fy", function()
+	local path = vim.fn.expand("%:p")
+	vim.fn.setreg("+", path)
+	print("Copied to clipboard: " .. path)
+end, { silent = false, desc = "Copy absolute file path to clipboard" })
+vim.keymap.set("n", "<leader>fY", function()
+	local path = vim.fn.expand("%:.")
+	vim.fn.setreg("+", path)
+	print("Copied to clipboard: " .. path)
+end, { silent = false, desc = "Copy relative file path to clipboard" })
 
 function vim.getVisualSelection()
 	local _, ls_row, ls_col, _ = unpack(vim.fn.getpos("v"))
@@ -340,6 +350,34 @@ vim.api.nvim_create_autocmd("FileType", {
 			"<leader>ps",
 			":Rails console<CR>",
 			vim.tbl_extend("force", opts, { desc = "Project: Console (Rails)" })
+		)
+	end,
+})
+
+-- ERB tag mappings (eruby files only)
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "eruby",
+	callback = function()
+		local opts = { buffer = true, silent = true, noremap = true }
+
+		-- Insert ERB tags (normal mode)
+		vim.keymap.set(
+			"n",
+			"<leader>ie",
+			"i<%=  %><Esc>hhi",
+			vim.tbl_extend("force", opts, { desc = "Insert ERB output tag" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>im",
+			"i<%  %><Esc>hhi",
+			vim.tbl_extend("force", opts, { desc = "Insert ERB execution tag" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>ic",
+			"i<%#  %><Esc>hhi",
+			vim.tbl_extend("force", opts, { desc = "Insert ERB comment tag" })
 		)
 	end,
 })
