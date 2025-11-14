@@ -10,6 +10,9 @@
   navigate = true
   line-numbers = true
   syntax-theme = base16
+  side-by-side = true
+  diff-so-fancy = true
+  hyperlinks = true
 [merge]
   conflictstyle = diff3
 	tool = nvimdiff

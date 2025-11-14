@@ -1,6 +1,6 @@
 return {
 	"nvim-telescope/telescope.nvim",
-	tag = "0.1.3",
+  branch = "master",
 	dependencies = {
 		"nvim-lua/plenary.nvim",
 		"nvim-telescope/telescope-file-browser.nvim",
@@ -13,6 +13,8 @@ return {
 	},
 	config = function()
 		local telescope = require("telescope")
+		local actions = require("telescope.actions")
+
 		telescope.setup({
 			defaults = {
 				vimgrep_arguments = {
@@ -25,10 +27,11 @@ return {
 					"--smart-case",
 					"--hidden",
 					"--glob=!.git/",
+					"--fixed-strings", -- Literal string search (not regex)
 				},
 				mappings = {
 					n = {
-						["q"] = require("telescope.actions").close,
+						["q"] = actions.close,
 					},
 					i = {
 					},

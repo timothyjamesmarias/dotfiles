@@ -86,18 +86,21 @@ vim.keymap.set("n", "<leader>fY", function()
 end, { silent = false, desc = "Copy relative file path to clipboard" })
 
 function vim.getVisualSelection()
-	local _, ls_row, ls_col, _ = unpack(vim.fn.getpos("v"))
-	local _, le_row, le_col, _ = unpack(vim.fn.getpos("."))
-	if ls_row > le_row or (ls_row == le_row and ls_col > le_col) then
-		ls_row, le_row = le_row, ls_row
-		ls_col, le_col = le_col, ls_col
-	end
+	local _, ls_row, ls_col, _ = unpack(vim.fn.getpos("'<"))
+	local _, le_row, le_col, _ = unpack(vim.fn.getpos("'>"))
 	local lines = vim.fn.getline(ls_row, le_row)
 	if #lines == 0 then
 		return ""
 	end
-	lines[1] = string.sub(lines[1], ls_col)
-	lines[#lines] = string.sub(lines[#lines], 1, le_col)
+
+	-- Handle single-line selection separately to avoid double-modification
+	if #lines == 1 then
+		lines[1] = string.sub(lines[1], ls_col, le_col)
+	else
+		lines[1] = string.sub(lines[1], ls_col)
+		lines[#lines] = string.sub(lines[#lines], 1, le_col)
+	end
+
 	return table.concat(lines, " ")
 end
 
@@ -319,6 +322,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		vim.keymap.set("n", "<leader>lI", "<cmd>LspInfo<CR>", vim.tbl_extend("force", opts, { desc = "LSP info" }))
 	end,
 })
+
+
+vim.keymap.set("n", "<leader>po", "<cmd>!open .<CR>", { silent = true, desc = "Open project directory in finder" })
 
 -- Ruby/Rails Project keymaps (set on filetype)
 vim.api.nvim_create_autocmd("FileType", {
