@@ -23,6 +23,25 @@ rgnvim() {
     | sh
 }
 
+# Ripgrep to quickfix - populate vim quickfix list with search results
+rgq() {
+  if [ -z "$1" ]; then
+    echo "Usage: rgq <pattern> [rg options]"
+    echo "Opens nvim with search results in quickfix list"
+    return 1
+  fi
+
+  local results=$(rg --vimgrep --no-heading --hidden --glob='!.git' "$@")
+
+  if [ -z "$results" ]; then
+    echo "No matches found for: $1"
+    return 1
+  fi
+
+  # Open nvim with results in quickfix
+  nvim -q <(echo "$results")
+}
+
 # Interactive search - prompts for pattern
 alias rgf='rgnvim'
 alias gjs='rgnvim --type js --type ts'

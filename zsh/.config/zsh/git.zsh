@@ -116,6 +116,37 @@ view_in_github_fzf() {
   fi
 }
 
+# Git worktree functions
+# Create worktree for a branch
+gwt() {
+  if [ -z "$1" ]; then
+    echo "Usage: gwt <branch> [directory]"
+    return 1
+  fi
+
+  local branch="$1"
+  local dir="${2:-../${PWD##*/}-${branch}}"
+
+  git worktree add "$dir" "$branch"
+  echo "Worktree created at: $dir"
+}
+
+# List worktrees
+alias gwtl='git worktree list'
+
+# Remove worktree
+alias gwtr='git worktree remove'
+
+# Fuzzy switch to worktree directory
+gwts() {
+  local worktree
+  worktree=$(git worktree list | tail -n +2 | fzf --height=40% --reverse | awk '{print $1}')
+
+  if [ -n "$worktree" ]; then
+    cd "$worktree"
+  fi
+}
+
 # Basic git aliases
 alias gs='git status -sb'
 alias gc='git commit -v'
@@ -136,6 +167,65 @@ alias grs='git restore --staged'
 alias gcp='git cherry-pick'
 alias gsw='git switch'
 alias gpr='gh pr create --web'
+
+# Fuzzy create fixup commit
+gfix() {
+  local commit
+  # Try to get commits since upstream, fallback to last 20 commits
+  commit=$(git log --oneline @{upstream}..HEAD 2>/dev/null || git log --oneline -n 20 | \
+    fzf --preview 'echo {} | grep -o "[a-f0-9]\{7,\}" | head -1 | xargs git show --color=always --stat' \
+        --preview-window=right:60% \
+        --header='Select commit to create fixup for') || return
+
+  local hash=$(echo "$commit" | grep -o "[a-f0-9]\{7,\}" | head -1)
+
+  # Stage files interactively first
+  echo "Staging files for fixup..."
+  git_stage
+
+  # Create fixup commit
+  git commit --fixup="$hash"
+
+  echo ""
+  echo "✓ Created fixup for: $hash"
+  echo "To apply: git rebase -i --autosquash $hash~1"
+}
+
+# Auto-rebase with autosquash
+grba() {
+  local base="${1:-@{upstream}}"
+  if ! git rev-parse "$base" >/dev/null 2>&1; then
+    echo "Error: Base '$base' not found"
+    echo "Usage: grba [base-ref]"
+    echo "Example: grba HEAD~5"
+    return 1
+  fi
+
+  git rebase -i --autosquash "$base"
+}
+
+# Fuzzy git reflog navigation
+grl() {
+  local commit
+  commit=$(git reflog --pretty=format:'%C(yellow)%h%Creset %C(cyan)%gd%Creset %gs %C(green)(%cr)%Creset' | \
+    fzf --ansi \
+        --preview 'echo {} | grep -o "[a-f0-9]\{7,\}" | head -1 | xargs git show --color=always --stat' \
+        --preview-window=right:60% \
+        --header='Select reflog entry (c=checkout, r=reset-soft, s=show)') || return
+
+  local hash=$(echo "$commit" | grep -o "[a-f0-9]\{7,\}" | head -1)
+
+  echo "Selected: $hash"
+  echo -n "Action? (c)heckout, (r)eset-soft, (s)how [default=show]: "
+  read action
+
+  case "$action" in
+    c) git checkout "$hash" ;;
+    r) git reset --soft "$hash" ;;
+    s|"") git show "$hash" ;;
+    *) echo "Cancelled" ;;
+  esac
+}
 
 # Fuzzy git aliases
 alias gcb="git_checkout"

@@ -45,13 +45,6 @@ return {
 		vim.lsp.config.jdtls = make_config({})
 		vim.lsp.config.vue_ls = make_config({})
 
-		-- JetBrains Kotlin LSP (kotlin-lsp from homebrew)
-		vim.lsp.config.kotlin_language_server = make_config({
-			cmd = { "kotlin-lsp", "--stdio" },
-			root_markers = { "settings.gradle", "settings.gradle.kts", "build.gradle", "build.gradle.kts", ".git" },
-			filetypes = { "kotlin" },
-		})
-
 		-- Enable LSP servers
 		vim.lsp.enable({
 			"html",
@@ -63,9 +56,7 @@ return {
 			"intelephense",
 			"rust_analyzer",
 			"ruby_lsp",
-			"jdtls",
 			"vue_ls",
-			"kotlin_language_server",
 		})
 
 		-- Completion config

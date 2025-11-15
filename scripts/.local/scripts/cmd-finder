@@ -48,6 +48,50 @@ extract_functions() {
   done
 }
 
+# Extract vim keybindings from remap.lua
+extract_vim_keymaps() {
+  local file="$HOME/dotfiles/nvim/.config/nvim/lua/tim/remap.lua"
+
+  if [ ! -f "$file" ]; then
+    return
+  fi
+
+  # Parse vim.keymap.set lines - extract key and description
+  grep -E 'vim\.keymap\.set\(' "$file" | \
+    perl -ne 'if (/keymap\.set\([^,]+,\s*"([^"]+)".*desc\s*=\s*"([^"]+)"/) {
+      $key = $1;
+      $desc = $2;
+      $key =~ s/<leader>/ /g;  # Convert <leader> to space for readability
+      print "vim\t$key\t$desc\n"
+    }'
+}
+
+# Extract git aliases from gitconfig
+extract_git_config_aliases() {
+  git config --get-regexp '^alias\.' 2>/dev/null | \
+    sed 's/^alias\.//' | \
+    awk '{cmd=$1; $1=""; desc=$0; gsub(/^[ \t]+/, "", desc); print "git-cfg\t" cmd "\t" desc}'
+}
+
+# Extract tmux keybindings
+extract_tmux_bindings() {
+  local file="$HOME/dotfiles/tmux/.tmux.conf"
+
+  if [ ! -f "$file" ]; then
+    return
+  fi
+
+  grep -E '^bind' "$file" | \
+    perl -ne 'if (/bind(?:-key)?\s+(?:-\w+\s+)*(\S+)\s+(.+)/) {
+      $key = $1;
+      $cmd = $2;
+      $cmd =~ s/#.*//;  # Remove comments
+      $cmd =~ s/^\s+|\s+$//g;  # Trim whitespace
+      $cmd =~ s/^(split-window|send-keys|run-shell|new-window)\s+/\1: /;  # Format common commands
+      print "tmux\t$key\t$cmd\n" if $cmd;
+    }'
+}
+
 # Build the command list
 {
   # Extract from all zsh config files
@@ -55,18 +99,61 @@ extract_functions() {
     extract_aliases "$ZSHCONFIG/aliases.zsh" "alias"
     extract_aliases "$ZSHCONFIG/files.zsh" "files"
     extract_aliases "$ZSHCONFIG/git.zsh" "git"
-    extract_aliases "$ZSHCONFIG/gradle.zsh" "gradle"
     extract_aliases "$ZSHCONFIG/rust.zsh" "rust"
     extract_aliases "$ZSHCONFIG/utils.zsh" "utils"
 
     extract_functions "$ZSHCONFIG/files.zsh" "files"
     extract_functions "$ZSHCONFIG/git.zsh" "git"
-    extract_functions "$ZSHCONFIG/gradle.zsh" "gradle"
     extract_functions "$ZSHCONFIG/utils.zsh" "utils"
   fi
+
+  # Extract vim keymaps
+  extract_vim_keymaps
+
+  # Extract git config aliases
+  extract_git_config_aliases
+
+  # Extract tmux bindings
+  extract_tmux_bindings
 } > "$TEMP_FILE"
 
-# Use fzf to select a command
+# Function to show implementation preview
+show_preview() {
+  local category="$1"
+  local name="$2"
+  local desc="$3"
+
+  echo -e "${CYAN}Category:${RESET} $category"
+  echo -e "${GREEN}Command:${RESET}  $name"
+  echo -e "${YELLOW}Details:${RESET}  $desc"
+  echo ""
+
+  # Show implementation based on category
+  case "$category" in
+    vim)
+      # Show vim keymap implementation
+      local search_key=$(echo "$name" | sed 's/ /<leader>/g')
+      grep -A3 "\"$search_key\"" "$HOME/dotfiles/nvim/.config/nvim/lua/tim/remap.lua" 2>/dev/null | head -5
+      ;;
+    git|files|rust|utils|alias)
+      # Show zsh function or alias definition
+      type "$name" 2>/dev/null || echo "(shell function/alias)"
+      ;;
+    git-cfg)
+      # Show git config alias
+      git config --get "alias.$name" 2>/dev/null
+      ;;
+    tmux)
+      # Show tmux binding
+      grep "^bind.*$name" "$HOME/dotfiles/tmux/.tmux.conf" 2>/dev/null
+      ;;
+  esac
+}
+
+export -f show_preview
+export CYAN GREEN YELLOW RESET
+
+# Use fzf to select a command with enhanced preview
 selected=$(cat "$TEMP_FILE" | \
   awk -F'\t' '{printf "%-12s %-20s %s\n", $1, $2, $3}' | \
   fzf --ansi \
@@ -74,9 +161,9 @@ selected=$(cat "$TEMP_FILE" | \
       --layout=reverse \
       --border \
       --prompt="⚡ Command > " \
-      --preview-window=down:3:wrap \
-      --preview 'echo -e "'\''${CYAN}Category:${RESET} {1}\n${GREEN}Command:${RESET}  {2}\n${YELLOW}Details:${RESET}  {3..}'\'' | sed "s/\x1b\[[0-9;]*m//g"' \
-      --header="Search commands and aliases (Ctrl-C to cancel)" \
+      --preview-window=down:8:wrap \
+      --preview 'bash -c "show_preview {1} {2} {3..}"' \
+      --header="Search commands/aliases/keymaps (Ctrl-Y to copy, Ctrl-C to cancel)" \
       --bind='ctrl-y:execute-silent(echo -n {2} | pbcopy)+abort')
 
 # Clean up temp file

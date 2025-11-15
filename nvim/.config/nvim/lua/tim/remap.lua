@@ -14,6 +14,7 @@
 --                     * Laravel: artisan, routes, related/model
 --                     * Gradle/Kotlin: build, test, run, clean, dev server
 -- <leader>g*        - Git operations (via gitsigns or other git plugins)
+-- <leader>x*        - Quickfix/Location list operations
 -- <leader>cm        - Run shell command
 -- <C-n/p>           - Buffer navigation (next/previous)
 -- n/N               - Search navigation (centered)
@@ -326,6 +327,33 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
 vim.keymap.set("n", "<leader>po", "<cmd>!open .<CR>", { silent = true, desc = "Open project directory in finder" })
 
+-- Quickfix list navigation
+vim.keymap.set("n", "]q", "<cmd>cnext<CR>zz", { desc = "Next quickfix item" })
+vim.keymap.set("n", "[q", "<cmd>cprev<CR>zz", { desc = "Previous quickfix item" })
+vim.keymap.set("n", "<leader>xo", "<cmd>copen<CR>", { desc = "Open quickfix list" })
+vim.keymap.set("n", "<leader>xc", "<cmd>cclose<CR>", { desc = "Close quickfix list" })
+vim.keymap.set("n", "<leader>xx", "<cmd>cexpr []<CR>", { desc = "Clear quickfix list" })
+vim.keymap.set("n", "<leader>xr", ":Rg ", { desc = "Ripgrep to quickfix" })
+
+-- Send current search pattern to quickfix
+vim.keymap.set("n", "<leader>xs", function()
+	local pattern = vim.fn.getreg("/")
+	if pattern == "" then
+		print("No search pattern set")
+		return
+	end
+	-- Remove leading/trailing slashes from pattern
+	pattern = pattern:gsub("^/", ""):gsub("/$", "")
+	vim.cmd("vimgrep /" .. pattern .. "/gj **/*")
+	vim.cmd("copen")
+end, { desc = "Send current search to quickfix" })
+
+-- Location list navigation (per-window quickfix)
+vim.keymap.set("n", "]l", "<cmd>lnext<CR>zz", { desc = "Next location item" })
+vim.keymap.set("n", "[l", "<cmd>lprev<CR>zz", { desc = "Previous location item" })
+vim.keymap.set("n", "<leader>xl", "<cmd>lopen<CR>", { desc = "Open location list" })
+vim.keymap.set("n", "<leader>xL", "<cmd>lclose<CR>", { desc = "Close location list" })
+
 -- Ruby/Rails Project keymaps (set on filetype)
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "ruby", "eruby", "slim" },
@@ -388,52 +416,3 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
--- Kotlin/Java Project keymaps (set on filetype)
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = { "kotlin", "java" },
-	callback = function()
-		local opts = { buffer = true, silent = true, noremap = true }
-
-		-- Project commands (Gradle)
-		vim.keymap.set(
-			"n",
-			"<leader>pb",
-			":!./gradlew build<CR>",
-			vim.tbl_extend("force", opts, { desc = "Project: Build" })
-		)
-		vim.keymap.set(
-			"n",
-			"<leader>pt",
-			":!./gradlew test<CR>",
-			vim.tbl_extend("force", opts, { desc = "Project: Test" })
-		)
-		vim.keymap.set(
-			"n",
-			"<leader>pr",
-			":!./gradlew run<CR>",
-			vim.tbl_extend("force", opts, { desc = "Project: Run" })
-		)
-		vim.keymap.set(
-			"n",
-			"<leader>pc",
-			":!./gradlew clean<CR>",
-			vim.tbl_extend("force", opts, { desc = "Project: Clean" })
-		)
-		vim.keymap.set(
-			"n",
-			"<leader>pd",
-			":!./gradlew bootRun<CR>",
-			vim.tbl_extend("force", opts, { desc = "Project: Dev server (bootRun)" })
-		)
-		vim.keymap.set(
-			"n",
-			"<leader>pq",
-			":!./gradlew build -x test<CR>",
-			vim.tbl_extend("force", opts, { desc = "Project: Quick build (skip tests)" })
-		)
-		vim.keymap.set("n", "<leader>pT", function()
-			local class_name = vim.fn.expand("%:t:r")
-			vim.cmd("!./gradlew test --tests " .. class_name)
-		end, vim.tbl_extend("force", opts, { desc = "Project: Test current class" }))
-	end,
-})
