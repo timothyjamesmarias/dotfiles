@@ -10,7 +10,6 @@ alias ts="tmux-sessionizer"
 alias cl="claude"
 alias k="kubectl"
 alias xclip="xclip -selection c"
-alias ch="cheatsheet"
 alias bi="brew install"
 alias yy="yazi"
 alias ls='ls -G'
