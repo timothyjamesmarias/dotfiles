@@ -74,7 +74,12 @@ vim.api.nvim_create_autocmd({ "BufAdd", "BufDelete" }, {
 
 -- Telescope and file keymaps
 vim.keymap.set("n", "<leader>fo", "<cmd>!open -R %<CR>", { silent = true, desc = "Open current file in finder" })
-vim.keymap.set("n", "<leader>fO", "<cmd>!open %<CR>", { silent = true, desc = "Open current file with the default program" })
+vim.keymap.set(
+	"n",
+	"<leader>fO",
+	"<cmd>!open %<CR>",
+	{ silent = true, desc = "Open current file with the default program" }
+)
 vim.keymap.set("n", "<leader>fy", function()
 	local path = vim.fn.expand("%:p")
 	vim.fn.setreg("+", path)
@@ -324,7 +329,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	end,
 })
 
-
 vim.keymap.set("n", "<leader>po", "<cmd>!open .<CR>", { silent = true, desc = "Open project directory in finder" })
 
 -- Quickfix list navigation
@@ -415,4 +419,3 @@ vim.api.nvim_create_autocmd("FileType", {
 		)
 	end,
 })
-

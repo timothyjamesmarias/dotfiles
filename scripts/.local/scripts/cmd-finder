@@ -99,7 +99,6 @@ extract_tmux_bindings() {
     extract_aliases "$ZSHCONFIG/aliases.zsh" "alias"
     extract_aliases "$ZSHCONFIG/files.zsh" "files"
     extract_aliases "$ZSHCONFIG/git.zsh" "git"
-    extract_aliases "$ZSHCONFIG/rust.zsh" "rust"
     extract_aliases "$ZSHCONFIG/utils.zsh" "utils"
 
     extract_functions "$ZSHCONFIG/files.zsh" "files"
@@ -135,7 +134,7 @@ show_preview() {
       local search_key=$(echo "$name" | sed 's/ /<leader>/g')
       grep -A3 "\"$search_key\"" "$HOME/dotfiles/nvim/.config/nvim/lua/tim/remap.lua" 2>/dev/null | head -5
       ;;
-    git|files|rust|utils|alias)
+    git|files|utils|alias)
       # Show zsh function or alias definition
       type "$name" 2>/dev/null || echo "(shell function/alias)"
       ;;

@@ -31,26 +31,24 @@ git_log_fzf() {
 
 # Fuzzy select changed files and view diff (handles both staged and unstaged)
 git_diff_fzf() {
-  local preview_cmd='
-    file={2}
-    st={1}
-    # Check if file is staged (first char is not space/?)
-    if [[ "$st" =~ ^[^\ ?] ]]; then
-      git diff --cached --color=always "$file"
-    else
-      git diff --color=always "$file"
-    fi
-  '
-
   local files
-  files=$(git status --short | fzf -m --preview "$preview_cmd" --preview-window=right:70%) || return
+  files=$(git status --short | fzf -m \
+    --preview 'file=$(echo {} | cut -c4-);
+      st=$(echo {} | cut -c1-2);
+      if [[ "$st" =~ ^[^\ ?] ]]; then
+        git diff --cached --color=always "$file";
+      else
+        git diff --color=always "$file";
+      fi' \
+    --preview-window=right:70%) || return
 
   if [[ -n "$files" ]]; then
     while IFS= read -r line; do
-      local st=$(echo "$line" | awk '{print $1}')
-      local file=$(echo "$line" | awk '{print $2}')
+      # Extract first 2 chars as status, rest starting from char 4 as filename
+      local st="${line:0:2}"
+      local file="${line:3}"
 
-      # Show staged diff if file is staged, otherwise show unstaged diff
+      # Show staged diff if file is staged (first char is not space/?)
       if [[ "$st" =~ ^[^\ ?] ]]; then
         git diff --cached "$file"
       else

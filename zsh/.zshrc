@@ -26,7 +26,6 @@ source "$ZSHCONFIG/keybindings.zsh" # Custom keybindings
 source "$ZSHCONFIG/aliases.zsh"     # Basic aliases
 source "$ZSHCONFIG/files.zsh"       # File and project search utilities
 source "$ZSHCONFIG/git.zsh"         # Git aliases and functions
-source "$ZSHCONFIG/rust.zsh"        # Rust development aliases
 source "$ZSHCONFIG/utils.zsh"       # Utility functions
 
 # --- FZF integration ---
