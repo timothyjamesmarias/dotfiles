@@ -24,9 +24,18 @@ git_commit_fzf() {
   git commit -m "$msg"
 }
 
-# Fuzzy view commits
+# Fuzzy view commits with file preview
 git_log_fzf() {
-  git log --oneline --graph --decorate --all | fzf --no-sort --reverse --height=40%
+  local commit
+  commit=$(git log --oneline --graph --decorate --color=always --all | \
+    fzf --ansi \
+        --no-sort \
+        --reverse \
+        --height=40% \
+        --preview 'echo {} | grep -o "[a-f0-9]\{7,\}" | head -1 | xargs -I{} git show --color=always --stat {}' \
+        --preview-window=right:60%)
+
+  [ -n "$commit" ] && echo "$commit" | grep -o "[a-f0-9]\{7,\}" | head -1 | xargs git show
 }
 
 # Fuzzy select changed files and view diff (handles both staged and unstaged)
@@ -223,6 +232,40 @@ grl() {
     s|"") git show "$hash" ;;
     *) echo "Cancelled" ;;
   esac
+}
+
+# Git file history - browse commits that changed a file
+gfh() {
+  local file="${1}"
+
+  if [ -z "$file" ]; then
+    echo "Usage: gfh <file>"
+    echo "  or: gfhf (to select file interactively)"
+    return 1
+  fi
+
+  if [ ! -f "$file" ]; then
+    echo "Error: File '$file' not found"
+    return 1
+  fi
+
+  local commit
+  commit=$(git log --oneline --follow --color=always -- "$file" | \
+    fzf --ansi \
+        --no-sort \
+        --preview "echo {} | grep -o '[a-f0-9]\{7,\}' | head -1 | xargs -I{} git show --color=always {} -- $file" \
+        --preview-window=right:70% \
+        --header="History: $file (Enter=view full diff)")
+
+  [ -n "$commit" ] && echo "$commit" | grep -o "[a-f0-9]\{7,\}" | head -1 | xargs -I{} git show {} -- "$file"
+}
+
+# Git file history with fuzzy file selection
+gfhf() {
+  local file
+  file=$(git ls-files | fzf --preview 'bat --color=always --style=numbers {}' --preview-window=right:60%)
+
+  [ -n "$file" ] && gfh "$file"
 }
 
 # Fuzzy git aliases

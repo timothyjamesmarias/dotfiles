@@ -14,6 +14,7 @@
 --                     * Laravel: artisan, routes, related/model
 --                     * Gradle/Kotlin: build, test, run, clean, dev server
 -- <leader>g*        - Git operations (via gitsigns or other git plugins)
+--                     * <leader>gh - Git history of current file
 -- <leader>x*        - Quickfix/Location list operations
 -- <leader>cm        - Run shell command
 -- <C-n/p>           - Buffer navigation (next/previous)
@@ -357,6 +358,16 @@ vim.keymap.set("n", "]l", "<cmd>lnext<CR>zz", { desc = "Next location item" })
 vim.keymap.set("n", "[l", "<cmd>lprev<CR>zz", { desc = "Previous location item" })
 vim.keymap.set("n", "<leader>xl", "<cmd>lopen<CR>", { desc = "Open location list" })
 vim.keymap.set("n", "<leader>xL", "<cmd>lclose<CR>", { desc = "Close location list" })
+
+-- Git operations
+vim.keymap.set("n", "<leader>gh", function()
+	local file = vim.fn.expand("%")
+	if file == "" then
+		print("No file in current buffer")
+		return
+	end
+	vim.cmd("!gfh " .. vim.fn.shellescape(file))
+end, { desc = "Git history of current file" })
 
 -- Ruby/Rails Project keymaps (set on filetype)
 vim.api.nvim_create_autocmd("FileType", {
