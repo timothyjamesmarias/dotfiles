@@ -13,14 +13,23 @@ alias deldf="find . -type d | fzf -m --preview 'bat --style=numbers --color=alwa
 # Ripgrep + nvim integration
 rgnvim() {
   if [ -z "$1" ]; then
-    echo "Usage: rgnvim <search_pattern> [additional rg options]"
-    return 1
-  fi
+    # No arguments: interactive search with fzf as you type
+    local file_and_line=$(rg --no-heading --line-number --color=always --hidden --glob='!.git' '' \
+      | fzf --ansi \
+          --delimiter ':' \
+          --preview 'bat --style=numbers --color=always --highlight-line {2} {1}' \
+          --preview-window '+{2}/2')
 
-  rg --no-heading --line-number --color=always --hidden --glob='!.git' "$@" \
-    | fzf --ansi --preview 'echo {}' \
-    | awk -F':' '{printf "nvim +%s %s\n", $2, $1}' \
-    | sh
+    [ -z "$file_and_line" ] && return
+
+    echo "$file_and_line" | awk -F':' '{printf "nvim +%s %s\n", $2, $1}' | sh
+  else
+    # With arguments: search for pattern, then select from results
+    rg --no-heading --line-number --color=always --hidden --glob='!.git' "$@" \
+      | fzf --ansi --preview 'echo {}' \
+      | awk -F':' '{printf "nvim +%s %s\n", $2, $1}' \
+      | sh
+  fi
 }
 
 # Ripgrep to quickfix - populate vim quickfix list with search results
