@@ -1,0 +1,8 @@
+# Global ripgrep configuration
+# Exclude common directories
+
+--glob=!.git/
+--glob=!node_modules/
+--glob=!wp-content/plugins/
+--glob=!wp-content/cache/
+--glob=!wp-content/mu-plugins/
