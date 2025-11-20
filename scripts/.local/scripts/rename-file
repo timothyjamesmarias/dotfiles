@@ -1,0 +1,188 @@
+#!/usr/bin/env bash
+
+# rename-file - Interactive file renaming with fzf
+
+set -e
+
+# Colors
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+RED='\033[0;31m'
+RESET='\033[0m'
+
+usage() {
+  cat << EOF
+${CYAN}rename-file${RESET} - Interactive file renaming
+
+${YELLOW}Usage:${RESET}
+  rename-file [options]
+  rename-file <old-path> <new-path>
+
+${YELLOW}Options:${RESET}
+  --no-keep-path          Don't prepend original path to new filename
+  -h, --help              Show this help
+
+${YELLOW}Examples:${RESET}
+  rename-file                           # Interactive mode with fzf
+  rename-file old.txt new.txt           # Direct rename
+  rename-file --no-keep-path            # Interactive without path prepending
+
+${YELLOW}Features:${RESET}
+  • Interactive file selection with fzf
+  • Preview files before renaming
+  • Path prepending by default (just edit the filename)
+  • Git-aware renaming (uses git mv when in a git repo)
+EOF
+  exit 0
+}
+
+# Parse arguments
+KEEP_PATH=1
+OLD_NAME=""
+NEW_NAME=""
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h|--help)
+      usage
+      ;;
+    --no-keep-path)
+      KEEP_PATH=0
+      shift
+      ;;
+    -*)
+      echo -e "${RED}Error: Unknown option: $1${RESET}"
+      echo "Use --help for usage information"
+      exit 1
+      ;;
+    *)
+      if [ -z "$OLD_NAME" ]; then
+        OLD_NAME="$1"
+      elif [ -z "$NEW_NAME" ]; then
+        NEW_NAME="$1"
+      else
+        echo -e "${RED}Error: Too many arguments${RESET}"
+        exit 1
+      fi
+      shift
+      ;;
+  esac
+done
+
+# Interactive mode if no arguments provided
+if [ -z "$OLD_NAME" ]; then
+  echo -e "${CYAN}Interactive File Rename${RESET}"
+  echo ""
+
+  # Use fzf to select a file
+  echo -e "${YELLOW}Select a file to rename:${RESET}"
+  SELECTED_FILE=$(fzf --ansi \
+      --height=80% \
+      --layout=reverse \
+      --border \
+      --prompt="Select file > " \
+      --preview 'bat --style=numbers --color=always {} 2>/dev/null || cat {}' \
+      --preview-window=right:60%:wrap \
+      --header="ENTER: select file, ESC: cancel")
+
+  if [ -z "$SELECTED_FILE" ]; then
+    echo -e "${YELLOW}Cancelled by user${RESET}"
+    exit 0
+  fi
+
+  OLD_NAME="$SELECTED_FILE"
+  echo -e "${GREEN}Selected: ${SELECTED_FILE}${RESET}"
+  echo ""
+
+  # Prepare default new name with path prepended
+  if [ $KEEP_PATH -eq 1 ]; then
+    DIR_PATH=$(dirname "$SELECTED_FILE")
+    FILE_NAME=$(basename "$SELECTED_FILE")
+    if [ "$DIR_PATH" = "." ]; then
+      DEFAULT_NEW_NAME="${FILE_NAME}"
+    else
+      DEFAULT_NEW_NAME="${DIR_PATH}/${FILE_NAME}"
+    fi
+  else
+    DEFAULT_NEW_NAME=$(basename "$SELECTED_FILE")
+  fi
+
+  # Prompt for new name with default
+  read -e -p "$(echo -e ${YELLOW}Enter new name:${RESET} )" -i "$DEFAULT_NEW_NAME" NEW_NAME
+
+  # If user didn't change it, exit
+  if [ "$NEW_NAME" = "$DEFAULT_NEW_NAME" ] || [ -z "$NEW_NAME" ]; then
+    echo -e "${YELLOW}No changes made${RESET}"
+    exit 0
+  fi
+fi
+
+# Validate input
+if [ -z "$OLD_NAME" ] || [ -z "$NEW_NAME" ]; then
+  echo -e "${RED}Error: Both old and new names are required${RESET}"
+  exit 1
+fi
+
+if [ "$OLD_NAME" = "$NEW_NAME" ]; then
+  echo -e "${RED}Error: Old and new names are identical${RESET}"
+  exit 1
+fi
+
+if [ ! -e "$OLD_NAME" ]; then
+  echo -e "${RED}Error: File '${OLD_NAME}' does not exist${RESET}"
+  exit 1
+fi
+
+if [ -e "$NEW_NAME" ]; then
+  echo -e "${RED}Error: File '${NEW_NAME}' already exists${RESET}"
+  exit 1
+fi
+
+# Create directory for new file if it doesn't exist
+NEW_DIR=$(dirname "$NEW_NAME")
+if [ ! -d "$NEW_DIR" ]; then
+  echo -e "${YELLOW}Creating directory: ${NEW_DIR}${RESET}"
+  mkdir -p "$NEW_DIR"
+fi
+
+# Check if we're in a git repo
+IN_GIT_REPO=0
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  IN_GIT_REPO=1
+fi
+
+# Perform the rename
+echo ""
+echo -e "${CYAN}Renaming:${RESET}"
+echo -e "  ${YELLOW}From:${RESET} ${OLD_NAME}"
+echo -e "  ${GREEN}To:${RESET}   ${NEW_NAME}"
+echo ""
+
+if [ $IN_GIT_REPO -eq 1 ]; then
+  # Check if file is tracked by git
+  if git ls-files --error-unmatch "$OLD_NAME" >/dev/null 2>&1; then
+    echo -e "${CYAN}Using git mv (file is tracked)${RESET}"
+    if git mv "$OLD_NAME" "$NEW_NAME"; then
+      echo -e "${GREEN}✓ File renamed successfully${RESET}"
+    else
+      echo -e "${RED}✗ Git mv failed${RESET}"
+      exit 1
+    fi
+  else
+    echo -e "${CYAN}Using regular mv (file not tracked by git)${RESET}"
+    if mv "$OLD_NAME" "$NEW_NAME"; then
+      echo -e "${GREEN}✓ File renamed successfully${RESET}"
+    else
+      echo -e "${RED}✗ Rename failed${RESET}"
+      exit 1
+    fi
+  fi
+else
+  if mv "$OLD_NAME" "$NEW_NAME"; then
+    echo -e "${GREEN}✓ File renamed successfully${RESET}"
+  else
+    echo -e "${RED}✗ Rename failed${RESET}"
+    exit 1
+  fi
+fi

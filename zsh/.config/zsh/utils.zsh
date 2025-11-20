@@ -18,3 +18,7 @@ awsctx () {
 alias rr='refactor-rename'
 alias rri='refactor-rename --interactive'
 alias rrp='refactor-rename --preview-only'
+
+# File renaming
+alias rf='rename-file'
+alias rfn='rename-file --no-keep-path'

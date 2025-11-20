@@ -15,6 +15,8 @@ alias yy="yazi"
 alias ls='ls -G'
 alias cj='curl -s -H "Content-Type: application/json"'
 alias png="ping google.com"
+alias dcu="docker compose up -d"
+alias dcd="docker compose up -d"
 
 # --- Clipboard alias (cross-platform) ---
 if [[ $(uname) == "Linux" ]]; then

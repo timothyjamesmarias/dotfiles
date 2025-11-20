@@ -21,7 +21,7 @@ return {
 
 		-- LSP servers using new vim.lsp.config API
 		vim.lsp.config.html = make_config({ filetypes = { "html", "eruby", "blade" } })
-		vim.lsp.config.cssls = make_config({ filetypes = { "html", "css", "scss" } })
+		vim.lsp.config.cssls = make_config({ filetypes = { "html", "css", "scss", "blade", "eruby", "slim" } })
 		vim.lsp.config.ts_ls = make_config({
 			filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" }
 		})
@@ -47,7 +47,7 @@ return {
 		vim.lsp.config.jdtls = make_config({})
 		vim.lsp.config.vue_ls = make_config({})
 		vim.lsp.config.tailwindcss = make_config({
-			filetypes = { "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "eruby" },
+			filetypes = { "html", "blade", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "eruby" },
 		})
 
 		-- Enable LSP servers

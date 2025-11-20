@@ -6,3 +6,5 @@
 --glob=!wp-content/plugins/
 --glob=!wp-content/cache/
 --glob=!wp-content/mu-plugins/
+--glob=!public/critical-styles/
+--glob=!public/css-critical/
