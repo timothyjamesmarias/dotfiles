@@ -11,6 +11,13 @@ git_stage() {
   git status --short | fzf -m | awk '{print $2}' | xargs git add
 }
 
+# Fuzzy stage files - interactive
+git_stage_patch() {
+  local file
+  file=$(git status --short | fzf | awk '{print $2}')
+  [ -n "$file" ] && git add -p "$file"
+}
+
 # Fuzzy reset files
 git_unstage() {
   git diff --cached --name-only | fzf -m | xargs git reset HEAD --
@@ -271,6 +278,7 @@ gfhf() {
 # Fuzzy git aliases
 alias gcb="git_checkout"
 alias ga="git_stage"
+alias gap="git_stage_patch"
 alias gu="git_unstage"
 alias gcmsg="git_commit_fzf"
 alias glog="git_log_fzf"
