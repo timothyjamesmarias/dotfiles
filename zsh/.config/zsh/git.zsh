@@ -275,6 +275,57 @@ gfhf() {
   [ -n "$file" ] && gfh "$file"
 }
 
+# Claude-assisted git commit
+# Stages files interactively, then uses Claude to generate commit message
+gclaude() {
+  # Check if there are changes
+  if git diff --cached --quiet && git diff --quiet; then
+    echo "No changes to commit"
+    return 1
+  fi
+
+  # Stage files if nothing staged
+  if git diff --cached --quiet; then
+    echo "No files staged. Staging files..."
+    git_stage
+  fi
+
+  # Check again after staging
+  if git diff --cached --quiet; then
+    echo "No files staged, aborting"
+    return 1
+  fi
+
+  # Get the diff for Claude
+  local diff=$(git diff --cached)
+
+  # Use Claude to generate commit message
+  echo "Generating commit message with Claude..."
+  local msg=$(echo "$diff" | claude -p "Generate a concise git commit message for this diff. Follow conventional commits format (feat/fix/refactor/docs/chore). Output ONLY the commit message, nothing else. Keep it under 72 chars for the first line." 2>/dev/null)
+
+  if [ -z "$msg" ]; then
+    echo "Failed to generate message, falling back to manual"
+    git commit -v
+    return
+  fi
+
+  echo ""
+  echo "Proposed commit message:"
+  echo "─────────────────────────"
+  echo "$msg"
+  echo "─────────────────────────"
+  echo ""
+  echo -n "(a)ccept, (e)dit, (r)egenerate, (c)ancel? "
+  read action
+
+  case "$action" in
+    a) git commit -m "$msg" ;;
+    e) git commit -v -m "$msg" ;;
+    r) gclaude ;;
+    *) echo "Cancelled" ;;
+  esac
+}
+
 # Fuzzy git aliases
 alias gcb="git_checkout"
 alias ga="git_stage"
@@ -287,3 +338,4 @@ alias ghviewf='view_in_github_fzf'
 alias gdf='git_diff_fzf'
 alias gdfs='git_diff_staged_fzf'
 alias grsf='git_reset_soft_fzf'
+alias gcl='gclaude'

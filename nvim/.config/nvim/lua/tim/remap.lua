@@ -16,6 +16,7 @@
 -- <leader>g*        - Git operations (via gitsigns or other git plugins)
 --                     * <leader>gh - Git history of current file
 -- <leader>x*        - Quickfix/Location list operations
+-- <leader>c*        - Claude Code integration
 -- <leader>cm        - Run shell command
 -- <C-n/p>           - Buffer navigation (next/previous)
 -- n/N               - Search navigation (centered)
@@ -493,3 +494,44 @@ vim.api.nvim_create_autocmd("FileType", {
 		)
 	end,
 })
+
+-- Claude Code integration
+-- Opens Claude in a tmux pane with context
+vim.keymap.set("n", "<leader>cc", function()
+	local file = vim.fn.expand("%:p")
+	local rel_file = vim.fn.expand("%:.")
+	if file == "" then
+		-- No file, just open Claude
+		vim.fn.system("tmux split-window -h 'zsh -i -c claude'")
+	else
+		-- Open Claude with file context
+		vim.fn.system(string.format(
+			"tmux split-window -h 'zsh -i -c \"claude \\\"%s\\\"\"'",
+			rel_file
+		))
+	end
+end, { desc = "Claude: Open with current file" })
+
+vim.keymap.set("n", "<leader>cC", function()
+	-- Open Claude in new tmux window
+	local file = vim.fn.expand("%:.")
+	if file == "" then
+		vim.fn.system("tmux new-window 'zsh -i -c claude'")
+	else
+		vim.fn.system(string.format(
+			"tmux new-window 'zsh -i -c \"claude \\\"%s\\\"\"'",
+			file
+		))
+	end
+end, { desc = "Claude: Open in new window with file" })
+
+vim.keymap.set("v", "<leader>cc", function()
+	local text = vim.getVisualSelection()
+	-- Escape quotes and special chars for shell
+	local escaped = text:gsub("'", "'\\''")
+	-- Send to Claude asking to explain/review
+	vim.fn.system(string.format(
+		"tmux split-window -h 'zsh -i -c \"claude \\\"explain this code: %s\\\"\"'",
+		escaped:sub(1, 500) -- Limit length for command line
+	))
+end, { desc = "Claude: Explain selection" })
