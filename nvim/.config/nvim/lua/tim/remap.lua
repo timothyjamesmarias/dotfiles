@@ -96,22 +96,12 @@ vim.keymap.set("n", "<leader>fY", function()
 end, { silent = false, desc = "Copy relative file path to clipboard" })
 
 function vim.getVisualSelection()
-	local _, ls_row, ls_col, _ = unpack(vim.fn.getpos("'<"))
-	local _, le_row, le_col, _ = unpack(vim.fn.getpos("'>"))
-	local lines = vim.fn.getline(ls_row, le_row)
-	if #lines == 0 then
-		return ""
-	end
-
-	-- Handle single-line selection separately to avoid double-modification
-	if #lines == 1 then
-		lines[1] = string.sub(lines[1], ls_col, le_col)
-	else
-		lines[1] = string.sub(lines[1], ls_col)
-		lines[#lines] = string.sub(lines[#lines], 1, le_col)
-	end
-
-	return table.concat(lines, " ")
+	-- Exit visual mode to set '< and '> marks, then get the text
+	vim.cmd('noau normal! "vy')
+	local text = vim.fn.getreg("v")
+	vim.fn.setreg("v", {})
+	-- Replace newlines with spaces for single-line search
+	return text:gsub("\n", " "):gsub("%s+$", "")
 end
 
 vim.keymap.set(
@@ -120,10 +110,6 @@ vim.keymap.set(
 	"<cmd>Telescope find_files follow=true hidden=true<CR>",
 	{ silent = true, desc = "Find files" }
 )
-vim.keymap.set("v", "<leader>fw", function()
-	local text = vim.getVisualSelection()
-	require("telescope.builtin").live_grep({ default_text = text })
-end, { desc = "Live grep with selection" })
 vim.keymap.set("v", "<leader>fs", function()
 	local text = vim.getVisualSelection()
 	require("telescope.builtin").find_files({ default_text = text })
