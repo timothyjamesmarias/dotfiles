@@ -38,6 +38,8 @@ vim.keymap.set("n", "N", "Nzzzv", { silent = true, desc = "Previous search resul
 vim.keymap.set("n", "<leader>hh", "<cmd>vsp<CR>", { silent = true, desc = "Vertical split" })
 vim.keymap.set("n", "<leader>vv", "<cmd>sp<CR>", { silent = true, desc = "Horizontal split" })
 vim.keymap.set("n", "<leader>sf", "/", { desc = "Search in file" })
+vim.keymap.set("v", "*", "y/\\V<C-R>=escape(@\",'/\\')<CR><CR>", { desc = "Search selection forward" })
+vim.keymap.set("v", "#", "y?\\V<C-R>=escape(@\",'/\\')<CR><CR>", { desc = "Search selection backward" })
 vim.keymap.set("n", "<leader>sr", ":%s///gc<Left><Left><Left><Left>", { desc = "Search and replace" })
 vim.keymap.set("n", "<leader>sw", ":%s/<C-r><C-w>//gc<Left><Left><Left>", { desc = "Replace word under cursor" })
 vim.keymap.set("v", "<leader>sr", '"hy:%s/<C-r>h//gc<Left><Left><Left>', { desc = "Replace selection" })
