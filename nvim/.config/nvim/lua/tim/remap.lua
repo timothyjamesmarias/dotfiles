@@ -409,6 +409,55 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
+-- PHP/Laravel Project keymaps
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "php", "blade" },
+	callback = function()
+		local opts = { buffer = true, silent = true, noremap = true }
+
+		-- Go to Controller@method under cursor
+		vim.keymap.set("n", "gf", function()
+			local word = vim.fn.expand("<cWORD>")
+			-- Match Controller@method or Namespace\Controller@method patterns
+			local controller, method = word:match("([%w\\]+Controller)@(%w+)")
+			if not controller then
+				-- Try without method
+				controller = word:match("([%w\\]+Controller)")
+			end
+
+			if controller then
+				-- Get just the class name without namespace for searching
+				local class_name = controller:match("([^\\]+)$") or controller
+				-- Store method for after file opens
+				if method then
+					vim.g._laravel_goto_method = method
+				end
+				-- Search for the controller file
+				require("telescope.builtin").find_files({
+					default_text = class_name .. ".php",
+				})
+			else
+				-- Fallback to default gf
+				vim.cmd("normal! gf")
+			end
+		end, vim.tbl_extend("force", opts, { desc = "Go to Controller@method" }))
+	end,
+})
+
+-- After opening a PHP file, jump to stored method if any
+vim.api.nvim_create_autocmd("BufWinEnter", {
+	pattern = "*.php",
+	callback = function()
+		local method = vim.g._laravel_goto_method
+		if method then
+			vim.g._laravel_goto_method = nil
+			vim.defer_fn(function()
+				vim.fn.search("function\\s\\+" .. method)
+			end, 50)
+		end
+	end,
+})
+
 -- ERB tag mappings (eruby files only)
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "eruby",
