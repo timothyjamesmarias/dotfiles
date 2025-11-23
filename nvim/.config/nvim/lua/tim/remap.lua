@@ -415,24 +415,46 @@ vim.api.nvim_create_autocmd("FileType", {
 	callback = function()
 		local opts = { buffer = true, silent = true, noremap = true }
 
-		-- Go to Controller@method under cursor
+		-- Go to Controller@method or view under cursor
 		vim.keymap.set("n", "gf", function()
+			local line = vim.fn.getline(".")
+			local col = vim.fn.col(".")
+
+			-- Check if cursor is inside a quoted string (view path)
+			-- Match view('...') or View::make('...') patterns
+			local view_pattern = "[vV]iew[^'\"]*['\"]([%w%.%-_/]+)['\"]"
+			local view_path = line:match(view_pattern)
+
+			-- Verify cursor is actually on the view string
+			if view_path then
+				local start_pos, end_pos = line:find("['\"]" .. view_path:gsub("%-", "%%-"):gsub("%.", "%%.") .. "['\"]")
+				if start_pos and col >= start_pos and col <= end_pos then
+					-- Convert dot notation to path: front.pages.features -> front/pages/features
+					local file_path = "resources/views/" .. view_path:gsub("%.", "/") .. ".blade.php"
+					if vim.fn.filereadable(file_path) == 1 then
+						vim.cmd("edit " .. file_path)
+						return
+					else
+						-- Try finding it with telescope if exact path doesn't exist
+						local search_name = view_path:match("([^%.]+)$") .. ".blade.php"
+						require("telescope.builtin").find_files({ default_text = search_name })
+						return
+					end
+				end
+			end
+
+			-- Check for Controller@method pattern
 			local word = vim.fn.expand("<cWORD>")
-			-- Match Controller@method or Namespace\Controller@method patterns
 			local controller, method = word:match("([%w\\]+Controller)@(%w+)")
 			if not controller then
-				-- Try without method
 				controller = word:match("([%w\\]+Controller)")
 			end
 
 			if controller then
-				-- Get just the class name without namespace for searching
 				local class_name = controller:match("([^\\]+)$") or controller
-				-- Store method for after file opens
 				if method then
 					vim.g._laravel_goto_method = method
 				end
-				-- Search for the controller file
 				require("telescope.builtin").find_files({
 					default_text = class_name .. ".php",
 				})
@@ -440,7 +462,7 @@ vim.api.nvim_create_autocmd("FileType", {
 				-- Fallback to default gf
 				vim.cmd("normal! gf")
 			end
-		end, vim.tbl_extend("force", opts, { desc = "Go to Controller@method" }))
+		end, vim.tbl_extend("force", opts, { desc = "Go to Controller@method or view" }))
 	end,
 })
 
