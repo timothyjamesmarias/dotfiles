@@ -23,7 +23,7 @@ return {
 		vim.lsp.config.html = make_config({ filetypes = { "html", "eruby", "blade" } })
 		vim.lsp.config.cssls = make_config({ filetypes = { "html", "css", "scss", "blade", "eruby", "slim" } })
 		vim.lsp.config.ts_ls = make_config({
-			filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" }
+			filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" }
 		})
 		vim.lsp.config.lua_ls = make_config({
 			settings = {

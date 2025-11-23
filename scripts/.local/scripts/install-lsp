@@ -1,0 +1,109 @@
+#!/bin/zsh
+
+# LSP Server Installation Script
+# Usage: install-lsp [server...]
+# If no servers specified, installs all
+
+set -e
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+info() { echo "${GREEN}[+]${NC} $1"; }
+warn() { echo "${YELLOW}[!]${NC} $1"; }
+error() { echo "${RED}[-]${NC} $1"; }
+
+SERVERS="typescript vue intelephense tailwindcss html"
+
+# Check for npm
+check_npm() {
+  if ! command -v npm &> /dev/null; then
+    error "npm not found. Please install Node.js first."
+    exit 1
+  fi
+}
+
+# Install functions for each server
+install_typescript() {
+  info "Installing TypeScript Language Server..."
+  npm install -g typescript typescript-language-server
+}
+
+install_vue() {
+  info "Installing Vue Language Server..."
+  npm install -g @vue/language-server
+}
+
+install_intelephense() {
+  info "Installing Intelephense (PHP)..."
+  npm install -g intelephense
+}
+
+install_tailwindcss() {
+  info "Installing Tailwind CSS Language Server..."
+  npm install -g @tailwindcss/language-server
+}
+
+install_html() {
+  info "Installing HTML/CSS/JSON Language Servers..."
+  npm install -g vscode-langservers-extracted
+}
+
+# List available servers
+list_servers() {
+  echo "Available LSP servers:"
+  for server in ${=SERVERS}; do
+    echo "  - $server"
+  done
+}
+
+# Install specific server
+install_server() {
+  local server="$1"
+  case "$server" in
+    typescript)   install_typescript ;;
+    vue)          install_vue ;;
+    intelephense) install_intelephense ;;
+    tailwindcss)  install_tailwindcss ;;
+    html)         install_html ;;
+    *)
+      error "Unknown server: $server"
+      list_servers
+      exit 1
+      ;;
+  esac
+}
+
+# Install all servers
+install_all() {
+  info "Installing all LSP servers..."
+  for server in ${=SERVERS}; do
+    install_server "$server"
+  done
+}
+
+# Main
+check_npm
+
+if [[ $# -eq 0 ]]; then
+  install_all
+elif [[ "$1" == "--list" || "$1" == "-l" ]]; then
+  list_servers
+elif [[ "$1" == "--help" || "$1" == "-h" ]]; then
+  echo "Usage: install-lsp [server...]"
+  echo ""
+  echo "Options:"
+  echo "  -l, --list    List available servers"
+  echo "  -h, --help    Show this help"
+  echo ""
+  list_servers
+else
+  for server in "$@"; do
+    install_server "$server"
+  done
+fi
+
+info "Done!"
