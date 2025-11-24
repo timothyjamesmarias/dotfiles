@@ -1,0 +1,435 @@
+#!/usr/bin/env bash
+#
+# install-deps - Install all third-party dependencies for dotfiles
+#
+# Usage: install-deps [options]
+#   --all         Install everything
+#   --cli         Install CLI tools only
+#   --lsp         Install LSP servers only
+#   --fonts       Install fonts only
+#   --help        Show this help message
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Detect OS
+OS="$(uname -s)"
+ARCH="$(uname -m)"
+
+log_info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+log_success() {
+    echo -e "${GREEN}[OK]${NC} $1"
+}
+
+log_warn() {
+    echo -e "${YELLOW}[WARN]${NC} $1"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Check if a command exists
+command_exists() {
+    command -v "$1" &> /dev/null
+}
+
+# Install Homebrew if not present (macOS/Linux)
+install_homebrew() {
+    if ! command_exists brew; then
+        log_info "Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+        # Add to PATH for current session
+        if [[ "$OS" == "Darwin" ]]; then
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+        else
+            eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        fi
+        log_success "Homebrew installed"
+    else
+        log_success "Homebrew already installed"
+    fi
+}
+
+# CLI Tools to install via Homebrew
+BREW_PACKAGES=(
+    # Core CLI tools
+    "fzf"                   # Fuzzy finder
+    "ripgrep"               # Fast grep alternative (rg)
+    "bat"                   # Syntax-highlighted cat
+    "fd"                    # Fast find alternative
+    "tree"                  # Directory tree view
+    "jq"                    # JSON processor
+    "curl"                  # HTTP client
+    "gh"                    # GitHub CLI
+    "git"                   # Version control
+    "git-delta"             # Better git diffs
+
+    # Editors & Terminal
+    "neovim"                # Text editor
+    "tmux"                  # Terminal multiplexer
+    "alacritty"             # GPU terminal emulator
+
+    # Development tools
+    "ast-grep"              # Structural code search
+    "universal-ctags"       # Code tagging
+    "stow"                  # Symlink manager
+
+    # Language tools
+    "lua-language-server"   # Lua LSP
+    "stylua"                # Lua formatter
+    "rustup"                # Rust toolchain
+    "go"                    # Go language
+
+    # File manager
+    "yazi"                  # Terminal file manager
+
+    # Image processing
+    "imagemagick"           # Image manipulation
+
+    # Cloud & Containers
+    "awscli"                # AWS CLI
+    "docker"                # Containers
+    "kubectl"               # Kubernetes CLI
+)
+
+# macOS-specific packages
+BREW_PACKAGES_MACOS=(
+    "duti"                  # File associations
+)
+
+# Linux-specific packages (via apt)
+APT_PACKAGES=(
+    "xclip"                 # Clipboard (X11)
+    "wl-clipboard"          # Clipboard (Wayland)
+)
+
+# NPM packages (LSP servers and tools)
+NPM_PACKAGES=(
+    "typescript"
+    "typescript-language-server"
+    "@vue/language-server"
+    "intelephense"
+    "@tailwindcss/language-server"
+    "vscode-langservers-extracted"  # HTML, CSS, JSON, ESLint
+    "sql-language-server"
+)
+
+# Cargo packages
+CARGO_PACKAGES=(
+    "rust-analyzer"         # Rust LSP
+)
+
+install_cli_tools() {
+    log_info "Installing CLI tools via Homebrew..."
+
+    install_homebrew
+
+    # Update Homebrew
+    brew update
+
+    # Install packages
+    for package in "${BREW_PACKAGES[@]}"; do
+        if brew list "$package" &> /dev/null; then
+            log_success "$package already installed"
+        else
+            log_info "Installing $package..."
+            brew install "$package" || log_warn "Failed to install $package"
+        fi
+    done
+
+    # macOS-specific packages
+    if [[ "$OS" == "Darwin" ]]; then
+        for package in "${BREW_PACKAGES_MACOS[@]}"; do
+            if brew list "$package" &> /dev/null; then
+                log_success "$package already installed"
+            else
+                log_info "Installing $package..."
+                brew install "$package" || log_warn "Failed to install $package"
+            fi
+        done
+    fi
+
+    # Linux-specific packages
+    if [[ "$OS" == "Linux" ]]; then
+        if command_exists apt; then
+            log_info "Installing Linux-specific packages via apt..."
+            sudo apt update
+            for package in "${APT_PACKAGES[@]}"; do
+                if dpkg -l "$package" &> /dev/null; then
+                    log_success "$package already installed"
+                else
+                    log_info "Installing $package..."
+                    sudo apt install -y "$package" || log_warn "Failed to install $package"
+                fi
+            done
+        fi
+    fi
+
+    # Post-install setup
+    setup_fzf
+    setup_rust
+}
+
+setup_fzf() {
+    if command_exists fzf; then
+        log_info "Setting up fzf key bindings..."
+        "$(brew --prefix)/opt/fzf/install" --key-bindings --completion --no-update-rc --no-bash --no-fish 2>/dev/null || true
+        log_success "fzf setup complete"
+    fi
+}
+
+setup_rust() {
+    if command_exists rustup; then
+        log_info "Setting up Rust toolchain..."
+        rustup default stable
+        rustup component add rust-analyzer
+        log_success "Rust setup complete"
+    fi
+}
+
+install_lsp_servers() {
+    log_info "Installing LSP servers..."
+
+    # Check for npm
+    if ! command_exists npm; then
+        log_warn "npm not found. Please install Node.js first."
+        log_info "You can install Node.js via: brew install node"
+        log_info "Or use asdf: asdf plugin add nodejs && asdf install nodejs latest"
+        return 1
+    fi
+
+    # Install npm packages globally
+    for package in "${NPM_PACKAGES[@]}"; do
+        log_info "Installing $package..."
+        npm install -g "$package" || log_warn "Failed to install $package"
+    done
+
+    # Install Cargo packages
+    if command_exists cargo; then
+        for package in "${CARGO_PACKAGES[@]}"; do
+            log_info "Installing $package via cargo..."
+            cargo install "$package" || log_warn "Failed to install $package"
+        done
+    else
+        log_warn "cargo not found. Skipping Rust-based tools."
+    fi
+
+    # Java/Kotlin LSP (needs manual setup)
+    log_info "Note: Java (jdtls) and Kotlin LSP require manual installation."
+    log_info "  - jdtls: Download from https://download.eclipse.org/jdtls/snapshots/"
+    log_info "  - kotlin-lsp: https://github.com/fwcd/kotlin-language-server"
+
+    # Ruby LSP
+    if command_exists gem; then
+        log_info "Installing Ruby LSP..."
+        gem install ruby-lsp || log_warn "Failed to install ruby-lsp"
+    fi
+
+    # C/C++ LSP
+    if [[ "$OS" == "Darwin" ]]; then
+        log_info "Installing clangd via Xcode Command Line Tools..."
+        xcode-select --install 2>/dev/null || log_success "Xcode CLT already installed"
+    else
+        log_info "Installing clangd..."
+        if command_exists apt; then
+            sudo apt install -y clangd
+        else
+            brew install llvm
+        fi
+    fi
+
+    log_success "LSP servers installation complete"
+}
+
+install_version_managers() {
+    log_info "Installing version managers..."
+
+    # asdf
+    if ! command_exists asdf; then
+        log_info "Installing asdf..."
+        brew install asdf
+        log_success "asdf installed"
+    else
+        log_success "asdf already installed"
+    fi
+
+    # SDKMAN (for JVM languages)
+    if [[ ! -d "$HOME/.sdkman" ]]; then
+        log_info "Installing SDKMAN..."
+        curl -s "https://get.sdkman.io" | bash
+        log_success "SDKMAN installed"
+    else
+        log_success "SDKMAN already installed"
+    fi
+
+    log_success "Version managers installed"
+}
+
+install_fonts() {
+    log_info "Installing Nerd Fonts..."
+
+    brew tap homebrew/cask-fonts 2>/dev/null || true
+
+    FONTS=(
+        "font-jetbrains-mono-nerd-font"
+        "font-fira-code-nerd-font"
+        "font-hack-nerd-font"
+    )
+
+    for font in "${FONTS[@]}"; do
+        if brew list --cask "$font" &> /dev/null; then
+            log_success "$font already installed"
+        else
+            log_info "Installing $font..."
+            brew install --cask "$font" || log_warn "Failed to install $font"
+        fi
+    done
+
+    log_success "Fonts installed"
+}
+
+install_neovim_dependencies() {
+    log_info "Setting up Neovim dependencies..."
+
+    # Create necessary directories
+    mkdir -p ~/.local/share/nvim
+    mkdir -p ~/.local/state/nvim
+    mkdir -p ~/.cache/nvim
+
+    # Install pynvim for Python integration
+    if command_exists pip3; then
+        pip3 install --user pynvim || log_warn "Failed to install pynvim"
+    fi
+
+    # Install neovim npm package
+    if command_exists npm; then
+        npm install -g neovim || log_warn "Failed to install neovim npm package"
+    fi
+
+    log_success "Neovim dependencies installed"
+    log_info "Run 'nvim' to install plugins via lazy.nvim"
+}
+
+stow_dotfiles() {
+    log_info "Stowing dotfiles..."
+
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    DOTFILES_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+
+    cd "$DOTFILES_DIR"
+
+    # Stow all directories
+    STOW_DIRS=(
+        "alacritty"
+        "ctags"
+        "git"
+        "nvim"
+        "scripts"
+        "tmux"
+        "zsh"
+    )
+
+    for dir in "${STOW_DIRS[@]}"; do
+        if [[ -d "$dir" ]]; then
+            log_info "Stowing $dir..."
+            stow -v "$dir" || log_warn "Failed to stow $dir"
+        fi
+    done
+
+    log_success "Dotfiles stowed"
+}
+
+show_help() {
+    echo "install-deps - Install all third-party dependencies for dotfiles"
+    echo ""
+    echo "Usage: install-deps [options]"
+    echo ""
+    echo "Options:"
+    echo "  --all         Install everything (default if no options)"
+    echo "  --cli         Install CLI tools only"
+    echo "  --lsp         Install LSP servers only"
+    echo "  --fonts       Install fonts only"
+    echo "  --version-mgr Install version managers (asdf, sdkman)"
+    echo "  --nvim        Setup Neovim dependencies"
+    echo "  --stow        Stow dotfiles to home directory"
+    echo "  --help        Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  install-deps --all        # Full installation"
+    echo "  install-deps --cli --lsp  # CLI tools and LSP servers"
+    echo "  install-deps --stow       # Just link dotfiles"
+}
+
+main() {
+    echo ""
+    echo "╔════════════════════════════════════════════╗"
+    echo "║     Dotfiles Dependency Installer          ║"
+    echo "╚════════════════════════════════════════════╝"
+    echo ""
+
+    # Default to --all if no arguments
+    if [[ $# -eq 0 ]]; then
+        set -- "--all"
+    fi
+
+    for arg in "$@"; do
+        case "$arg" in
+            --all)
+                install_cli_tools
+                install_lsp_servers
+                install_version_managers
+                install_fonts
+                install_neovim_dependencies
+                ;;
+            --cli)
+                install_cli_tools
+                ;;
+            --lsp)
+                install_lsp_servers
+                ;;
+            --fonts)
+                install_fonts
+                ;;
+            --version-mgr)
+                install_version_managers
+                ;;
+            --nvim)
+                install_neovim_dependencies
+                ;;
+            --stow)
+                stow_dotfiles
+                ;;
+            --help|-h)
+                show_help
+                exit 0
+                ;;
+            *)
+                log_error "Unknown option: $arg"
+                show_help
+                exit 1
+                ;;
+        esac
+    done
+
+    echo ""
+    log_success "Installation complete!"
+    echo ""
+    echo "Next steps:"
+    echo "  1. Restart your shell or run: source ~/.zshrc"
+    echo "  2. Run 'install-deps --stow' to symlink dotfiles"
+    echo "  3. Open Neovim to install plugins: nvim"
+    echo ""
+}
+
+main "$@"
