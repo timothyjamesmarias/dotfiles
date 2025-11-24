@@ -5,7 +5,7 @@ vim.opt.clipboard:append({ "unnamed", "unnamedplus" })
 vim.opt.path:append("**")
 vim.opt.wildmenu = true
 vim.opt.wildmode = { "longest:full", "full" }
-vim.opt.background = "dark"
+-- vim.opt.background = "dark"
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.smartindent = true
@@ -16,8 +16,6 @@ vim.opt.updatetime = 1000
 vim.opt.completeopt = { "menuone", "longest", "preview" }
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
--- vim.opt.shell = '/bin/zsh'
--- vim.opt.shellcmdflag = '-ic'  -- -i makes it interactive, -c runs the command
 
 vim.opt.tabstop = 2
 vim.opt.softtabstop = 2

@@ -45,6 +45,16 @@ return {
 		vim.lsp.config.rust_analyzer = make_config({})
 		vim.lsp.config.ruby_lsp = make_config({})
 		vim.lsp.config.jdtls = make_config({})
+		vim.lsp.config.kotlin_lsp = make_config({
+			cmd = { "kotlin-lsp", "--stdio" },
+			filetypes = { "kotlin" },
+			root_markers = {
+				"settings.gradle",
+				"settings.gradle.kts",
+				"build.gradle",
+				"build.gradle.kts",
+			},
+		})
 		vim.lsp.config.vue_ls = make_config({})
 		vim.lsp.config.tailwindcss = make_config({
 			filetypes = { "html", "blade", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "eruby" },
@@ -63,6 +73,7 @@ return {
 			"rust_analyzer",
 			"ruby_lsp",
 			"vue_ls",
+			"kotlin_lsp",
 		})
 
 		-- Completion config
