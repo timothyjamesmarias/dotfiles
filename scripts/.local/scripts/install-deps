@@ -109,7 +109,7 @@ BREW_PACKAGES_MACOS=(
 )
 
 # Linux-specific packages (via apt)
-APT_PACKAGES=(
+DNF_PACKAGES=(
     "xclip"                 # Clipboard (X11)
     "wl-clipboard"          # Clipboard (Wayland)
 )
@@ -165,12 +165,12 @@ install_cli_tools() {
         if command_exists apt; then
             log_info "Installing Linux-specific packages via apt..."
             sudo apt update
-            for package in "${APT_PACKAGES[@]}"; do
+            for package in "${DNF_PACKAGES[@]}"; do
                 if dpkg -l "$package" &> /dev/null; then
                     log_success "$package already installed"
                 else
                     log_info "Installing $package..."
-                    sudo apt install -y "$package" || log_warn "Failed to install $package"
+                    sudo dnf install -y "$package" || log_warn "Failed to install $package"
                 fi
             done
         fi
