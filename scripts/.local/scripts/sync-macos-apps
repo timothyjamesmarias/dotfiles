@@ -1,0 +1,68 @@
+#!/bin/bash
+# sync-macos-apps
+# Compiles AppleScript files from macos-apps/ to ~/Applications/
+# Run this after cloning dotfiles or when updating scripts
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+APPS_SOURCE="$SCRIPT_DIR/macos-apps"
+APPS_DEST="$HOME/Applications"
+
+# Ensure destination exists
+mkdir -p "$APPS_DEST"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
+
+echo "Syncing macOS apps from dotfiles..."
+echo ""
+
+compiled=0
+failed=0
+
+for script in "$APPS_SOURCE"/*.applescript; do
+    [ -f "$script" ] || continue
+
+    name=$(basename "$script" .applescript)
+    app_path="$APPS_DEST/$name.app"
+
+    echo -n "Compiling $name..."
+
+    # Remove existing app to ensure clean compile
+    [ -d "$app_path" ] && rm -rf "$app_path"
+
+    if osacompile -o "$app_path" "$script" 2>/dev/null; then
+        # Add bundle identifier to Info.plist for duti compatibility
+        plist_path="$app_path/Contents/Info.plist"
+        bundle_id="com.dotfiles.$name"
+
+        /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string $bundle_id" "$plist_path" 2>/dev/null || true
+
+        # Mark as a droplet (accepts files)
+        /usr/libexec/PlistBuddy -c "Add :CFBundleTypeExtensions array" "$plist_path" 2>/dev/null || true
+        /usr/libexec/PlistBuddy -c "Add :NSAppleEventsUsageDescription string 'This app needs to control other apps to open files in Neovim.'" "$plist_path" 2>/dev/null || true
+
+        echo -e " ${GREEN}done${NC} ($bundle_id)"
+        compiled=$((compiled + 1))
+    else
+        echo -e " ${RED}failed${NC}"
+        failed=$((failed + 1))
+    fi
+done
+
+echo ""
+echo "---"
+echo -e "Compiled: ${GREEN}$compiled${NC}"
+[ $failed -gt 0 ] && echo -e "Failed: ${RED}$failed${NC}"
+echo "Apps installed to: $APPS_DEST"
+echo ""
+echo "Next steps:"
+echo "  1. Open System Settings > Privacy & Security > Accessibility"
+echo "  2. Add the compiled apps to allow UI automation"
+echo "  3. Use 'duti' to set file associations (example):"
+echo "     duti -s com.dotfiles.OpenInNeovim public.plain-text all"
+echo "     duti -s com.dotfiles.OpenInNeovim public.source-code all"
