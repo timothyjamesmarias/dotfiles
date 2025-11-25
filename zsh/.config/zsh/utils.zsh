@@ -176,3 +176,61 @@ imgopt-batch() {
         echo "No image files found"
     fi
 }
+
+# Convert image to different format
+# Usage: imgconvert <file> <extension> [width]
+# Examples: imgconvert logo.svg png
+#           imgconvert logo.svg png 2048
+#           imgconvert photo.png jpg
+imgconvert() {
+    local file="$1"
+    local ext="$2"
+    local width="${3:-1024}"
+
+    if [[ -z "$file" || -z "$ext" ]]; then
+        echo "Usage: imgconvert <file> <extension> [width]"
+        echo "  Convert image to different format"
+        echo ""
+        echo "Examples:"
+        echo "  imgconvert logo.svg png        # Convert to PNG (1024px width)"
+        echo "  imgconvert logo.svg png 2048   # Convert to PNG (2048px width)"
+        echo "  imgconvert photo.png jpg       # Convert PNG to JPG"
+        return 1
+    fi
+
+    if [[ ! -f "$file" ]]; then
+        echo "Error: File not found: $file"
+        return 1
+    fi
+
+    local base="${file%.*}"
+    local input_ext="${file##*.}"
+    local output="${base}.${ext}"
+
+    # Check if output already exists
+    if [[ -f "$output" ]]; then
+        echo "Warning: $output already exists"
+        read "?Overwrite? (y/N): " response
+        if [[ ! "$response" =~ ^[Yy]$ ]]; then
+            echo "Cancelled"
+            return 0
+        fi
+    fi
+
+    # Handle SVG conversion specially (needs rasterization settings)
+    if [[ "${input_ext:l}" == "svg" ]]; then
+        echo "Converting SVG: $file -> $output (width: ${width}px)"
+        magick -density 300 -background none "$file" -resize "${width}x" "$output"
+    else
+        echo "Converting: $file -> $output"
+        magick "$file" "$output"
+    fi
+
+    if [[ $? -eq 0 ]]; then
+        local size=$(stat -f%z "$output" 2>/dev/null || stat -c%s "$output")
+        echo "Created: $output ($(numfmt --to=iec $size 2>/dev/null || echo "${size}B"))"
+    else
+        echo "Error: Conversion failed"
+        return 1
+    fi
+}

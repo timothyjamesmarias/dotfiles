@@ -132,9 +132,9 @@ view_in_github_fzf() {
 
 # Git worktree functions
 # Create worktree for a branch
-gwt() {
+gwta() {
   if [ -z "$1" ]; then
-    echo "Usage: gwt <branch> [directory]"
+    echo "Usage: gwta <branch> [directory]"
     return 1
   fi
 
