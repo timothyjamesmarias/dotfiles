@@ -29,6 +29,7 @@ source "$ZSHCONFIG/git.zsh"         # Git aliases and functions
 source "$ZSHCONFIG/utils.zsh"       # Utility functions
 source "$ZSHCONFIG/ast-grep.zsh"    # Structural code search (ast-grep)
 source "$ZSHCONFIG/kotlin.zsh"      # Kotlin/Gradle utilities
+source "$ZSHCONFIG/docker.zsh"      # Docker utilities
 
 # --- FZF integration ---
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
