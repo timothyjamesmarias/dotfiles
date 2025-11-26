@@ -87,12 +87,12 @@ vim.keymap.set(
 	"<cmd>!open %<CR>",
 	{ silent = true, desc = "Open current file with the default program" }
 )
-vim.keymap.set("n", "<leader>fy", function()
+vim.keymap.set("n", "<leader>fY", function()
 	local path = vim.fn.expand("%:p")
 	vim.fn.setreg("+", path)
 	print("Copied to clipboard: " .. path)
 end, { silent = false, desc = "Copy absolute file path to clipboard" })
-vim.keymap.set("n", "<leader>fY", function()
+vim.keymap.set("n", "<leader>fy", function()
 	local path = vim.fn.expand("%:.")
 	vim.fn.setreg("+", path)
 	print("Copied to clipboard: " .. path)
@@ -363,6 +363,95 @@ vim.keymap.set("n", "<leader>gh", function()
 	end
 	vim.cmd("!gfh " .. vim.fn.shellescape(file))
 end, { desc = "Git history of current file" })
+
+-- Git hunk navigation (gitsigns)
+vim.keymap.set("n", "]c", function()
+	if vim.wo.diff then
+		return "]c"
+	end
+	vim.schedule(function()
+		require("gitsigns").next_hunk()
+	end)
+	return "<Ignore>"
+end, { expr = true, desc = "Next git hunk" })
+
+vim.keymap.set("n", "[c", function()
+	if vim.wo.diff then
+		return "[c"
+	end
+	vim.schedule(function()
+		require("gitsigns").prev_hunk()
+	end)
+	return "<Ignore>"
+end, { expr = true, desc = "Previous git hunk" })
+
+-- Git hunk operations (gitsigns)
+vim.keymap.set("n", "<leader>gs", function()
+	local confirm = vim.fn.confirm("Stage this hunk?", "&Yes\n&No", 2)
+	if confirm == 1 then
+		require("gitsigns").stage_hunk()
+	end
+end, { desc = "Git: Stage hunk" })
+
+vim.keymap.set("n", "<leader>gu", function()
+	local confirm = vim.fn.confirm("Reset this hunk? (this will discard changes)", "&Yes\n&No", 2)
+	if confirm == 1 then
+		require("gitsigns").reset_hunk()
+	end
+end, { desc = "Git: Undo/reset hunk" })
+
+vim.keymap.set("v", "<leader>gs", function()
+	local confirm = vim.fn.confirm("Stage selected lines?", "&Yes\n&No", 2)
+	if confirm == 1 then
+		require("gitsigns").stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+	end
+end, { desc = "Git: Stage hunk (visual)" })
+
+vim.keymap.set("v", "<leader>gu", function()
+	local confirm = vim.fn.confirm("Reset selected lines? (this will discard changes)", "&Yes\n&No", 2)
+	if confirm == 1 then
+		require("gitsigns").reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+	end
+end, { desc = "Git: Undo/reset hunk (visual)" })
+
+vim.keymap.set("n", "<leader>gS", function()
+	local confirm = vim.fn.confirm("Stage entire buffer?", "&Yes\n&No", 2)
+	if confirm == 1 then
+		require("gitsigns").stage_buffer()
+	end
+end, { desc = "Git: Stage buffer" })
+
+vim.keymap.set("n", "<leader>gU", function()
+	local confirm = vim.fn.confirm("Reset entire buffer? (this will discard ALL changes)", "&Yes\n&No", 2)
+	if confirm == 1 then
+		require("gitsigns").reset_buffer()
+	end
+end, { desc = "Git: Reset buffer" })
+
+vim.keymap.set("n", "<leader>gp", function()
+	require("gitsigns").preview_hunk()
+end, { desc = "Git: Preview hunk" })
+
+-- Git blame (gitsigns)
+vim.keymap.set("n", "<leader>gb", function()
+	require("gitsigns").blame_line({ full = true })
+end, { desc = "Git: Blame line" })
+
+vim.keymap.set("n", "<leader>gB", function()
+	require("gitsigns").toggle_current_line_blame()
+end, { desc = "Git: Toggle blame line" })
+
+-- Git diff (gitsigns)
+vim.keymap.set("n", "<leader>gd", function()
+	require("gitsigns").diffthis()
+end, { desc = "Git: Diff this" })
+
+vim.keymap.set("n", "<leader>gD", function()
+	require("gitsigns").diffthis("~")
+end, { desc = "Git: Diff this (cached)" })
+
+-- Git hunk text object (gitsigns)
+vim.keymap.set({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", { desc = "Git: Select hunk (text object)" })
 
 -- Ruby/Rails Project keymaps (set on filetype)
 vim.api.nvim_create_autocmd("FileType", {
