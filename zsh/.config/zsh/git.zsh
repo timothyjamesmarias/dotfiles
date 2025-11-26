@@ -8,7 +8,13 @@ git_checkout() {
 
 # Fuzzy stage files
 git_stage() {
-  git status --short | fzf -m | awk '{print $2}' | xargs git add
+  if [ $# -eq 0 ]; then
+    # No arguments - use fzf menu
+    git status --short | fzf -m | awk '{print $2}' | xargs git add
+  else
+    # Arguments provided - stage them directly
+    git add "$@"
+  fi
 }
 
 # Fuzzy stage files - interactive
@@ -20,7 +26,13 @@ git_stage_patch() {
 
 # Fuzzy reset files
 git_unstage() {
-  git diff --cached --name-only | fzf -m | xargs git reset HEAD --
+  if [ $# -eq 0 ]; then
+    # No arguments - use fzf menu
+    git diff --cached --name-only | fzf -m | xargs git reset HEAD --
+  else
+    # Arguments provided - unstage them directly
+    git reset HEAD -- "$@"
+  fi
 }
 
 # Fuzzy commit from selected files
