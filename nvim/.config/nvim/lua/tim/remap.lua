@@ -493,10 +493,88 @@ vim.api.nvim_create_autocmd("FileType", {
 	callback = function()
 		local opts = { buffer = true, silent = true, noremap = true }
 
-		-- Go to Controller@method or view under cursor
+		-- Go to component, controller@method, or view under cursor
 		vim.keymap.set("n", "gf", function()
 			local line = vim.fn.getline(".")
 			local col = vim.fn.col(".")
+
+			-- Check for component tag: <x-component-name> or </x-component-name>
+			local component_pattern = "</x%-([%w%.%-_]+)"
+			for component_match in line:gmatch(component_pattern) do
+				local tag_start, tag_end = line:find("</x%-" .. component_match:gsub("%-", "%%-"):gsub("%.", "%%."))
+				if tag_start and col >= tag_start and col <= (tag_end + 10) then -- +10 for closing >
+					-- Try Laravel component path first
+					local laravel_path = "resources/views/components/" .. component_match:gsub("%.", "/") .. ".blade.php"
+					if vim.fn.filereadable(laravel_path) == 1 then
+						vim.cmd("edit " .. laravel_path)
+						return
+					end
+
+					-- If not Laravel, try Maizzle paths
+					local maizzle_paths = {
+						"components/" .. component_match .. ".html",
+						"components/" .. component_match .. "/index.html",
+					}
+
+					-- Check if there's a dot (variant file pattern)
+					local last_dot = component_match:match("^(.*)%.([^%.]+)$")
+					if last_dot then
+						local dir_name, variant_name = component_match:match("^(.*)%.([^%.]+)$")
+						table.insert(maizzle_paths, 1, "components/" .. dir_name .. "/" .. variant_name .. ".html")
+					end
+
+					for _, path in ipairs(maizzle_paths) do
+						if vim.fn.filereadable(path) == 1 then
+							vim.cmd("edit " .. path)
+							return
+						end
+					end
+
+					-- Fallback to telescope search with better filename
+					local search_name = component_match:match("([^%.]+)$") .. ".html"
+					require("telescope.builtin").find_files({ default_text = search_name })
+					return
+				end
+			end
+
+			-- Check for opening component tag: <x-component-name>
+			component_pattern = "<x%-([%w%.%-_]+)"
+			for component_match in line:gmatch(component_pattern) do
+				local tag_start, tag_end = line:find("<x%-" .. component_match:gsub("%-", "%%-"):gsub("%.", "%%."))
+				if tag_start and col >= tag_start and col <= (tag_end + 10) then -- +10 for closing >
+					-- Try Laravel component path first
+					local laravel_path = "resources/views/components/" .. component_match:gsub("%.", "/") .. ".blade.php"
+					if vim.fn.filereadable(laravel_path) == 1 then
+						vim.cmd("edit " .. laravel_path)
+						return
+					end
+
+					-- If not Laravel, try Maizzle paths
+					local maizzle_paths = {
+						"components/" .. component_match .. ".html",
+						"components/" .. component_match .. "/index.html",
+					}
+
+					-- Check if there's a dot (variant file pattern)
+					local last_dot = component_match:match("^(.*)%.([^%.]+)$")
+					if last_dot then
+						local dir_name, variant_name = component_match:match("^(.*)%.([^%.]+)$")
+						table.insert(maizzle_paths, 1, "components/" .. dir_name .. "/" .. variant_name .. ".html")
+					end
+
+					for _, path in ipairs(maizzle_paths) do
+						if vim.fn.filereadable(path) == 1 then
+							vim.cmd("edit " .. path)
+							return
+						end
+					end
+
+					-- Fallback to telescope search with better filename
+					local search_name = component_match:match("([^%.]+)$") .. ".html"
+					require("telescope.builtin").find_files({ default_text = search_name })
+					return
+				end
+			end
 
 			-- Check if cursor is inside a quoted string (view path)
 			-- Match view('...') or View::make('...') patterns
@@ -505,7 +583,8 @@ vim.api.nvim_create_autocmd("FileType", {
 
 			-- Verify cursor is actually on the view string
 			if view_path then
-				local start_pos, end_pos = line:find("['\"]" .. view_path:gsub("%-", "%%-"):gsub("%.", "%%.") .. "['\"]")
+				local start_pos, end_pos =
+					line:find("['\"]" .. view_path:gsub("%-", "%%-"):gsub("%.", "%%.") .. "['\"]")
 				if start_pos and col >= start_pos and col <= end_pos then
 					-- Convert dot notation to path: front.pages.features -> front/pages/features
 					local file_path = "resources/views/" .. view_path:gsub("%.", "/") .. ".blade.php"
@@ -540,7 +619,7 @@ vim.api.nvim_create_autocmd("FileType", {
 				-- Fallback to default gf
 				vim.cmd("normal! gf")
 			end
-		end, vim.tbl_extend("force", opts, { desc = "Go to Controller@method or view" }))
+		end, vim.tbl_extend("force", opts, { desc = "Go to component, controller@method, or view" }))
 	end,
 })
 
@@ -555,6 +634,119 @@ vim.api.nvim_create_autocmd("BufWinEnter", {
 				vim.fn.search("function\\s\\+" .. method)
 			end, 50)
 		end
+	end,
+})
+
+-- HTML/Maizzle Project keymaps
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "html",
+	callback = function()
+		local opts = { buffer = true, silent = true, noremap = true }
+
+		-- Go to component under cursor
+		vim.keymap.set("n", "gf", function()
+			local line = vim.fn.getline(".")
+			local col = vim.fn.col(".")
+
+			-- Check for closing component tag: </x-component-name>
+			local component_pattern = "</x%-([%w%.%-_]+)"
+			for component_match in line:gmatch(component_pattern) do
+				local tag_start, tag_end = line:find("</x%-" .. component_match:gsub("%-", "%%-"):gsub("%.", "%%."))
+				if tag_start and col >= tag_start and col <= (tag_end + 10) then -- +10 for closing >
+					-- Try Maizzle paths
+					local maizzle_paths = {
+						"components/" .. component_match .. ".html",
+						"components/" .. component_match .. "/index.html",
+					}
+
+					-- Check if there's a dot (variant file pattern)
+					local last_dot = component_match:match("^(.*)%.([^%.]+)$")
+					if last_dot then
+						local dir_name, variant_name = component_match:match("^(.*)%.([^%.]+)$")
+						table.insert(maizzle_paths, 1, "components/" .. dir_name .. "/" .. variant_name .. ".html")
+					end
+
+					for _, path in ipairs(maizzle_paths) do
+						if vim.fn.filereadable(path) == 1 then
+							vim.cmd("edit " .. path)
+							return
+						end
+					end
+
+					-- Try Laravel component path (in case it's a Laravel project)
+					local laravel_path = "resources/views/components/" .. component_match:gsub("%.", "/") .. ".blade.php"
+					if vim.fn.filereadable(laravel_path) == 1 then
+						vim.cmd("edit " .. laravel_path)
+						return
+					end
+
+					-- Fallback to telescope search with better filename
+					local search_name = component_match:match("([^%.]+)$") .. ".html"
+					require("telescope.builtin").find_files({ default_text = search_name })
+					return
+				end
+			end
+
+			-- Check for opening component tag: <x-component-name>
+			component_pattern = "<x%-([%w%.%-_]+)"
+			for component_match in line:gmatch(component_pattern) do
+				local tag_start, tag_end = line:find("<x%-" .. component_match:gsub("%-", "%%-"):gsub("%.", "%%."))
+				if tag_start and col >= tag_start and col <= (tag_end + 10) then -- +10 for closing >
+					-- Try Maizzle paths
+					local maizzle_paths = {
+						"components/" .. component_match .. ".html",
+						"components/" .. component_match .. "/index.html",
+					}
+
+					-- Check if there's a dot (variant file pattern)
+					local last_dot = component_match:match("^(.*)%.([^%.]+)$")
+					if last_dot then
+						local dir_name, variant_name = component_match:match("^(.*)%.([^%.]+)$")
+						table.insert(maizzle_paths, 1, "components/" .. dir_name .. "/" .. variant_name .. ".html")
+					end
+
+					for _, path in ipairs(maizzle_paths) do
+						if vim.fn.filereadable(path) == 1 then
+							vim.cmd("edit " .. path)
+							return
+						end
+					end
+
+					-- Try Laravel component path (in case it's a Laravel project)
+					local laravel_path = "resources/views/components/" .. component_match:gsub("%.", "/") .. ".blade.php"
+					if vim.fn.filereadable(laravel_path) == 1 then
+						vim.cmd("edit " .. laravel_path)
+						return
+					end
+
+					-- Fallback to telescope search with better filename
+					local search_name = component_match:match("([^%.]+)$") .. ".html"
+					require("telescope.builtin").find_files({ default_text = search_name })
+					return
+				end
+			end
+
+			-- Check for PostHTML component syntax: <component src="path">
+			local poshtml_pattern = '<component%s+src="([^"]+)"'
+			local component_src = line:match(poshtml_pattern)
+			if component_src then
+				local src_start, src_end = line:find('src="' .. component_src:gsub("%-", "%%-") .. '"')
+				if src_start and col >= src_start and col <= src_end then
+					if vim.fn.filereadable(component_src) == 1 then
+						vim.cmd("edit " .. component_src)
+						return
+					else
+						-- Fallback to telescope
+						local filename = component_src:match("([^/]+)$")
+						require("telescope.builtin").find_files({ default_text = filename })
+						return
+					end
+				end
+			end
+
+			-- Fallback to default gf
+			vim.cmd("normal! gf")
+		end, vim.tbl_extend("force", opts, { desc = "Go to component" }))
 	end,
 })
 
@@ -596,10 +788,7 @@ vim.keymap.set("n", "<leader>cc", function()
 		vim.fn.system("tmux split-window -h 'zsh -i -c claude'")
 	else
 		-- Open Claude with file context
-		vim.fn.system(string.format(
-			"tmux split-window -h 'zsh -i -c \"claude \\\"%s\\\"\"'",
-			rel_file
-		))
+		vim.fn.system(string.format('tmux split-window -h \'zsh -i -c "claude \\"%s\\""\'', rel_file))
 	end
 end, { desc = "Claude: Open with current file" })
 
@@ -609,10 +798,7 @@ vim.keymap.set("n", "<leader>cC", function()
 	if file == "" then
 		vim.fn.system("tmux new-window 'zsh -i -c claude'")
 	else
-		vim.fn.system(string.format(
-			"tmux new-window 'zsh -i -c \"claude \\\"%s\\\"\"'",
-			file
-		))
+		vim.fn.system(string.format('tmux new-window \'zsh -i -c "claude \\"%s\\""\'', file))
 	end
 end, { desc = "Claude: Open in new window with file" })
 
@@ -622,7 +808,9 @@ vim.keymap.set("v", "<leader>cc", function()
 	local escaped = text:gsub("'", "'\\''")
 	-- Send to Claude asking to explain/review
 	vim.fn.system(string.format(
-		"tmux split-window -h 'zsh -i -c \"claude \\\"explain this code: %s\\\"\"'",
+		'tmux split-window -h \'zsh -i -c "claude \\"explain this code: %s\\""\'',
 		escaped:sub(1, 500) -- Limit length for command line
 	))
 end, { desc = "Claude: Explain selection" })
+
+vim.keymap.set("n", "<leader>tm", "<cmd>terminal<CR>", { desc = "Open Terminal Mode" })
