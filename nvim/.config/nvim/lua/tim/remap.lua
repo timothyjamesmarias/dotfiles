@@ -487,6 +487,89 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
+-- Helper function to find Laravel view/component references
+local function find_laravel_component_references()
+	local file_path = vim.fn.expand("%:p")
+
+	-- Try to extract relative path from resources/views/
+	local view_path = file_path:match("resources/views/(.+)%.blade%.php$")
+
+	if not view_path then
+		vim.notify("Not a Laravel view/component file (must be in resources/views/)", vim.log.levels.WARN)
+		return
+	end
+
+	-- Check if this is a component (in components/ subdirectory)
+	local component_path = view_path:match("^components/(.+)$")
+
+	if component_path then
+		-- This is a component file
+		-- Convert path to component name: forms/input -> forms.input
+		local component_name = component_path:gsub("/", ".")
+
+		-- Search for component usage: <x-forms.input
+		local search_pattern = "<x-" .. component_name
+
+		require("telescope.builtin").live_grep({
+			default_text = search_pattern,
+			prompt_title = "Find References: <x-" .. component_name .. ">",
+		})
+	else
+		-- This is a regular view or partial
+		-- Convert path to dot notation: partials/header -> partials.header
+		local view_name = view_path:gsub("/", ".")
+
+		-- Search for view/include usage
+		-- Matches: view('name'), @include('name'), View::make('name')
+		local search_patterns = {
+			"view.*['\"]" .. view_name:gsub("%.", "%%."):gsub("%-", "%%-") .. "['\"]",
+			"@include.*['\"]" .. view_name:gsub("%.", "%%."):gsub("%-", "%%-") .. "['\"]",
+		}
+
+		require("telescope.builtin").live_grep({
+			default_text = view_name,
+			prompt_title = "Find References: " .. view_name,
+		})
+	end
+end
+
+-- Helper function to find Maizzle component references
+local function find_maizzle_component_references()
+	local file_path = vim.fn.expand("%:p")
+
+	-- Try to extract relative path from components/
+	local component_path = file_path:match("components/(.+)%.html$")
+
+	if not component_path then
+		vim.notify("Not a Maizzle component file (must be in components/ directory)", vim.log.levels.WARN)
+		return
+	end
+
+	-- Handle variant files: button/ignore-outlook -> button.ignore-outlook
+	-- Handle index files: button/index -> button
+	-- Handle regular files: button -> button
+	local component_name
+	if component_path:match("(.+)/index$") then
+		-- Index file: button/index -> button
+		component_name = component_path:match("(.+)/index$")
+	elseif component_path:match("(.+)/(.+)$") then
+		-- Variant file: button/ignore-outlook -> button.ignore-outlook
+		local dir, variant = component_path:match("(.+)/(.+)$")
+		component_name = dir .. "." .. variant
+	else
+		-- Regular file: button -> button
+		component_name = component_path
+	end
+
+	-- Search for component usage: <x-component-name
+	local search_pattern = "<x-" .. component_name
+
+	require("telescope.builtin").live_grep({
+		default_text = search_pattern,
+		prompt_title = "Find References: <x-" .. component_name .. ">",
+	})
+end
+
 -- PHP/Laravel Project keymaps
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "php", "blade" },
@@ -620,6 +703,19 @@ vim.api.nvim_create_autocmd("FileType", {
 				vim.cmd("normal! gf")
 			end
 		end, vim.tbl_extend("force", opts, { desc = "Go to component, controller@method, or view" }))
+
+		-- Find all references to the current component
+		vim.keymap.set(
+			"n",
+			"<leader>pr",
+			find_laravel_component_references,
+			vim.tbl_extend("force", opts, { desc = "Project: Find component references" })
+		)
+
+		-- Create a buffer-local command
+		vim.api.nvim_buf_create_user_command(0, "FindComponentReferences", find_laravel_component_references, {
+			desc = "Find all references to this Laravel component",
+		})
 	end,
 })
 
@@ -747,6 +843,19 @@ vim.api.nvim_create_autocmd("FileType", {
 			-- Fallback to default gf
 			vim.cmd("normal! gf")
 		end, vim.tbl_extend("force", opts, { desc = "Go to component" }))
+
+		-- Find all references to the current component
+		vim.keymap.set(
+			"n",
+			"<leader>pr",
+			find_maizzle_component_references,
+			vim.tbl_extend("force", opts, { desc = "Project: Find component references" })
+		)
+
+		-- Create a buffer-local command
+		vim.api.nvim_buf_create_user_command(0, "FindComponentReferences", find_maizzle_component_references, {
+			desc = "Find all references to this Maizzle component",
+		})
 	end,
 })
 
