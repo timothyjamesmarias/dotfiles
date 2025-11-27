@@ -453,39 +453,63 @@ end, { desc = "Git: Diff this (cached)" })
 -- Git hunk text object (gitsigns)
 vim.keymap.set({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", { desc = "Git: Select hunk (text object)" })
 
--- Ruby/Rails Project keymaps (set on filetype)
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = { "ruby", "eruby", "slim" },
-	callback = function()
-		local opts = { buffer = true, silent = true, noremap = true }
+-- Helper function to find Rails view/partial references
+local function find_rails_view_references()
+	local file_path = vim.fn.expand("%:p")
 
-		-- Project commands (Rails)
-		vim.keymap.set("n", "<leader>pa", ":A<CR>", vim.tbl_extend("force", opts, { desc = "Project: Alternate file" }))
-		vim.keymap.set("n", "<leader>pr", ":R<CR>", vim.tbl_extend("force", opts, { desc = "Project: Related file" }))
-		vim.keymap.set("n", "<leader>pm", ":Emodel<CR>", vim.tbl_extend("force", opts, { desc = "Project: Model" }))
-		vim.keymap.set("n", "<leader>pv", ":Eview<CR>", vim.tbl_extend("force", opts, { desc = "Project: View" }))
-		vim.keymap.set(
-			"n",
-			"<leader>pc",
-			":Econtroller<CR>",
-			vim.tbl_extend("force", opts, { desc = "Project: Controller" })
-		)
-		vim.keymap.set("n", "<leader>pg", ":Generate ", vim.tbl_extend("force", opts, { desc = "Project: Generate" }))
-		vim.keymap.set("n", "<leader>pt", ":Rails<CR>", vim.tbl_extend("force", opts, { desc = "Project: Test/Run" }))
-		vim.keymap.set(
-			"n",
-			"<leader>pT",
-			":.Rails<CR>",
-			vim.tbl_extend("force", opts, { desc = "Project: Test current" })
-		)
-		vim.keymap.set(
-			"n",
-			"<leader>ps",
-			":Rails console<CR>",
-			vim.tbl_extend("force", opts, { desc = "Project: Console (Rails)" })
-		)
-	end,
-})
+	-- Try to extract relative path from app/views/
+	local view_path = file_path:match("app/views/(.+)%.html%.erb$")
+	if not view_path then
+		view_path = file_path:match("app/views/(.+)%.html%.haml$")
+	end
+	if not view_path then
+		view_path = file_path:match("app/views/(.+)%.html%.slim$")
+	end
+
+	if not view_path then
+		vim.notify("Not a Rails view file (must be in app/views/)", vim.log.levels.WARN)
+		return
+	end
+
+	-- Check if this is a partial (starts with _)
+	local is_partial = false
+	local render_path
+
+	-- Extract directory and filename
+	local dir, filename = view_path:match("^(.+)/([^/]+)$")
+	if not dir then
+		-- File is directly in views/ directory
+		dir = ""
+		filename = view_path
+	end
+
+	-- Check if it's a partial
+	if filename:match("^_(.+)$") then
+		is_partial = true
+		local partial_name = filename:match("^_(.+)$")
+		if dir ~= "" then
+			render_path = dir .. "/" .. partial_name
+		else
+			render_path = partial_name
+		end
+	else
+		-- Regular view
+		if dir ~= "" then
+			render_path = dir .. "/" .. filename
+		else
+			render_path = filename
+		end
+	end
+
+	-- Search for render usage
+	-- This will match: render "path", render partial: "path", render("path"), etc.
+	local search_pattern = render_path
+
+	require("telescope.builtin").live_grep({
+		default_text = search_pattern,
+		prompt_title = "Find References: " .. render_path .. (is_partial and " (partial)" or " (view)"),
+	})
+end
 
 -- Helper function to find Laravel view/component references
 local function find_laravel_component_references()
@@ -569,6 +593,53 @@ local function find_maizzle_component_references()
 		prompt_title = "Find References: <x-" .. component_name .. ">",
 	})
 end
+
+-- Ruby/Rails Project keymaps (set on filetype)
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "ruby", "eruby", "slim" },
+	callback = function()
+		local opts = { buffer = true, silent = true, noremap = true }
+
+		-- Project commands (Rails)
+		vim.keymap.set("n", "<leader>pa", ":A<CR>", vim.tbl_extend("force", opts, { desc = "Project: Alternate file" }))
+		vim.keymap.set("n", "<leader>pr", ":R<CR>", vim.tbl_extend("force", opts, { desc = "Project: Related file" }))
+		vim.keymap.set("n", "<leader>pm", ":Emodel<CR>", vim.tbl_extend("force", opts, { desc = "Project: Model" }))
+		vim.keymap.set("n", "<leader>pv", ":Eview<CR>", vim.tbl_extend("force", opts, { desc = "Project: View" }))
+		vim.keymap.set(
+			"n",
+			"<leader>pc",
+			":Econtroller<CR>",
+			vim.tbl_extend("force", opts, { desc = "Project: Controller" })
+		)
+		vim.keymap.set("n", "<leader>pg", ":Generate ", vim.tbl_extend("force", opts, { desc = "Project: Generate" }))
+		vim.keymap.set("n", "<leader>pt", ":Rails<CR>", vim.tbl_extend("force", opts, { desc = "Project: Test/Run" }))
+		vim.keymap.set(
+			"n",
+			"<leader>pT",
+			":.Rails<CR>",
+			vim.tbl_extend("force", opts, { desc = "Project: Test current" })
+		)
+		vim.keymap.set(
+			"n",
+			"<leader>ps",
+			":Rails console<CR>",
+			vim.tbl_extend("force", opts, { desc = "Project: Console (Rails)" })
+		)
+
+		-- Find all references to the current view/partial
+		vim.keymap.set(
+			"n",
+			"<leader>pf",
+			find_rails_view_references,
+			vim.tbl_extend("force", opts, { desc = "Project: Find view references" })
+		)
+
+		-- Create a buffer-local command
+		vim.api.nvim_buf_create_user_command(0, "FindViewReferences", find_rails_view_references, {
+			desc = "Find all references to this Rails view/partial",
+		})
+	end,
+})
 
 -- PHP/Laravel Project keymaps
 vim.api.nvim_create_autocmd("FileType", {
@@ -707,7 +778,7 @@ vim.api.nvim_create_autocmd("FileType", {
 		-- Find all references to the current component
 		vim.keymap.set(
 			"n",
-			"<leader>pr",
+			"<leader>pf",
 			find_laravel_component_references,
 			vim.tbl_extend("force", opts, { desc = "Project: Find component references" })
 		)
@@ -847,7 +918,7 @@ vim.api.nvim_create_autocmd("FileType", {
 		-- Find all references to the current component
 		vim.keymap.set(
 			"n",
-			"<leader>pr",
+			"<leader>pf",
 			find_maizzle_component_references,
 			vim.tbl_extend("force", opts, { desc = "Project: Find component references" })
 		)
