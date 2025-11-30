@@ -8,6 +8,7 @@ alias sail='[ -f vendor/bin/sail ] && bash vendor/bin/sail'
 alias sart="sail artisan"
 alias ts="tmux-sessionizer"
 alias cl="claude"
+alias clr="claude --resume"
 alias k="kubectl"
 alias xclip="xclip -selection c"
 alias bi="brew install"

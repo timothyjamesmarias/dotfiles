@@ -9,7 +9,8 @@
       "Bash(stow:*)",
       "WebSearch",
       "WebFetch(domain:ast-grep.github.io)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(git config:*)"
     ],
     "deny": [],
     "ask": []
