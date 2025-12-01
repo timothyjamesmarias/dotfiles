@@ -339,6 +339,120 @@ gclaude() {
   esac
 }
 
+# Git string search - find commits that added/removed a string
+git_search_string() {
+  local search_term="$1"
+
+  if [ -z "$search_term" ]; then
+    echo "Usage: gss <search-string>"
+    echo "  Search git history for commits that added/removed a string"
+    return 1
+  fi
+
+  local commit
+  commit=$(git log -S"$search_term" --oneline --color=always --all | \
+    fzf --ansi \
+        --no-sort \
+        --preview "echo {} | grep -o '[a-f0-9]\{7,\}' | head -1 | xargs -I{} git show --color=always {}" \
+        --preview-window=right:60% \
+        --header="Commits with '$search_term' (Enter=actions, Ctrl-Y=copy hash)") || return
+
+  local hash=$(echo "$commit" | grep -o "[a-f0-9]\{7,\}" | head -1)
+
+  echo "Selected: $hash"
+  echo -n "Action? (c)heckout, (d)iff with delta, (y)ank/copy hash, (s)how [default=show]: "
+  read action
+
+  case "$action" in
+    c) git checkout "$hash" ;;
+    d) git show "$hash" | delta ;;
+    y) echo -n "$hash" | pbcopy && echo "✓ Copied $hash to clipboard" ;;
+    s|"") git show "$hash" ;;
+    *) echo "Cancelled" ;;
+  esac
+}
+
+# Interactive squash - select base commit and squash everything after it
+git_squash() {
+  # Check if we're in a git repo
+  if ! git rev-parse --git-dir > /dev/null 2>&1; then
+    echo "Error: Not a git repository"
+    return 1
+  fi
+
+  # Check if there are commits to squash
+  local commit_count=$(git rev-list --count HEAD 2>/dev/null)
+  if [ "$commit_count" -le 1 ]; then
+    echo "Error: Need at least 2 commits to squash"
+    return 1
+  fi
+
+  local base_commit
+  base_commit=$(git log --oneline --color=always | \
+    fzf --ansi \
+        --no-sort \
+        --preview 'hash=$(echo {} | grep -o "[a-f0-9]\{7,\}" | head -1); \
+                    count=$(git rev-list --count ${hash}..HEAD); \
+                    echo "Will squash ${count} commit(s) after this base commit\n"; \
+                    git log --oneline --color=always ${hash}..HEAD | nl -w2 -s". "; \
+                    echo "\n--- Base commit details ---"; \
+                    git show --color=always --stat $hash' \
+        --preview-window=right:60% \
+        --header='Select BASE commit to squash onto (commits after this will be squashed)') || return
+
+  local base_hash=$(echo "$base_commit" | grep -o "[a-f0-9]\{7,\}" | head -1)
+  local squash_count=$(git rev-list --count ${base_hash}..HEAD)
+
+  if [ "$squash_count" -eq 0 ]; then
+    echo "No commits to squash (selected commit is HEAD)"
+    return 1
+  fi
+
+  echo ""
+  echo "Base commit: $base_hash"
+  echo "Commits to squash: $squash_count"
+  echo ""
+  echo "Commits that will be squashed:"
+  git log --oneline ${base_hash}..HEAD | nl -w2 -s". "
+  echo ""
+  echo -n "Action? (a)uto-squash with new message, (i)nteractive rebase, (c)ancel [default=cancel]: "
+  read action
+
+  case "$action" in
+    a)
+      # Get all commit messages for reference
+      echo ""
+      echo "--- Previous commit messages ---"
+      git log --format="%B" ${base_hash}..HEAD | sed '/^$/d' | nl -w2 -s". "
+      echo ""
+      echo "Enter new commit message for squashed commit:"
+      read new_message
+
+      if [ -z "$new_message" ]; then
+        echo "Error: Commit message cannot be empty"
+        return 1
+      fi
+
+      # Soft reset to base, keeping all changes staged
+      git reset --soft "$base_hash"
+      # Create new commit with all the changes
+      git commit -m "$new_message"
+
+      echo "✓ Successfully squashed $squash_count commits"
+      ;;
+    i)
+      # Interactive rebase
+      git rebase -i "${base_hash}"
+      ;;
+    c|"")
+      echo "Cancelled"
+      ;;
+    *)
+      echo "Invalid option, cancelled"
+      ;;
+  esac
+}
+
 # Fuzzy git aliases
 alias gcb="git_checkout"
 alias ga="git_stage"
@@ -352,3 +466,5 @@ alias gdf='git_diff_fzf'
 alias gdfs='git_diff_staged_fzf'
 alias grsf='git_reset_soft_fzf'
 alias gcl='gclaude'
+alias gss='git_search_string'
+alias gsq='git_squash'
