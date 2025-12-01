@@ -557,6 +557,19 @@ local function find_laravel_component_references()
 	end
 end
 
+-- Helper function to convert between PascalCase and kebab-case
+local function pascal_to_kebab(str)
+	return str:gsub("(%u)", function(c)
+		return "-" .. c:lower()
+	end):gsub("^%-", "")
+end
+
+local function kebab_to_pascal(str)
+	return str:gsub("%-(%w)", function(c)
+		return c:upper()
+	end):gsub("^%w", string.upper)
+end
+
 -- Helper function to find Maizzle component references
 local function find_maizzle_component_references()
 	local file_path = vim.fn.expand("%:p")
@@ -591,6 +604,19 @@ local function find_maizzle_component_references()
 	require("telescope.builtin").live_grep({
 		default_text = search_pattern,
 		prompt_title = "Find References: <x-" .. component_name .. ">",
+	})
+end
+
+-- Helper function to find Vue component references
+local function find_vue_component_references()
+	local file_path = vim.fn.expand("%:p")
+	local filename = vim.fn.fnamemodify(file_path, ":t:r") -- Get filename without extension
+
+	-- Just search for the component name as-is
+	-- Telescope's live grep will find it in PascalCase, kebab-case, or any other form
+	require("telescope.builtin").live_grep({
+		default_text = filename,
+		prompt_title = "Find References: " .. filename,
 	})
 end
 
@@ -955,6 +981,107 @@ vim.api.nvim_create_autocmd("FileType", {
 			"i<%#  %><Esc>hhi",
 			vim.tbl_extend("force", opts, { desc = "Insert ERB comment tag" })
 		)
+	end,
+})
+
+-- Vue/JavaScript Project keymaps
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "vue", "javascript", "typescript", "javascriptreact", "typescriptreact" },
+	callback = function()
+		local opts = { buffer = true, silent = true, noremap = true }
+
+		-- Go to Vue component under cursor
+		vim.keymap.set("n", "gf", function()
+			local line = vim.fn.getline(".")
+			local col = vim.fn.col(".")
+
+			-- Check for component tag: <ComponentName> or <component-name>
+			-- Match both PascalCase and kebab-case
+			local component_pattern = "<([A-Z][%w%-]*)"
+			local component_match = line:match(component_pattern)
+
+			if not component_match then
+				-- Try kebab-case
+				component_pattern = "<([a-z][%w%-]+)"
+				component_match = line:match(component_pattern)
+			end
+
+			if component_match then
+				local tag_start, tag_end = line:find("<" .. component_match:gsub("%-", "%%-"))
+				if tag_start and col >= tag_start and col <= (tag_end + 10) then
+					-- Convert to both cases to search for files
+					local pascal_name = component_match:match("^%u") and component_match or kebab_to_pascal(component_match)
+					local kebab_name = component_match:match("^%l") and component_match or pascal_to_kebab(component_match)
+
+					-- Try common Vue file paths
+					local vue_paths = {
+						-- Try both naming conventions
+						"src/components/" .. pascal_name .. ".vue",
+						"components/" .. pascal_name .. ".vue",
+						"src/components/" .. kebab_name .. ".vue",
+						"components/" .. kebab_name .. ".vue",
+						-- Try nested paths (assuming component name might indicate folder)
+						"src/components/" .. pascal_name .. "/" .. pascal_name .. ".vue",
+						"components/" .. pascal_name .. "/" .. pascal_name .. ".vue",
+						"src/components/" .. pascal_name .. "/index.vue",
+						"components/" .. pascal_name .. "/index.vue",
+					}
+
+					for _, path in ipairs(vue_paths) do
+						if vim.fn.filereadable(path) == 1 then
+							vim.cmd("edit " .. path)
+							return
+						end
+					end
+
+					-- Fallback to telescope search
+					require("telescope.builtin").find_files({ default_text = pascal_name .. ".vue" })
+					return
+				end
+			end
+
+			-- Check for import statement: import ComponentName from 'path'
+			local import_pattern = 'from%s+["\']([^"\']+)["\']'
+			local import_path = line:match(import_pattern)
+
+			if import_path then
+				local import_start, import_end = line:find('from%s+["\']' .. import_path:gsub("%-", "%%-") .. '["\']')
+				if import_start and col >= import_start and col <= import_end then
+					-- Handle @ alias (common in Vue projects)
+					local resolved_path = import_path:gsub("^@/", "src/")
+					-- Add .vue extension if not present
+					if not resolved_path:match("%.vue$") and not resolved_path:match("%.js$") and not resolved_path:match("%.ts$") then
+						resolved_path = resolved_path .. ".vue"
+					end
+
+					if vim.fn.filereadable(resolved_path) == 1 then
+						vim.cmd("edit " .. resolved_path)
+						return
+					else
+						-- Try without the alias
+						local filename = import_path:match("([^/]+)$")
+						require("telescope.builtin").find_files({ default_text = filename })
+						return
+					end
+				end
+			end
+
+			-- Fallback to default gf
+			vim.cmd("normal! gf")
+		end, vim.tbl_extend("force", opts, { desc = "Go to Vue component" }))
+
+		-- Find all references to the current Vue component
+		vim.keymap.set(
+			"n",
+			"<leader>pf",
+			find_vue_component_references,
+			vim.tbl_extend("force", opts, { desc = "Project: Find component references" })
+		)
+
+		-- Create a buffer-local command
+		vim.api.nvim_buf_create_user_command(0, "FindComponentReferences", find_vue_component_references, {
+			desc = "Find all references to this Vue component",
+		})
 	end,
 })
 
