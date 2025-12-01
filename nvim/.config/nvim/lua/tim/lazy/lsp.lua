@@ -43,7 +43,7 @@ return {
 			},
 		})
 		vim.lsp.config.rust_analyzer = make_config({})
-		vim.lsp.config.ruby_lsp = make_config({})
+		vim.lsp.config.ruby_lsp = make_config({ "ruby", "eruby", "cr", "crystal"})
 		vim.lsp.config.jdtls = make_config({})
 		vim.lsp.config.kotlin_lsp = make_config({
 			cmd = { "kotlin-lsp", "--stdio" },
