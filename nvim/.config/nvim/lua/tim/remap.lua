@@ -87,6 +87,7 @@ vim.keymap.set(
 	"<cmd>!open %<CR>",
 	{ silent = true, desc = "Open current file with the default program" }
 )
+vim.keymap.set("n", "<leader>fd", "<cmd>!open %:h:h<CR>", { silent = true, desc = "Open parent directory in finder" })
 vim.keymap.set("n", "<leader>fY", function()
 	local path = vim.fn.expand("%:p")
 	vim.fn.setreg("+", path)

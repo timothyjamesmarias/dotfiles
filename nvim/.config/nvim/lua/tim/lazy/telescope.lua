@@ -48,7 +48,18 @@ return {
 					".git/",
 				},
 			},
-			pickers = {},
+			pickers = {
+			buffers = {
+				mappings = {
+					i = {
+						["<C-x>"] = actions.delete_buffer,
+					},
+					n = {
+						["<C-x>"] = actions.delete_buffer,
+					},
+				},
+			},
+		},
 			extensions = {
 				fzf = {
 					fuzzy = true,
