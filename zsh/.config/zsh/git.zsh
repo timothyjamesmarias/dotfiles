@@ -453,6 +453,20 @@ git_squash() {
   esac
 }
 
+# Composite workflow: commit + push + PR
+git_commit_push_pr() {
+  echo "=== Step 1/3: Commit ==="
+  git_commit_fzf || return 1
+
+  echo ""
+  echo "=== Step 2/3: Push ==="
+  git push -u origin HEAD || return 1
+
+  echo ""
+  echo "=== Step 3/3: Create PR ==="
+  gh pr create --web
+}
+
 # Fuzzy git aliases
 alias gcb="git_checkout"
 alias ga="git_stage"
@@ -468,3 +482,4 @@ alias grsf='git_reset_soft_fzf'
 alias gcl='gclaude'
 alias gss='git_search_string'
 alias gsq='git_squash'
+alias gcpp='git_commit_push_pr'

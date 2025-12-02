@@ -10,7 +10,8 @@
       "WebSearch",
       "WebFetch(domain:ast-grep.github.io)",
       "Bash(tree:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "WebFetch(domain:yazi-rs.github.io)"
     ],
     "deny": [],
     "ask": []
