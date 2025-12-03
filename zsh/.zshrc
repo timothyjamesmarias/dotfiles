@@ -30,6 +30,7 @@ source "$ZSHCONFIG/utils.zsh"       # Utility functions
 source "$ZSHCONFIG/ast-grep.zsh"    # Structural code search (ast-grep)
 source "$ZSHCONFIG/kotlin.zsh"      # Kotlin/Gradle utilities
 source "$ZSHCONFIG/docker.zsh"      # Docker utilities
+source "$ZSHCONFIG/heroku.zsh"      # Heroku utilities
 
 # --- FZF integration ---
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
@@ -41,10 +42,5 @@ source "$ZSHCONFIG/docker.zsh"      # Docker utilities
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 
-
-# Load Angular CLI autocompletion.
-source <(ng completion script)
-
-
-# Load Angular CLI autocompletion.
-source <(ng completion script)
+# heroku autocomplete setup
+HEROKU_AC_ZSH_SETUP_PATH=/Users/timmarias/Library/Caches/heroku/autocomplete/zsh_setup && test -f $HEROKU_AC_ZSH_SETUP_PATH && source $HEROKU_AC_ZSH_SETUP_PATH;
