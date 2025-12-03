@@ -1,8 +1,26 @@
 --recurse=yes
 --tag-relative=yes
---fields=+l
---extras=+q
 
+# Enhanced tag fields for better context
+--fields=+ailmnS
+# +a: Access (public/private)
+# +i: Inheritance information
+# +l: Language
+# +m: Implementation
+# +n: Line number
+# +S: Signature (function parameters)
+
+# Extra tags for better navigation
+--extras=+q
+# +q: Include extra tag entries for qualified tags
+
+# Pattern length (improves matching accuracy)
+--pattern-length-limit=250
+
+# Sort tags for faster lookups
+--sort=foldcase
+
+# Exclusions
 --exclude=.git
 --exclude=node_modules
 --exclude=vendor
@@ -12,9 +30,23 @@
 --exclude=build
 --exclude=coverage
 --exclude=.bundle
+--exclude=*.min.js
+--exclude=*.min.css
+--exclude=*.map
+--exclude=public/packs
+--exclude=public/assets
 
+# Template file extensions
 --langmap=html:+.blade.php
 --langmap=html:+.slim
 --langmap=html:+.erb
+--langmap=ruby:+.rake
 
---languages=PHP,Ruby,JavaScript,TypeScript,HTML,CSS,SCSS,Lua,Go,Rust,Python
+# Enable languages (exclude TOML to avoid Cargo warning)
+--languages=PHP,Ruby,JavaScript,TypeScript,HTML,CSS,SCSS,Lua,Go,Rust,Python,Kotlin,Java,SQL,Markdown,YAML,JSON
+--languages=-TOML
+
+# Ruby enhancements (for Rails)
+# Note: Associations are better handled by rails.vim's gf command
+# We only index scopes since they're actual methods you can call
+--regex-ruby=/^[ \t]*scope[ \t]*:([a-zA-Z0-9_]+)/\1/S,scope/

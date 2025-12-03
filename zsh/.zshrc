@@ -38,6 +38,7 @@ source "$ZSHCONFIG/ast-grep.zsh"    # Structural code search (ast-grep)
 source "$ZSHCONFIG/kotlin.zsh"      # Kotlin/Gradle utilities
 source "$ZSHCONFIG/docker.zsh"      # Docker utilities
 source "$ZSHCONFIG/heroku.zsh"      # Heroku utilities
+source "$ZSHCONFIG/ctags.zsh"       # Ctags utilities
 
 # --- FZF integration ---
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

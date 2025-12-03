@@ -171,12 +171,73 @@ vim.keymap.set("n", "<leader>fp", function()
 		layout_config = { height = 0.5 },
 	})
 end, { noremap = true, silent = true, desc = "File browser (project root)" })
-vim.keymap.set("n", "<leader>ts", function()
-	require("telescope.builtin").tagstack()
-end, { silent = true, desc = "Tag stack" })
+-- Tag navigation with Telescope (better than Ctrl-])
+vim.keymap.set("n", "<leader>td", function()
+	-- Search tags with word under cursor pre-filled (DEFINITIONS)
+	require("telescope.builtin").tags({ default_text = vim.fn.expand("<cword>") })
+end, { silent = true, desc = "Tag definition (under cursor)" })
+
+vim.keymap.set("n", "<leader>tu", function()
+	-- Grep for word under cursor (USAGES/IMPLEMENTATIONS)
+	require("telescope.builtin").grep_string()
+end, { silent = true, desc = "Tag usages (grep)" })
+
+vim.keymap.set("n", "<leader>ta", function()
+	-- Show BOTH definitions and usages in a picker
+	local word = vim.fn.expand("<cword>")
+	local actions = require("telescope.actions")
+	local action_state = require("telescope.actions.state")
+	local pickers = require("telescope.pickers")
+	local finders = require("telescope.finders")
+	local conf = require("telescope.config").values
+
+	pickers
+		.new({}, {
+			prompt_title = "Find: " .. word .. " (Definitions & Usages)",
+			finder = finders.new_table({
+				results = {
+					{ display = "1. Jump to Definition (ctags)", value = "tags" },
+					{ display = "2. Find Usages (grep)", value = "grep" },
+					{ display = "3. LSP References", value = "lsp" },
+					{ display = "4. LSP Definitions", value = "lsp_def" },
+				},
+				entry_maker = function(entry)
+					return {
+						value = entry.value,
+						display = entry.display,
+						ordinal = entry.display,
+					}
+				end,
+			}),
+			sorter = conf.generic_sorter({}),
+			attach_mappings = function(prompt_bufnr, map)
+				actions.select_default:replace(function()
+					local selection = action_state.get_selected_entry()
+					actions.close(prompt_bufnr)
+
+					if selection.value == "tags" then
+						require("telescope.builtin").tags({ default_text = word })
+					elseif selection.value == "grep" then
+						require("telescope.builtin").grep_string({ search = word })
+					elseif selection.value == "lsp" then
+						require("telescope.builtin").lsp_references()
+					elseif selection.value == "lsp_def" then
+						require("telescope.builtin").lsp_definitions()
+					end
+				end)
+				return true
+			end,
+		})
+		:find()
+end, { silent = true, desc = "Find all (definitions + usages)" })
+
 vim.keymap.set("n", "<leader>tg", function()
 	require("telescope.builtin").tags()
-end, { silent = true, desc = "Find tags" })
+end, { silent = true, desc = "Search all tags" })
+
+vim.keymap.set("n", "<leader>ts", function()
+	require("telescope.builtin").tagstack()
+end, { silent = true, desc = "Tag jump history" })
 vim.keymap.set("n", "<leader>sl", function()
 	require("telescope.builtin").grep_string()
 end, { silent = true, noremap = true, desc = "Grep string under cursor" })

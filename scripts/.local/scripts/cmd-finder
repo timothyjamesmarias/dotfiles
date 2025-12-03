@@ -22,6 +22,7 @@ SOURCE_FILES=(
   "$ZSHCONFIG/kotlin.zsh"
   "$ZSHCONFIG/docker.zsh"
   "$ZSHCONFIG/heroku.zsh"
+  "$ZSHCONFIG/ctags.zsh"
   "$HOME/dotfiles/nvim/.config/nvim/lua/tim/remap.lua"
   "$HOME/dotfiles/tmux/.tmux.conf"
 )
