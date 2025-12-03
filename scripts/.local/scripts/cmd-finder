@@ -5,13 +5,108 @@
 
 # Configuration
 ZSHCONFIG="${ZSHCONFIG:-$HOME/.config/zsh}"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"
+CACHE_FILE="$CACHE_DIR/cmd-finder-index"
 TEMP_FILE=$(mktemp)
+
+# Ensure cache directory exists
+mkdir -p "$CACHE_DIR"
+
+# List of source files to track
+SOURCE_FILES=(
+  "$ZSHCONFIG/aliases.zsh"
+  "$ZSHCONFIG/files.zsh"
+  "$ZSHCONFIG/git.zsh"
+  "$ZSHCONFIG/utils.zsh"
+  "$ZSHCONFIG/ast-grep.zsh"
+  "$ZSHCONFIG/kotlin.zsh"
+  "$ZSHCONFIG/docker.zsh"
+  "$ZSHCONFIG/heroku.zsh"
+  "$HOME/dotfiles/nvim/.config/nvim/lua/tim/remap.lua"
+  "$HOME/dotfiles/tmux/.tmux.conf"
+)
 
 # Colors for output
 CYAN='\033[0;36m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 RESET='\033[0m'
+
+# Function to get modification time of a file
+get_mtime() {
+  local file="$1"
+  if [ -f "$file" ]; then
+    stat -f %m "$file" 2>/dev/null || stat -c %Y "$file" 2>/dev/null
+  else
+    echo "0"
+  fi
+}
+
+# Function to check if cache is valid
+is_cache_valid() {
+  [ ! -f "$CACHE_FILE" ] && return 1
+
+  # Compare each source file's current mtime with cached mtime
+  for file in "${SOURCE_FILES[@]}"; do
+    local current_mtime=$(get_mtime "$file")
+
+    # Look for this file's mtime in the cache header
+    local cached_mtime=$(grep "^# $file:" "$CACHE_FILE" 2>/dev/null | cut -d: -f2)
+
+    # If file is newer or wasn't in cache, cache is invalid
+    if [ "$current_mtime" != "$cached_mtime" ]; then
+      return 1
+    fi
+  done
+
+  return 0
+}
+
+# Function to build the cache
+build_cache() {
+  local temp_cache=$(mktemp)
+
+  # Write metadata header with file mtimes
+  echo "# cmd-finder cache - do not edit manually" > "$temp_cache"
+  for file in "${SOURCE_FILES[@]}"; do
+    local mtime=$(get_mtime "$file")
+    echo "# $file:$mtime" >> "$temp_cache"
+  done
+
+  # Extract all commands and append to cache
+  {
+    # Extract from all zsh config files
+    if [ -d "$ZSHCONFIG" ]; then
+      extract_aliases "$ZSHCONFIG/aliases.zsh" "alias"
+      extract_aliases "$ZSHCONFIG/files.zsh" "files"
+      extract_aliases "$ZSHCONFIG/git.zsh" "git"
+      extract_aliases "$ZSHCONFIG/utils.zsh" "utils"
+      extract_aliases "$ZSHCONFIG/ast-grep.zsh" "ast-grep"
+      extract_aliases "$ZSHCONFIG/kotlin.zsh" "kotlin"
+      extract_aliases "$ZSHCONFIG/docker.zsh" "docker"
+      extract_aliases "$ZSHCONFIG/heroku.zsh" "heroku"
+
+      extract_functions "$ZSHCONFIG/files.zsh" "files"
+      extract_functions "$ZSHCONFIG/git.zsh" "git"
+      extract_functions "$ZSHCONFIG/utils.zsh" "utils"
+      extract_functions "$ZSHCONFIG/ast-grep.zsh" "ast-grep"
+      extract_functions "$ZSHCONFIG/kotlin.zsh" "kotlin"
+      extract_functions "$ZSHCONFIG/docker.zsh" "docker"
+    fi
+
+    # Extract vim keymaps
+    extract_vim_keymaps
+
+    # Extract git config aliases
+    extract_git_config_aliases
+
+    # Extract tmux bindings
+    extract_tmux_bindings
+  } >> "$temp_cache"
+
+  # Move temp cache to final location
+  mv "$temp_cache" "$CACHE_FILE"
+}
 
 # Function to extract aliases from a file
 extract_aliases() {
@@ -92,35 +187,20 @@ extract_tmux_bindings() {
     }'
 }
 
-# Build the command list
-{
-  # Extract from all zsh config files
-  if [ -d "$ZSHCONFIG" ]; then
-    extract_aliases "$ZSHCONFIG/aliases.zsh" "alias"
-    extract_aliases "$ZSHCONFIG/files.zsh" "files"
-    extract_aliases "$ZSHCONFIG/git.zsh" "git"
-    extract_aliases "$ZSHCONFIG/utils.zsh" "utils"
-    extract_aliases "$ZSHCONFIG/ast-grep.zsh" "ast-grep"
-    extract_aliases "$ZSHCONFIG/kotlin.zsh" "kotlin"
-    extract_aliases "$ZSHCONFIG/docker.zsh" "docker"
+# Check for --rebuild flag
+if [ "$1" = "--rebuild" ]; then
+  build_cache
+  echo "Cache rebuilt at $CACHE_FILE" >&2
+  exit 0
+fi
 
-    extract_functions "$ZSHCONFIG/files.zsh" "files"
-    extract_functions "$ZSHCONFIG/git.zsh" "git"
-    extract_functions "$ZSHCONFIG/utils.zsh" "utils"
-    extract_functions "$ZSHCONFIG/ast-grep.zsh" "ast-grep"
-    extract_functions "$ZSHCONFIG/kotlin.zsh" "kotlin"
-    extract_functions "$ZSHCONFIG/docker.zsh" "docker"
-  fi
+# Build or use cache
+if ! is_cache_valid; then
+  build_cache
+fi
 
-  # Extract vim keymaps
-  extract_vim_keymaps
-
-  # Extract git config aliases
-  extract_git_config_aliases
-
-  # Extract tmux bindings
-  extract_tmux_bindings
-} > "$TEMP_FILE"
+# Load data from cache (skip header lines starting with #)
+grep -v '^#' "$CACHE_FILE" > "$TEMP_FILE"
 
 # Function to show implementation preview
 show_preview() {
