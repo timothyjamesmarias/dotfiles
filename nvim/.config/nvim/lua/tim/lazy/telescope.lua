@@ -118,6 +118,14 @@ return {
 				slim = 2,
 				javascript = 3,
 			},
+			-- When in HTML (e.g., Maizzle projects)
+			html = {
+				html = 1,
+				css = 2,
+				scss = 2,
+				javascript = 3,
+				typescript = 3,
+			},
 		}
 
 		-- Helper: Get file extension from path
@@ -152,6 +160,7 @@ return {
 			sass = "sass",
 			yml = "yaml",
 			yaml = "yaml",
+			html = "html",
 		}
 
 		-- Custom sorter that boosts results based on file type context
@@ -199,6 +208,13 @@ return {
 					end
 					local current_ft = current_ft_cache
 
+					-- Check if we have priorities for current filetype
+					local priorities = filetype_priorities[current_ft]
+					if not priorities then
+						-- No priorities defined for this filetype, use default fzf sorting
+						return score
+					end
+
 					-- Get result file extension/type
 					local result_path = entry.filename or entry.value or entry.path
 					if not result_path then
@@ -213,9 +229,7 @@ return {
 						filetype_cache[result_path] = result_ft
 					end
 
-					-- Check if we have priorities for current filetype
-					local priorities = filetype_priorities[current_ft]
-					if not priorities or not result_ft then
+					if not result_ft then
 						return score
 					end
 
@@ -229,10 +243,9 @@ return {
 						-- Priority 5 → 2.5x score (appears much later)
 						local boost_factor = priority * 0.5
 						score = score * boost_factor
-					else
-						-- If not in priority list, penalize it (3x score)
-						score = score * 3
 					end
+					-- NOTE: Removed penalty for files not in priority list
+					-- This prevents unrelated files from being hidden entirely
 
 					return score
 				end,
@@ -279,13 +292,10 @@ return {
 				},
 			},
 			pickers = {
-				-- Apply context-aware sorting ONLY to content searches (not file names)
-				grep_string = {
-					sorter = context_aware_sorter(),
-				},
-				live_grep = {
-					sorter = context_aware_sorter(),
-				},
+				-- Apply context-aware sorting to specific pickers
+				-- NOTE: Disabled for grep_string and live_grep - the custom sorter causes
+				-- issues with large result sets (e.g., HTML files in Maizzle projects)
+				-- Keep it enabled for tags and LSP where result sets are smaller
 				tags = {
 					sorter = context_aware_sorter(),
 				},
