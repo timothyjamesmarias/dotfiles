@@ -217,6 +217,7 @@ alias grs='git restore --staged'
 alias gcp='git cherry-pick'
 alias gsw='git switch'
 alias gpr='gh pr create --web'
+alias gmt='git mergetool'
 
 # Fuzzy create fixup commit
 gfix() {
