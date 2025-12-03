@@ -5,7 +5,7 @@
 	autocrlf = input
   editor = nvim
   pager = delta
-	excludesfile = ~/.config/git/gitignore
+	excludesfile = ~/.gitignore_global
 [delta]
   navigate = true
   line-numbers = true
