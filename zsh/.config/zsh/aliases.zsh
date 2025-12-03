@@ -18,6 +18,8 @@ alias cj='curl -s -H "Content-Type: application/json"'
 alias png="ping google.com"
 alias dcu="docker compose up -d"
 alias dcd="docker compose down"
+alias cmf="cmd-finder"
+alias cmr="cmd-finder --rebuild"
 
 # --- Clipboard alias (cross-platform) ---
 if [[ $(uname) == "Linux" ]]; then
