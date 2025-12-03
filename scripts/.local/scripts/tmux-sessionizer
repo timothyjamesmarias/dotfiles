@@ -1,7 +1,16 @@
 #!/usr/bin/env bash
 
-# Choose session directory
-session=$(find ~ ~/projects -mindepth 1 -maxdepth 2 -type d | fzf)
+# Cache configuration
+CACHE_FILE="$HOME/.cache/tmux-sessionizer-dirs"
+CACHE_TTL=3600  # 1 hour in seconds
+
+# Build or refresh cache
+if [[ ! -f "$CACHE_FILE" ]] || [[ $(find "$CACHE_FILE" -mmin +60 2>/dev/null) ]]; then
+  find ~ ~/projects -mindepth 1 -maxdepth 2 -type d 2>/dev/null > "$CACHE_FILE"
+fi
+
+# Choose session directory from cache
+session=$(cat "$CACHE_FILE" | fzf)
 session_name=$(basename "$session" | tr . _)
 
 # Check if tmux is running

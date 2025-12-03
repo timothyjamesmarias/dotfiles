@@ -1,14 +1,15 @@
 # --- File + Project Search Utilities ---
 
-alias index="find . -type f | grep -vE 'node_modules|target|.git'"
+# Use fd (faster alternative to find)
+alias index="fd --type f --hidden --exclude .git --exclude node_modules --exclude target"
 alias ff="index | fzf | xargs nvim"
 alias ffa="index | fzf -m | xargs nvim"
-alias cdd='cd "$(find . -type d | grep -vE "node_modules|target|.git" | fzf --preview "tree -C -L 2 {}")"'
+alias cdd='cd "$(fd --type d --hidden --exclude .git --exclude node_modules --exclude target | fzf --preview "tree -C -L 2 {}")"'
 alias t="tree -L 2 -I 'node_modules|.git|target|dist|*.lock|*.cache'"
 alias re="cat ~/.recentfiles | fzf | xargs nvim"
-alias del="find . -type f | fzf -m --preview 'bat --style=numbers --color=always {}' | xargs -o rm -i"
-alias deld="find . -type d | fzf -m --preview 'bat --style=numbers --color=always {}' | xargs -o rm -rf -i"
-alias deldf="find . -type d | fzf -m --preview 'bat --style=numbers --color=always {}' | xargs -o rm -rf"
+alias del="fd --type f | fzf -m --preview 'bat --style=numbers --color=always {}' | xargs -o rm -i"
+alias deld="fd --type d | fzf -m --preview 'bat --style=numbers --color=always {}' | xargs -o rm -rf -i"
+alias deldf="fd --type d | fzf -m --preview 'bat --style=numbers --color=always {}' | xargs -o rm -rf"
 
 # Ripgrep + nvim integration
 rgnvim() {
@@ -85,7 +86,7 @@ fcss() {
 # Create new file with fuzzy directory selection
 cf() {
   local dir
-  dir=$(find . -type d -not -path '*/.git/*' -not -path '*/node_modules/*' -not -path '*/target/*' \
+  dir=$(fd --type d --exclude .git --exclude node_modules --exclude target \
     | fzf --preview "tree -C -L 2 {}") || return
 
   read "filename?Enter new file name (relative to $dir): "

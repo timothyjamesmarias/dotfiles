@@ -144,37 +144,46 @@ imgopt-batch() {
         [[ "$1" == "--recursive" ]] && quality="${2:-85}"
     fi
 
-    local total_before=0
-    local total_after=0
-    local count=0
-
     local find_cmd="find . -maxdepth 1"
     [[ -n "$recursive" ]] && find_cmd="find ."
 
+    # Get total size before optimization
+    local files=$(eval "$find_cmd" -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" -o -iname "*.gif" \) 2>/dev/null)
+
+    if [[ -z "$files" ]]; then
+        echo "No image files found"
+        return
+    fi
+
+    local count=$(echo "$files" | wc -l | tr -d ' ')
+    local total_before=0
+
     while IFS= read -r file; do
         [[ -z "$file" ]] && continue
-        local size_before=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file")
-        total_before=$((total_before + size_before))
+        local size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file")
+        total_before=$((total_before + size))
+    done <<< "$files"
 
-        imgopt "$file" "$quality" >/dev/null 2>&1
+    echo "Optimizing $count images in parallel (quality: $quality)..."
 
-        local size_after=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file")
-        total_after=$((total_after + size_after))
-        count=$((count + 1))
-        echo "Optimized: $file"
-    done < <(eval "$find_cmd" -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" -o -iname "*.gif" \))
+    # Process images in parallel (4 at a time)
+    echo "$files" | xargs -P 4 -I {} bash -c "imgopt '{}' '$quality' >/dev/null 2>&1 && echo 'Optimized: {}'"
 
-    if [[ $count -gt 0 ]]; then
-        local saved=$((total_before - total_after))
-        local percent=$((saved * 100 / total_before))
-        echo ""
-        echo "Batch complete: $count files"
-        echo "  Total before: $(numfmt --to=iec $total_before 2>/dev/null || echo "${total_before}B")"
-        echo "  Total after:  $(numfmt --to=iec $total_after 2>/dev/null || echo "${total_after}B")"
-        echo "  Total saved:  ${percent}%"
-    else
-        echo "No image files found"
-    fi
+    # Calculate total size after optimization
+    local total_after=0
+    while IFS= read -r file; do
+        [[ -z "$file" ]] && continue
+        local size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file")
+        total_after=$((total_after + size))
+    done <<< "$files"
+
+    local saved=$((total_before - total_after))
+    local percent=$((saved * 100 / total_before))
+    echo ""
+    echo "Batch complete: $count files"
+    echo "  Total before: $(numfmt --to=iec $total_before 2>/dev/null || echo "${total_before}B")"
+    echo "  Total after:  $(numfmt --to=iec $total_after 2>/dev/null || echo "${total_after}B")"
+    echo "  Total saved:  ${percent}%"
 }
 
 # Convert image to different format

@@ -1,5 +1,28 @@
 # --- Git aliases and Utilities ---
 
+# Git status caching for improved performance
+_git_status_cache=""
+_git_status_cache_time=0
+_git_status_cache_pwd=""
+
+# Cache git status output (2 second TTL)
+git_status_cached() {
+  local current=$(date +%s)
+  local current_pwd=$(pwd)
+  local ttl=2
+
+  # Invalidate cache if pwd changed or cache is stale
+  if [[ "$current_pwd" != "$_git_status_cache_pwd" ]] || \
+     [[ -z "$_git_status_cache" ]] || \
+     (( current - _git_status_cache_time > ttl )); then
+    _git_status_cache=$(git status --short)
+    _git_status_cache_time=$current
+    _git_status_cache_pwd=$current_pwd
+  fi
+
+  echo "$_git_status_cache"
+}
+
 # Fuzzy switch to git branch
 git_checkout() {
   local branch
@@ -10,7 +33,7 @@ git_checkout() {
 git_stage() {
   if [ $# -eq 0 ]; then
     # No arguments - use fzf menu
-    git status --short | fzf -m | awk '{print $2}' | xargs git add
+    git_status_cached | fzf -m | awk '{print $2}' | xargs git add
   else
     # Arguments provided - stage them directly
     git add "$@"
@@ -20,7 +43,7 @@ git_stage() {
 # Fuzzy stage files - interactive
 git_stage_patch() {
   local file
-  file=$(git status --short | fzf | awk '{print $2}')
+  file=$(git_status_cached | fzf | awk '{print $2}')
   [ -n "$file" ] && git add -p "$file"
 }
 
@@ -60,7 +83,7 @@ git_log_fzf() {
 # Fuzzy select changed files and view diff (handles both staged and unstaged)
 git_diff_fzf() {
   local files
-  files=$(git status --short | fzf -m \
+  files=$(git_status_cached | fzf -m \
     --preview 'file=$(echo {} | cut -c4-);
       st=$(echo {} | cut -c1-2);
       if [[ "$st" =~ ^[^\ ?] ]]; then

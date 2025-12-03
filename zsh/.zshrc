@@ -1,7 +1,14 @@
 # ~/.zshrc - Main entrypoint for zsh configuration
 # This file sources modular configuration files from ~/.config/zsh/
+
+# --- Completion system with caching ---
+# Only rebuild completion cache once per day
 autoload -Uz compinit
-compinit
+if [[ -n ${ZDOTDIR:-~}/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
+fi
 
 # --- Basic environment setup ---
 export LANG=en_US.UTF-8
@@ -38,9 +45,25 @@ source "$ZSHCONFIG/heroku.zsh"      # Heroku utilities
 # --- ENV secrets ---
 [ -f "$HOME/.env" ] && source "$HOME/.env"
 
-# --- SDKMAN (must be at end) ---
+# --- SDKMAN (lazy loaded) ---
+# Initialize SDKMAN only when needed
 export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+sdkman_init() {
+  if [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]]; then
+    source "$HOME/.sdkman/bin/sdkman-init.sh"
+    unfunction sdkman_init
+  fi
+}
 
-# heroku autocomplete setup
-HEROKU_AC_ZSH_SETUP_PATH=/Users/timmarias/Library/Caches/heroku/autocomplete/zsh_setup && test -f $HEROKU_AC_ZSH_SETUP_PATH && source $HEROKU_AC_ZSH_SETUP_PATH;
+# Lazy load aliases for common SDKMAN commands
+for cmd in gradle java kotlin sdk mvn; do
+  alias $cmd="sdkman_init && $cmd"
+done
+
+# --- Heroku autocomplete (lazy loaded) ---
+heroku() {
+  unfunction heroku
+  HEROKU_AC_ZSH_SETUP_PATH=/Users/timmarias/Library/Caches/heroku/autocomplete/zsh_setup
+  [[ -f "$HEROKU_AC_ZSH_SETUP_PATH" ]] && source "$HEROKU_AC_ZSH_SETUP_PATH"
+  heroku "$@"
+}

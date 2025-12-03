@@ -1,7 +1,20 @@
 # --- Prompt styles and vi mode indicator ---
 
 autoload -Uz vcs_info
-precmd() { vcs_info }
+
+# Configure vcs_info for git
+zstyle ':vcs_info:*' enable git
+zstyle ':vcs_info:*' formats ' (%b)'
+zstyle ':vcs_info:*' actionformats ' (%b|%a)'
+
+# Only run vcs_info in git repos for performance
+precmd() {
+  if git rev-parse --is-inside-work-tree &>/dev/null; then
+    vcs_info
+  else
+    vcs_info_msg_0_=""
+  fi
+}
 
 setopt prompt_subst
 

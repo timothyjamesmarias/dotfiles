@@ -1,9 +1,41 @@
 # --- Docker aliases and Utilities ---
 
+# Docker ps caching for improved performance
+_docker_ps_cache=""
+_docker_ps_cache_time=0
+_docker_ps_all_cache=""
+_docker_ps_all_cache_time=0
+
+# Cache running containers (docker ps)
+docker_ps_cached() {
+  local current=$(date +%s)
+  local ttl=3  # 3 second cache
+
+  if [[ -z "$_docker_ps_cache" ]] || (( current - _docker_ps_cache_time > ttl )); then
+    _docker_ps_cache=$(docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}')
+    _docker_ps_cache_time=$current
+  fi
+
+  echo "$_docker_ps_cache"
+}
+
+# Cache all containers (docker ps -a)
+docker_ps_all_cached() {
+  local current=$(date +%s)
+  local ttl=3
+
+  if [[ -z "$_docker_ps_all_cache" ]] || (( current - _docker_ps_all_cache_time > ttl )); then
+    _docker_ps_all_cache=$(docker ps -a --format 'table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}')
+    _docker_ps_all_cache_time=$current
+  fi
+
+  echo "$_docker_ps_all_cache"
+}
+
 # Fuzzy exec into running container
 docker_exec_fzf() {
   local container
-  container=$(docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}' | \
+  container=$(docker_ps_cached | \
     tail -n +2 | \
     fzf --header='Select container to exec into' \
         --preview 'docker inspect $(echo {} | awk "{print \$1}")' \
@@ -22,7 +54,7 @@ docker_exec_fzf() {
 # Fuzzy view container logs
 docker_logs_fzf() {
   local container
-  container=$(docker ps -a --format 'table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}' | \
+  container=$(docker_ps_all_cached | \
     tail -n +2 | \
     fzf --header='Select container to view logs' \
         --preview 'docker logs --tail 100 $(echo {} | awk "{print \$1}") 2>&1' \
@@ -43,7 +75,7 @@ docker_logs_fzf() {
 # Fuzzy stop containers
 docker_stop_fzf() {
   local containers
-  containers=$(docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}' | \
+  containers=$(docker_ps_cached | \
     tail -n +2 | \
     fzf -m --header='Select containers to stop (TAB to select multiple)' \
            --preview 'docker inspect $(echo {} | awk "{print \$1}")' \
@@ -81,7 +113,7 @@ docker_stop_all() {
 # Fuzzy remove containers
 docker_rm_fzf() {
   local containers
-  containers=$(docker ps -a --format 'table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}' | \
+  containers=$(docker_ps_all_cached | \
     tail -n +2 | \
     fzf -m --header='Select containers to remove (TAB to select multiple)' \
            --preview 'docker inspect $(echo {} | awk "{print \$1}")' \
@@ -103,7 +135,7 @@ docker_rm_fzf() {
 # Fuzzy inspect container details
 docker_inspect_fzf() {
   local container
-  container=$(docker ps -a --format 'table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}' | \
+  container=$(docker_ps_all_cached | \
     tail -n +2 | \
     fzf --header='Select container to inspect' \
         --preview 'docker inspect $(echo {} | awk "{print \$1}")' \
@@ -165,7 +197,7 @@ docker_image_fzf() {
 # View port mappings for containers
 docker_port_fzf() {
   local container
-  container=$(docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Ports}}' | \
+  container=$(docker_ps_cached | sed '1s/Status/Ports/' | \
     tail -n +2 | \
     fzf --header='Select container to view ports' \
         --preview 'docker port $(echo {} | awk "{print \$1}")' \
@@ -180,7 +212,7 @@ docker_port_fzf() {
 # Interactive container stats
 docker_stats_fzf() {
   local container
-  container=$(docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Image}}' | \
+  container=$(docker_ps_cached | \
     tail -n +2 | \
     fzf -m --header='Select containers to monitor (TAB for multiple)' \
            --preview 'docker stats --no-stream $(echo {} | awk "{print \$1}")' \
@@ -194,7 +226,7 @@ docker_stats_fzf() {
 # Fuzzy restart containers
 docker_restart_fzf() {
   local containers
-  containers=$(docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}' | \
+  containers=$(docker_ps_cached | \
     tail -n +2 | \
     fzf -m --header='Select containers to restart (TAB for multiple)' \
            --preview 'docker inspect $(echo {} | awk "{print \$1}")' \
@@ -282,7 +314,7 @@ docker_find() {
 # Copy files from container
 docker_cp_fzf() {
   local container
-  container=$(docker ps -a --format 'table {{.ID}}\t{{.Names}}\t{{.Image}}' | \
+  container=$(docker_ps_all_cached | \
     tail -n +2 | \
     fzf --header='Select container to copy from') || return
 
