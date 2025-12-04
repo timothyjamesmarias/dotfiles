@@ -20,6 +20,7 @@ alias dcu="docker compose up -d"
 alias dcd="docker compose down"
 alias cmf="cmd-finder"
 alias cmr="cmd-finder --rebuild"
+alias mdev='while true; do npm run dev || { [ $? -eq 130 ] && break; sleep 1; }; done'
 
 # --- Clipboard alias (cross-platform) ---
 if [[ $(uname) == "Linux" ]]; then
