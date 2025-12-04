@@ -118,9 +118,49 @@ vim.keymap.set("v", "<leader>fs", function()
 	local text = vim.getVisualSelection()
 	require("telescope.builtin").find_files({ default_text = text })
 end, { silent = true, noremap = true, desc = "Find files with selection" })
+-- Recent files (project-specific using built-in v:oldfiles)
 vim.keymap.set("n", "<leader>fr", function()
-	require("telescope.builtin").oldfiles()
-end, { silent = true, desc = "Recent files" })
+	local pickers = require("telescope.pickers")
+	local finders = require("telescope.finders")
+	local conf = require("telescope.config").values
+
+	-- Get project root (git root or cwd)
+	local project_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
+	if vim.v.shell_error ~= 0 then
+		project_root = vim.fn.getcwd()
+	end
+
+	-- Normalize path for comparison
+	project_root = vim.fn.fnamemodify(project_root, ":p"):gsub("/$", "")
+
+	-- Filter v:oldfiles to only files in current project
+	local project_files = {}
+	for _, file in ipairs(vim.v.oldfiles) do
+		local abs_path = vim.fn.fnamemodify(file, ":p"):gsub("/$", "")
+		if abs_path:find(project_root, 1, true) == 1 then
+			table.insert(project_files, file)
+		end
+	end
+
+	-- Create picker with filtered files
+	pickers
+		.new({}, {
+			prompt_title = "Recent Files (" .. vim.fn.fnamemodify(project_root, ":t") .. ")",
+			finder = finders.new_table({
+				results = project_files,
+			}),
+			sorter = conf.file_sorter({}),
+			previewer = conf.file_previewer({}),
+		})
+		:find()
+end, { silent = true, desc = "Recent files (project)" })
+
+-- Recent files (global - all projects)
+vim.keymap.set("n", "<leader>fR", function()
+	require("telescope.builtin").oldfiles({
+		prompt_title = "Recent Files (All Projects)",
+	})
+end, { silent = true, desc = "Recent files (global)" })
 vim.keymap.set("n", "<leader>fg", function()
 	require("telescope.builtin").git_commits()
 end, { silent = true, desc = "Git commits" })
