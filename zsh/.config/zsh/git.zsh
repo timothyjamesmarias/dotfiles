@@ -23,6 +23,35 @@ git_status_cached() {
   echo "$_git_status_cache"
 }
 
+# --- Shared Git Utilities ---
+
+# Git hash extraction regex pattern
+_GIT_HASH_PATTERN='[a-f0-9]\{7,\}'
+
+# Extract git commit hash from fzf output
+_git_extract_hash() {
+  echo "$1" | grep -o "$_GIT_HASH_PATTERN" | head -1
+}
+
+# Interactive action menu for git commits
+# Usage: _git_commit_action_menu <hash> [context]
+_git_commit_action_menu() {
+  local hash="$1"
+  local context="${2:-commit}"
+
+  echo "Selected: $hash"
+  echo -n "Action? (c)heckout, (d)iff with delta, (y)ank/copy hash, (s)how [default=show]: "
+  read action
+
+  case "$action" in
+    c) git checkout "$hash" ;;
+    d) git show "$hash" | delta ;;
+    y) echo -n "$hash" | pbcopy && echo "✓ Copied $hash to clipboard" ;;
+    s|"") git show "$hash" ;;
+    *) echo "Cancelled" ;;
+  esac
+}
+
 # Fuzzy switch to git branch
 git_checkout() {
   local branch
@@ -74,10 +103,12 @@ git_log_fzf() {
         --no-sort \
         --reverse \
         --height=40% \
-        --preview 'echo {} | grep -o "[a-f0-9]\{7,\}" | head -1 | xargs -I{} git show --color=always --stat {}' \
-        --preview-window=right:60%)
+        --preview "echo {} | grep -o '$_GIT_HASH_PATTERN' | head -1 | xargs -I{} git show --color=always --stat {}" \
+        --preview-window=right:60% \
+        --header='Select commit (Enter=actions, Ctrl-Y=copy hash)') || return
 
-  [ -n "$commit" ] && echo "$commit" | grep -o "[a-f0-9]\{7,\}" | head -1 | xargs git show
+  local hash=$(_git_extract_hash "$commit")
+  [ -n "$hash" ] && _git_commit_action_menu "$hash"
 }
 
 # Fuzzy select changed files and view diff (handles both staged and unstaged)
@@ -122,10 +153,10 @@ git_diff_staged_fzf() {
 # Fuzzy select commit and soft reset to it
 git_reset_soft_fzf() {
   local commit
-  commit=$(git log --oneline --graph --decorate --all | fzf --no-sort --reverse --preview 'echo {} | grep -o "[a-f0-9]\{7,\}" | head -1 | xargs git show --color=always' --preview-window=right:60%) || return
+  commit=$(git log --oneline --graph --decorate --all | fzf --no-sort --reverse --preview "echo {} | grep -o '$_GIT_HASH_PATTERN' | head -1 | xargs git show --color=always" --preview-window=right:60%) || return
 
   if [[ -n "$commit" ]]; then
-    local hash=$(echo "$commit" | grep -o "[a-f0-9]\{7,\}" | head -1)
+    local hash=$(_git_extract_hash "$commit")
     echo "Soft resetting to: $hash"
     git reset --soft "$hash"
   fi
@@ -224,11 +255,11 @@ gfix() {
   local commit
   # Try to get commits since upstream, fallback to last 20 commits
   commit=$(git log --oneline @{upstream}..HEAD 2>/dev/null || git log --oneline -n 20 | \
-    fzf --preview 'echo {} | grep -o "[a-f0-9]\{7,\}" | head -1 | xargs git show --color=always --stat' \
+    fzf --preview "echo {} | grep -o '$_GIT_HASH_PATTERN' | head -1 | xargs git show --color=always --stat" \
         --preview-window=right:60% \
         --header='Select commit to create fixup for') || return
 
-  local hash=$(echo "$commit" | grep -o "[a-f0-9]\{7,\}" | head -1)
+  local hash=$(_git_extract_hash "$commit")
 
   # Stage files interactively first
   echo "Staging files for fixup..."
@@ -260,22 +291,12 @@ grl() {
   local commit
   commit=$(git reflog --pretty=format:'%C(yellow)%h%Creset %C(cyan)%gd%Creset %gs %C(green)(%cr)%Creset' | \
     fzf --ansi \
-        --preview 'echo {} | grep -o "[a-f0-9]\{7,\}" | head -1 | xargs git show --color=always --stat' \
+        --preview "echo {} | grep -o '$_GIT_HASH_PATTERN' | head -1 | xargs git show --color=always --stat" \
         --preview-window=right:60% \
-        --header='Select reflog entry (c=checkout, r=reset-soft, s=show)') || return
+        --header='Select reflog entry (Enter=actions)') || return
 
-  local hash=$(echo "$commit" | grep -o "[a-f0-9]\{7,\}" | head -1)
-
-  echo "Selected: $hash"
-  echo -n "Action? (c)heckout, (r)eset-soft, (s)how [default=show]: "
-  read action
-
-  case "$action" in
-    c) git checkout "$hash" ;;
-    r) git reset --soft "$hash" ;;
-    s|"") git show "$hash" ;;
-    *) echo "Cancelled" ;;
-  esac
+  local hash=$(_git_extract_hash "$commit")
+  [ -n "$hash" ] && _git_commit_action_menu "$hash" "reflog entry"
 }
 
 # Git file history - browse commits that changed a file
@@ -297,11 +318,12 @@ gfh() {
   commit=$(git log --oneline --follow --color=always -- "$file" | \
     fzf --ansi \
         --no-sort \
-        --preview "echo {} | grep -o '[a-f0-9]\{7,\}' | head -1 | xargs -I{} git show --color=always {} -- $file" \
+        --preview "echo {} | grep -o '$_GIT_HASH_PATTERN' | head -1 | xargs -I{} git show --color=always {} -- $file" \
         --preview-window=right:70% \
-        --header="History: $file (Enter=view full diff)")
+        --header="History: $file (Enter=actions)")
 
-  [ -n "$commit" ] && echo "$commit" | grep -o "[a-f0-9]\{7,\}" | head -1 | xargs -I{} git show {} -- "$file"
+  local hash=$(_git_extract_hash "$commit")
+  [ -n "$hash" ] && _git_commit_action_menu "$hash" "file history"
 }
 
 # Git file history with fuzzy file selection
@@ -377,23 +399,12 @@ git_search_string() {
   commit=$(git log -S"$search_term" --oneline --color=always --all | \
     fzf --ansi \
         --no-sort \
-        --preview "echo {} | grep -o '[a-f0-9]\{7,\}' | head -1 | xargs -I{} git show --color=always {}" \
+        --preview "echo {} | grep -o '$_GIT_HASH_PATTERN' | head -1 | xargs -I{} git show --color=always {}" \
         --preview-window=right:60% \
         --header="Commits with '$search_term' (Enter=actions, Ctrl-Y=copy hash)") || return
 
-  local hash=$(echo "$commit" | grep -o "[a-f0-9]\{7,\}" | head -1)
-
-  echo "Selected: $hash"
-  echo -n "Action? (c)heckout, (d)iff with delta, (y)ank/copy hash, (s)how [default=show]: "
-  read action
-
-  case "$action" in
-    c) git checkout "$hash" ;;
-    d) git show "$hash" | delta ;;
-    y) echo -n "$hash" | pbcopy && echo "✓ Copied $hash to clipboard" ;;
-    s|"") git show "$hash" ;;
-    *) echo "Cancelled" ;;
-  esac
+  local hash=$(_git_extract_hash "$commit")
+  [ -n "$hash" ] && _git_commit_action_menu "$hash" "search result"
 }
 
 # Interactive squash - select base commit and squash everything after it
@@ -415,16 +426,16 @@ git_squash() {
   base_commit=$(git log --oneline --color=always | \
     fzf --ansi \
         --no-sort \
-        --preview 'hash=$(echo {} | grep -o "[a-f0-9]\{7,\}" | head -1); \
-                    count=$(git rev-list --count ${hash}..HEAD); \
-                    echo "Will squash ${count} commit(s) after this base commit\n"; \
-                    git log --oneline --color=always ${hash}..HEAD | nl -w2 -s". "; \
-                    echo "\n--- Base commit details ---"; \
-                    git show --color=always --stat $hash' \
+        --preview "hash=\$(echo {} | grep -o '$_GIT_HASH_PATTERN' | head -1); \
+                    count=\$(git rev-list --count \${hash}..HEAD); \
+                    echo \"Will squash \${count} commit(s) after this base commit\n\"; \
+                    git log --oneline --color=always \${hash}..HEAD | nl -w2 -s\". \"; \
+                    echo \"\n--- Base commit details ---\"; \
+                    git show --color=always --stat \$hash" \
         --preview-window=right:60% \
         --header='Select BASE commit to squash onto (commits after this will be squashed)') || return
 
-  local base_hash=$(echo "$base_commit" | grep -o "[a-f0-9]\{7,\}" | head -1)
+  local base_hash=$(_git_extract_hash "$base_commit")
   local squash_count=$(git rev-list --count ${base_hash}..HEAD)
 
   if [ "$squash_count" -eq 0 ]; then
