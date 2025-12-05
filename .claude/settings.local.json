@@ -11,7 +11,17 @@
       "WebFetch(domain:ast-grep.github.io)",
       "Bash(tree:*)",
       "Bash(git config:*)",
-      "WebFetch(domain:yazi-rs.github.io)"
+      "WebFetch(domain:yazi-rs.github.io)",
+      "Bash(source:*)",
+      "Bash(kt-context)",
+      "Bash(echo:*)",
+      "Bash(kt-current-sourceset)",
+      "Bash(ktf-find:*)",
+      "Bash(kt-cache-project:*)",
+      "Bash(kt-modules)",
+      "Bash(kt context:*)",
+      "Bash(kt modules:*)",
+      "Bash(kt info:*)"
     ],
     "deny": [],
     "ask": []
