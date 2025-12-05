@@ -347,8 +347,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			vim.tbl_extend("force", opts, { desc = "Code action" })
 		)
 		vim.keymap.set("n", "<leader>ln", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename symbol" }))
-		-- Use formatter.nvim instead of LSP formatting
-		vim.keymap.set("n", "<leader>lf", "<cmd>Format<CR>", vim.tbl_extend("force", opts, { desc = "Format buffer" }))
 
 		-- Diagnostics (using Telescope for diagnostics lists)
 		vim.keymap.set(
