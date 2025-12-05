@@ -23,6 +23,19 @@ alias rrp='refactor-rename --preview-only'
 alias rf='rename-file'
 alias rfn='rename-file --no-keep-path'
 
+# Project-specific format command
+# Runs .format file in project root if it exists
+fmt() {
+	if [[ -f ".format" ]]; then
+		echo "Running .format..."
+		bash .format "$@"
+	else
+		echo "No .format file found in current directory"
+		echo "Create a .format file with your project-specific format commands"
+		return 1
+	fi
+}
+
 # --- Image optimization (TinyPNG-like compression) ---
 
 # Optimize a single image (strips metadata, applies quality compression)
