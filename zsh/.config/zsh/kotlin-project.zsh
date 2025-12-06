@@ -408,7 +408,7 @@ kt-modules() {
 
   # Use jq to extract module names
   if command -v jq &> /dev/null; then
-    jq -r '.modules[].name' "$cache_file" | column
+    jq -r '.modules[].name' "$cache_file"
   else
     # Fallback without jq
     grep '"name"' "$cache_file" | sed 's/.*"name": "\([^"]*\)".*/\1/'

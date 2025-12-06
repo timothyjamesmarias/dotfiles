@@ -36,7 +36,7 @@ source "$ZSHCONFIG/git.zsh"         # Git aliases and functions
 source "$ZSHCONFIG/utils.zsh"       # Utility functions
 source "$ZSHCONFIG/ast-grep.zsh"    # Structural code search (ast-grep)
 source "$ZSHCONFIG/kotlin.zsh"      # Kotlin/Gradle utilities
-source "$ZSHCONFIG/kotlin-project.zsh"  # Kotlin Multiplatform project navigation
+source "$ZSHCONFIG/kotlin-project-cli.zsh"  # Kotlin Multiplatform project navigation (Rust CLI)
 source "$ZSHCONFIG/docker.zsh"      # Docker utilities
 source "$ZSHCONFIG/heroku.zsh"      # Heroku utilities
 source "$ZSHCONFIG/ctags.zsh"       # Ctags utilities

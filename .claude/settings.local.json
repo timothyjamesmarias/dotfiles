@@ -21,7 +21,14 @@
       "Bash(kt-modules)",
       "Bash(kt context:*)",
       "Bash(kt modules:*)",
-      "Bash(kt info:*)"
+      "Bash(kt info:*)",
+      "Bash(cargo --version:*)",
+      "Bash(rustc:*)",
+      "Bash(cargo build:*)",
+      "Bash(/Users/timmarias/projects/kt/target/release/kt modules:*)",
+      "Bash(/Users/timmarias/projects/kt/target/release/kt info:*)",
+      "Bash(/Users/timmarias/projects/kt/target/release/kt find:*)",
+      "Bash(~/bin/kt:*)"
     ],
     "deny": [],
     "ask": []
