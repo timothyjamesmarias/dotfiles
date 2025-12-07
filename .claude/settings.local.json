@@ -28,7 +28,14 @@
       "Bash(/Users/timmarias/projects/kt/target/release/kt modules:*)",
       "Bash(/Users/timmarias/projects/kt/target/release/kt info:*)",
       "Bash(/Users/timmarias/projects/kt/target/release/kt find:*)",
-      "Bash(~/bin/kt:*)"
+      "Bash(~/bin/kt:*)",
+      "Bash(kt expect:*)",
+      "Bash(kt symbol:*)",
+      "Bash(kt help:*)",
+      "Bash(./gradlew:*)",
+      "Bash(~/projects/kt/target/release/kt spring components:*)",
+      "Bash(~/projects/kt/target/release/kt spring endpoints:*)",
+      "Bash(~/projects/kt/target/release/kt spring:*)"
     ],
     "deny": [],
     "ask": []

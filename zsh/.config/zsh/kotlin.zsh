@@ -152,22 +152,10 @@ alias gwscan='gw build --scan'
 alias gwrefresh='gw build --refresh-dependencies'
 alias gwcache='gw clean && rm -rf ~/.gradle/caches/modules-2/files-2.1'
 
-# --- Kotlin file search ---
-ktf() {
-  find . -name "*.kt" -not -path "*/build/*" 2>/dev/null \
-    | fzf --preview 'bat --style=numbers --color=always {}' \
-    | xargs -r nvim
-}
-
-ktclass() {
-  local query="${1:-class}"
-  rg --no-heading --line-number "^(data )?class $query" --glob "*.kt" \
-    | fzf --ansi \
-    | awk -F: '{printf "nvim +%s %s\n", $2, $1}' \
-    | sh
-}
-
 # --- Generate ctags for Kotlin ---
 kttags() {
   ctags -R --languages=Kotlin --exclude=build --exclude=.gradle .
 }
+
+# Note: ktf, ktclass, and other kt* navigation functions are now provided
+# by the kt Rust CLI (see kotlin-project-cli.zsh)

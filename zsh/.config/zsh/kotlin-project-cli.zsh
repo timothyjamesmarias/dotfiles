@@ -50,9 +50,29 @@ kti() {
     mod|modules|m)
       "$KT_BIN" modules --interactive
       ;;
+    sym|symbol)
+      if [[ -z "$1" ]]; then
+        echo "Usage: kti symbol <query>"
+        return 1
+      fi
+      "$KT_BIN" symbol "$@" --interactive
+      ;;
+    expect|exp)
+      "$KT_BIN" expect --interactive
+      ;;
+    # Spring Boot commands
+    spring-components|spc)
+      "$KT_BIN" spring components "$@" --interactive
+      ;;
+    spring-endpoints|spe)
+      "$KT_BIN" spring endpoints --interactive
+      ;;
+    spring-entities|spent)
+      "$KT_BIN" spring entities --interactive
+      ;;
     *)
       echo "Unknown command: $cmd"
-      echo "Usage: kti {find|here|ctx|all|sourceset|modules}"
+      echo "Usage: kti {find|here|ctx|all|sourceset|modules|symbol|expect|spring-components|spring-endpoints|spring-entities}"
       echo ""
       echo "Examples:"
       echo "  kti find Recipe    # Find and open Recipe files with fzf"
@@ -60,6 +80,13 @@ kti() {
       echo "  kti ctx            # Context-aware browse with fzf"
       echo "  kti ss             # Select source set, then browse"
       echo "  kti mod            # Browse modules and show info"
+      echo "  kti sym Recipe     # Search for Recipe symbols and jump to them"
+      echo "  kti expect         # Browse expect declarations and their actuals"
+      echo ""
+      echo "Spring Boot commands:"
+      echo "  kti spc            # Browse Spring components (controllers, services, etc.)"
+      echo "  kti spe            # Browse REST endpoints"
+      echo "  kti spent          # Browse JPA entities"
       return 1
       ;;
   esac
@@ -97,6 +124,13 @@ alias kth='kti here'
 alias ktc='kti ctx'
 alias kta='kti all'
 alias kts='kti ss'
+alias ktsym='kti sym'        # Search and jump to symbols
+alias ktexp='kti expect'     # Browse expect/actual declarations
+
+# Spring Boot aliases
+alias ktspc='kti spc'        # Browse Spring components
+alias ktspe='kti spe'        # Browse REST endpoints
+alias ktspent='kti spent'    # Browse JPA entities
 
 # --- Tab completion ---
 _kt_completion() {
@@ -122,6 +156,11 @@ _kt_completion() {
     'g:Jump to module (alias)'
     'tasks:Get Gradle tasks'
     'deps:Get module dependencies'
+    'symbol:Search for symbols (classes, functions, etc.)'
+    'sym:Search for symbols (alias)'
+    'expect:Find expect/actual declarations'
+    'actual:Find expect for current actual'
+    'spring:Spring Boot commands'
     'cache:Generate project cache'
   )
 
@@ -147,6 +186,16 @@ _kti_completion() {
     'modules:Browse modules (interactive)'
     'mod:Browse modules (alias)'
     'm:Browse modules (alias)'
+    'symbol:Search for symbols (interactive)'
+    'sym:Search for symbols (alias)'
+    'expect:Browse expect/actual declarations (interactive)'
+    'exp:Browse expect/actual declarations (alias)'
+    'spring-components:Browse Spring components (interactive)'
+    'spc:Browse Spring components (alias)'
+    'spring-endpoints:Browse REST endpoints (interactive)'
+    'spe:Browse REST endpoints (alias)'
+    'spring-entities:Browse JPA entities (interactive)'
+    'spent:Browse JPA entities (alias)'
   )
 
   _describe 'kti commands' commands
@@ -180,9 +229,19 @@ COMMANDS:
 
     Add --interactive or -i to any file command for fzf selection
 
+  Symbol Search:
+    kt symbol <query>        Search for symbols (classes, functions, etc.)
+    kt expect                Find expect declarations and their actuals
+    kt actual                Find expect for current actual
+
   Module Navigation:
     kt modules               List all modules
     kt goto [MODULE]         Print module path (or select with fzf)
+
+  Spring Boot:
+    kt spring components     List Spring components (@RestController, @Service, etc.)
+    kt spring endpoints      List REST endpoints
+    kt spring entities       List JPA entities
 
   Cache:
     kt cache                 Regenerate project structure cache
@@ -193,6 +252,11 @@ INTERACTIVE SHORTCUTS (kti):
   kti ctx                    Context-aware browse
   kti ss                     Select source set, then browse
   kti mod                    Browse modules, show info
+  kti sym Recipe             Search for symbols and jump to them
+  kti expect                 Browse expect/actual declarations
+  kti spc                    Browse Spring components
+  kti spe                    Browse REST endpoints
+  kti spent                  Browse JPA entities
   ktg                        Select module and cd to it
   ktg :backend               Jump directly to backend module
 
@@ -217,6 +281,12 @@ EXAMPLES:
 
   # Search in current module files
   kt here | xargs rg "suspend fun"
+
+  # Find all REST endpoints
+  kt spring endpoints
+
+  # Browse and open a Spring controller
+  kti spc
 
 For more help: kt --help
 EOF
