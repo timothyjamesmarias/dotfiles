@@ -20,6 +20,7 @@ SOURCE_FILES=(
   "$ZSHCONFIG/utils.zsh"
   "$ZSHCONFIG/ast-grep.zsh"
   "$ZSHCONFIG/kotlin.zsh"
+  "$ZSHCONFIG/kotlin-project-cli.zsh"
   "$ZSHCONFIG/docker.zsh"
   "$ZSHCONFIG/heroku.zsh"
   "$ZSHCONFIG/ctags.zsh"
@@ -84,6 +85,7 @@ build_cache() {
       extract_aliases "$ZSHCONFIG/utils.zsh" "utils"
       extract_aliases "$ZSHCONFIG/ast-grep.zsh" "ast-grep"
       extract_aliases "$ZSHCONFIG/kotlin.zsh" "kotlin"
+      extract_aliases "$ZSHCONFIG/kotlin-project-cli.zsh" "kt"
       extract_aliases "$ZSHCONFIG/docker.zsh" "docker"
       extract_aliases "$ZSHCONFIG/heroku.zsh" "heroku"
 
@@ -92,6 +94,7 @@ build_cache() {
       extract_functions "$ZSHCONFIG/utils.zsh" "utils"
       extract_functions "$ZSHCONFIG/ast-grep.zsh" "ast-grep"
       extract_functions "$ZSHCONFIG/kotlin.zsh" "kotlin"
+      extract_functions "$ZSHCONFIG/kotlin-project-cli.zsh" "kt"
       extract_functions "$ZSHCONFIG/docker.zsh" "docker"
     fi
 
@@ -228,6 +231,10 @@ show_preview() {
     git-cfg)
       # Show git config alias
       git config --get "alias.$name" 2>/dev/null
+      ;;
+    kt)
+      # Show kt CLI command or alias
+      type "$name" 2>/dev/null || echo "(kt CLI command - see: kt --help)"
       ;;
     tmux)
       # Show tmux binding

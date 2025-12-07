@@ -35,7 +35,8 @@
       "Bash(./gradlew:*)",
       "Bash(~/projects/kt/target/release/kt spring components:*)",
       "Bash(~/projects/kt/target/release/kt spring endpoints:*)",
-      "Bash(~/projects/kt/target/release/kt spring:*)"
+      "Bash(~/projects/kt/target/release/kt spring:*)",
+      "Bash(cargo test:*)"
     ],
     "deny": [],
     "ask": []

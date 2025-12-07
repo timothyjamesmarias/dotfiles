@@ -130,6 +130,11 @@ CARGO_PACKAGES=(
     "rust-analyzer"         # Rust LSP
 )
 
+# Custom Rust CLI tools (from git)
+CUSTOM_RUST_TOOLS=(
+    "kt|git@github.com:falki-io/kt.git"  # Kotlin Multiplatform project navigator
+)
+
 install_cli_tools() {
     log_info "Installing CLI tools via Homebrew..."
 
@@ -299,6 +304,53 @@ install_fonts() {
     log_success "Fonts installed"
 }
 
+install_custom_rust_tools() {
+    log_info "Installing custom Rust CLI tools..."
+
+    if ! command_exists cargo; then
+        log_warn "cargo not found. Please install Rust first."
+        return 1
+    fi
+
+    # Create temp directory for cloning
+    local temp_dir=$(mktemp -d)
+
+    for tool_spec in "${CUSTOM_RUST_TOOLS[@]}"; do
+        local tool_name="${tool_spec%%|*}"
+        local repo_url="${tool_spec##*|}"
+
+        # Check if already installed
+        if command_exists "$tool_name"; then
+            log_success "$tool_name already installed"
+            continue
+        fi
+
+        log_info "Installing $tool_name from $repo_url..."
+
+        # Clone and build
+        if git clone "$repo_url" "$temp_dir/$tool_name" 2>/dev/null; then
+            cd "$temp_dir/$tool_name"
+            if cargo build --release 2>&1 | grep -q "Finished"; then
+                # Install to ~/.local/bin
+                mkdir -p ~/.local/bin
+                cp "target/release/$tool_name" ~/.local/bin/
+                chmod +x ~/.local/bin/$tool_name
+                log_success "$tool_name installed to ~/.local/bin/$tool_name"
+            else
+                log_warn "Failed to build $tool_name"
+            fi
+            cd - > /dev/null
+        else
+            log_warn "Failed to clone $repo_url"
+        fi
+    done
+
+    # Clean up
+    rm -rf "$temp_dir"
+
+    log_success "Custom Rust tools installation complete"
+}
+
 install_neovim_dependencies() {
     log_info "Setting up Neovim dependencies..."
 
@@ -362,12 +414,14 @@ show_help() {
     echo "  --fonts       Install fonts only"
     echo "  --version-mgr Install version managers (asdf, sdkman)"
     echo "  --nvim        Setup Neovim dependencies"
+    echo "  --kotlin      Install Kotlin/Gradle tools (kt CLI)"
     echo "  --stow        Stow dotfiles to home directory"
     echo "  --help        Show this help message"
     echo ""
     echo "Examples:"
     echo "  install-deps --all        # Full installation"
     echo "  install-deps --cli --lsp  # CLI tools and LSP servers"
+    echo "  install-deps --kotlin     # Just Kotlin/Gradle tools"
     echo "  install-deps --stow       # Just link dotfiles"
 }
 
@@ -391,6 +445,7 @@ main() {
                 install_version_managers
                 install_fonts
                 install_neovim_dependencies
+                install_custom_rust_tools
                 ;;
             --cli)
                 install_cli_tools
@@ -406,6 +461,9 @@ main() {
                 ;;
             --nvim)
                 install_neovim_dependencies
+                ;;
+            --kotlin)
+                install_custom_rust_tools
                 ;;
             --stow)
                 stow_dotfiles

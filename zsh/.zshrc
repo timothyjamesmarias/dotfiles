@@ -35,8 +35,6 @@ source "$ZSHCONFIG/files.zsh"       # File and project search utilities
 source "$ZSHCONFIG/git.zsh"         # Git aliases and functions
 source "$ZSHCONFIG/utils.zsh"       # Utility functions
 source "$ZSHCONFIG/ast-grep.zsh"    # Structural code search (ast-grep)
-source "$ZSHCONFIG/kotlin.zsh"      # Kotlin/Gradle utilities
-source "$ZSHCONFIG/kotlin-project-cli.zsh"  # Kotlin Multiplatform project navigation (Rust CLI)
 source "$ZSHCONFIG/docker.zsh"      # Docker utilities
 source "$ZSHCONFIG/heroku.zsh"      # Heroku utilities
 source "$ZSHCONFIG/ctags.zsh"       # Ctags utilities
@@ -69,3 +67,39 @@ heroku() {
   [[ -f "$HEROKU_AC_ZSH_SETUP_PATH" ]] && source "$HEROKU_AC_ZSH_SETUP_PATH"
   heroku "$@"
 }
+
+# --- Kotlin/Gradle utilities (lazy loaded) ---
+# Load Kotlin utilities only when Kotlin/Gradle commands are used
+__kotlin_utils_loaded=0
+
+__load_kotlin_utils() {
+  if [[ "$__kotlin_utils_loaded" -eq 0 ]]; then
+    source "$ZSHCONFIG/kotlin.zsh" 2>/dev/null
+    source "$ZSHCONFIG/kotlin-project-cli.zsh" 2>/dev/null
+    __kotlin_utils_loaded=1
+  fi
+}
+
+# Auto-detect if we're in a Kotlin project and load utilities
+__autoload_kotlin_utils() {
+  # Check if we're in a Kotlin project (has gradlew or settings.gradle.kts)
+  if [[ -f "gradlew" ]] || [[ -f "settings.gradle.kts" ]] || [[ -f "build.gradle.kts" ]]; then
+    __load_kotlin_utils
+  fi
+}
+
+# Hook into directory changes
+autoload -U add-zsh-hook
+add-zsh-hook chpwd __autoload_kotlin_utils
+
+# Check on shell startup
+__autoload_kotlin_utils
+
+# Lazy load wrapper functions for kt CLI
+# These will load the full Kotlin utilities when called
+for cmd in kt kti ktg ktf kth ktc kta kts ktsym ktexp ktspc ktspe ktspent ktctx ktinfo ktmod ktcache; do
+  eval "$cmd() { __load_kotlin_utils && unfunction $cmd && $cmd \"\$@\"; }"
+done
+
+# Lazy load wrapper for gradle wrapper
+gw() { __load_kotlin_utils && unfunction gw && gw "$@"; }

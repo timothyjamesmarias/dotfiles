@@ -2,16 +2,53 @@
 # Shell integration for the kt Rust CLI tool with built-in fzf support
 
 # Path to the kt binary
-KT_BIN="${KT_BIN:-$HOME/bin/kt}"
+# Priority:
+#   1. KT_BIN environment variable (if set)
+#   2. System-installed binary (in PATH)
+#   3. User-installed binary (~/.local/bin/kt)
+#   4. Development version (~/projects/kt/target/release/kt)
+#   5. Legacy location (~/bin/kt)
 
-# Check if kt binary exists
-if [[ ! -x "$KT_BIN" ]]; then
+__find_kt_binary() {
+  # Check if KT_BIN is already set and valid
+  if [[ -n "$KT_BIN" ]] && [[ -x "$KT_BIN" ]]; then
+    return 0
+  fi
+
+  # Check if kt is in PATH (installed via package manager or install-deps)
   if command -v kt &> /dev/null; then
     KT_BIN="kt"
-  else
-    echo "Warning: kt binary not found. Install from /Users/timmarias/projects/kt" >&2
-    return 1
+    return 0
   fi
+
+  # Check ~/.local/bin (installed via install-deps --kotlin)
+  if [[ -x "$HOME/.local/bin/kt" ]]; then
+    KT_BIN="$HOME/.local/bin/kt"
+    return 0
+  fi
+
+  # Check development version
+  if [[ -x "$HOME/projects/kt/target/release/kt" ]]; then
+    KT_BIN="$HOME/projects/kt/target/release/kt"
+    return 0
+  fi
+
+  # Check legacy location
+  if [[ -x "$HOME/bin/kt" ]]; then
+    KT_BIN="$HOME/bin/kt"
+    return 0
+  fi
+
+  # Not found
+  echo "Warning: kt binary not found." >&2
+  echo "Install with: install-deps --kotlin" >&2
+  echo "Or build from source: https://github.com/falki-io/kt" >&2
+  return 1
+}
+
+# Find kt binary on load
+if ! __find_kt_binary; then
+  return 1
 fi
 
 # --- Main kt command (pass-through) ---
@@ -22,7 +59,7 @@ kt() {
 # --- Interactive wrapper functions ---
 # These use the --interactive flag for a better terminal experience
 
-# Interactive file navigation
+# Interactive wrapper for kt commands (adds fzf integration)
 kti() {
   local cmd="$1"
   shift
@@ -92,7 +129,7 @@ kti() {
   esac
 }
 
-# Interactive module navigation with cd
+# Jump to module directory with cd (interactive if no arg)
 ktg() {
   local module="$1"
 
