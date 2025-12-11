@@ -108,8 +108,9 @@ if [ -z "$OLD_NAME" ]; then
     DEFAULT_NEW_NAME=$(basename "$SELECTED_FILE")
   fi
 
-  # Prompt for new name with default
-  read -e -p "$(echo -e ${YELLOW}Enter new name:${RESET} )" -i "$DEFAULT_NEW_NAME" NEW_NAME
+  # Prompt for new name with default (portable for macOS bash 3.2)
+  read -e -p "$(echo -e ${YELLOW}Enter new name [${DEFAULT_NEW_NAME}]:${RESET} )" NEW_NAME
+  NEW_NAME="${NEW_NAME:-$DEFAULT_NEW_NAME}"
 
   # If user didn't change it, exit
   if [ "$NEW_NAME" = "$DEFAULT_NEW_NAME" ] || [ -z "$NEW_NAME" ]; then

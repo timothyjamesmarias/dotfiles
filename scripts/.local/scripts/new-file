@@ -1,0 +1,457 @@
+#!/usr/bin/env bash
+
+# new-file - Interactive file creation with templates and fzf
+
+set -e
+
+# Colors
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+RESET='\033[0m'
+
+# Get the dotfiles directory
+# Resolve symlinks (for GNU Stow) to find actual script location
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+while [ -L "$SCRIPT_PATH" ]; do
+  SCRIPT_DIR="$(cd -P "$(dirname "$SCRIPT_PATH")" && pwd)"
+  SCRIPT_PATH="$(readlink "$SCRIPT_PATH")"
+  [[ $SCRIPT_PATH != /* ]] && SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_PATH"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SCRIPT_PATH")" && pwd)"
+
+# From ~/dotfiles/scripts/.local/scripts, go up 3 levels to ~/dotfiles
+DOTFILES_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+TEMPLATES_DIR="$DOTFILES_DIR/templates"
+TEMPLATES_CONF="$TEMPLATES_DIR/templates.conf"
+
+usage() {
+  cat << EOF
+${CYAN}new-file${RESET} - Interactive file creation with templates
+
+${YELLOW}Usage:${RESET}
+  new-file [options]
+  new-file <file-path>
+
+${YELLOW}Options:${RESET}
+  --lang <language>       Specify language (php, typescript, javascript, etc.)
+  --kind <kind>           Specify template kind (class, interface, component, etc.)
+  --name <name>           Specify file name
+  --dir <directory>       Specify target directory
+  --no-confirm            Skip confirmation prompt
+  -h, --help              Show this help
+
+${YELLOW}Examples:${RESET}
+  new-file                                    # Full interactive mode
+  new-file src/components/Button.vue          # Quick create with path
+  new-file --lang php --kind class User       # Create with options
+
+${YELLOW}Features:${RESET}
+  • Interactive language and template selection with fzf
+  • Smart placeholder replacement (CLASS_NAME, NAMESPACE, etc.)
+  • Directory creation if needed
+  • Git-aware operations
+  • Preview templates before creation
+  • Confirm before creating
+EOF
+  exit 0
+}
+
+# Parse arguments
+LANG_ARG=""
+KIND_ARG=""
+NAME_ARG=""
+DIR_ARG=""
+NO_CONFIRM=0
+FILE_PATH_ARG=""
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h|--help)
+      usage
+      ;;
+    --lang)
+      LANG_ARG="$2"
+      shift 2
+      ;;
+    --kind)
+      KIND_ARG="$2"
+      shift 2
+      ;;
+    --name)
+      NAME_ARG="$2"
+      shift 2
+      ;;
+    --dir)
+      DIR_ARG="$2"
+      shift 2
+      ;;
+    --no-confirm)
+      NO_CONFIRM=1
+      shift
+      ;;
+    -*)
+      echo -e "${RED}Error: Unknown option: $1${RESET}"
+      echo "Use --help for usage information"
+      exit 1
+      ;;
+    *)
+      if [ -z "$FILE_PATH_ARG" ]; then
+        FILE_PATH_ARG="$1"
+      else
+        echo -e "${RED}Error: Too many arguments${RESET}"
+        exit 1
+      fi
+      shift
+      ;;
+  esac
+done
+
+# Check if templates exist
+if [ ! -d "$TEMPLATES_DIR" ] || [ ! -f "$TEMPLATES_CONF" ]; then
+  echo -e "${RED}Error: Templates not found at $TEMPLATES_DIR${RESET}"
+  echo "Please ensure your dotfiles templates are set up correctly"
+  exit 1
+fi
+
+# Function to load template config
+load_templates_config() {
+  grep -v '^#' "$TEMPLATES_CONF" | grep -v '^$'
+}
+
+# Function to get languages from config
+get_languages() {
+  load_templates_config | cut -d'|' -f1 | sort -u
+}
+
+# Function to get kinds for a language
+get_kinds_for_language() {
+  local lang="$1"
+  load_templates_config | grep "^${lang}|" | cut -d'|' -f3
+}
+
+# Function to get template details
+get_template_details() {
+  local lang="$1"
+  local kind="$2"
+  load_templates_config | grep "^${lang}|.*|${kind}|"
+}
+
+# Function to get extension for language and kind
+get_extension() {
+  local lang="$1"
+  local kind="$2"
+  get_template_details "$lang" "$kind" | cut -d'|' -f2
+}
+
+# Function to get template path
+get_template_path() {
+  local lang="$1"
+  local kind="$2"
+  local template_rel=$(get_template_details "$lang" "$kind" | cut -d'|' -f4)
+  echo "$TEMPLATES_DIR/$template_rel"
+}
+
+# Function to convert string to PascalCase
+to_pascal_case() {
+  echo "$1" | sed -r 's/(^|[-_])([a-z])/\U\2/g' | sed 's/[-_]//g'
+}
+
+# Function to convert string to kebab-case
+to_kebab_case() {
+  echo "$1" | sed 's/\([A-Z]\)/-\L\1/g' | sed 's/^-//' | tr '_' '-' | tr '[:upper:]' '[:lower:]'
+}
+
+# Function to convert string to snake_case
+to_snake_case() {
+  echo "$1" | sed 's/\([A-Z]\)/_\L\1/g' | sed 's/^_//' | tr '-' '_' | tr '[:upper:]' '[:lower:]'
+}
+
+# Function to extract namespace from path
+get_namespace_from_path() {
+  local file_path="$1"
+  local dir_path=$(dirname "$file_path")
+
+  # Convert path to namespace (e.g., src/Services/Auth -> Services\Auth)
+  # This is PHP-centric but can be adapted
+  echo "$dir_path" | sed 's|^src/||' | sed 's|/|\\|g'
+}
+
+# Function to replace placeholders in template
+replace_placeholders() {
+  local template_content="$1"
+  local file_path="$2"
+  local base_name="$3"
+
+  local file_name=$(basename "$base_name" | sed 's/\.[^.]*$//')
+  local class_name=$(to_pascal_case "$file_name")
+  local component_name=$(to_kebab_case "$file_name")
+  local namespace=$(get_namespace_from_path "$file_path")
+
+  # Replace placeholders
+  template_content="${template_content//\{\{CLASS_NAME\}\}/$class_name}"
+  template_content="${template_content//\{\{INTERFACE_NAME\}\}/$class_name}"
+  template_content="${template_content//\{\{MODULE_NAME\}\}/$file_name}"
+  template_content="${template_content//\{\{COMPONENT_NAME\}\}/$component_name}"
+  template_content="${template_content//\{\{FILE_NAME\}\}/$file_name}"
+  template_content="${template_content//\{\{NAMESPACE\}\}/$namespace}"
+  template_content="${template_content//\{\{TITLE\}\}/$file_name}"
+  template_content="${template_content//\{\{SELECTOR\}\}/$component_name}"
+
+  echo "$template_content"
+}
+
+# Interactive mode
+echo -e "${CYAN}╔════════════════════════════════════════╗${RESET}"
+echo -e "${CYAN}║     Interactive File Creator          ║${RESET}"
+echo -e "${CYAN}╚════════════════════════════════════════╝${RESET}"
+echo ""
+
+# Step 1: Determine target directory
+if [ -n "$DIR_ARG" ]; then
+  TARGET_DIR="$DIR_ARG"
+elif [ -n "$FILE_PATH_ARG" ]; then
+  TARGET_DIR=$(dirname "$FILE_PATH_ARG")
+else
+  echo -e "${BLUE}[1/5]${RESET} ${YELLOW}Select target directory:${RESET}"
+
+  # Offer current directory or browse
+  DIR_CHOICE=$(echo -e ".\nBrowse..." | fzf \
+    --height=10 \
+    --layout=reverse \
+    --border \
+    --prompt="Directory > " \
+    --header="Select '.' for current dir, 'Browse...' to pick a directory")
+
+  if [ "$DIR_CHOICE" = "Browse..." ]; then
+    # Use fd or find to list directories
+    if command -v fd &> /dev/null; then
+      TARGET_DIR=$(fd --type d --hidden --exclude .git | fzf \
+        --height=80% \
+        --layout=reverse \
+        --border \
+        --prompt="Directory > " \
+        --preview 'ls -la {}' \
+        --header="Select target directory")
+    else
+      TARGET_DIR=$(find . -type d -not -path '*/\.git/*' | fzf \
+        --height=80% \
+        --layout=reverse \
+        --border \
+        --prompt="Directory > " \
+        --preview 'ls -la {}' \
+        --header="Select target directory")
+    fi
+  else
+    TARGET_DIR="."
+  fi
+
+  if [ -z "$TARGET_DIR" ]; then
+    echo -e "${YELLOW}Cancelled by user${RESET}"
+    exit 0
+  fi
+
+  echo -e "${GREEN}✓ Directory: ${TARGET_DIR}${RESET}"
+  echo ""
+fi
+
+# Step 2: Select language
+if [ -n "$LANG_ARG" ]; then
+  SELECTED_LANG="$LANG_ARG"
+elif [ -n "$FILE_PATH_ARG" ]; then
+  # Infer language from extension
+  EXTENSION="${FILE_PATH_ARG##*.}"
+  SELECTED_LANG=$(load_templates_config | grep "|${EXTENSION}|" | head -1 | cut -d'|' -f1)
+
+  if [ -z "$SELECTED_LANG" ]; then
+    echo -e "${RED}Error: Could not infer language from extension: $EXTENSION${RESET}"
+    exit 1
+  fi
+else
+  echo -e "${BLUE}[2/5]${RESET} ${YELLOW}Select language/file type:${RESET}"
+
+  SELECTED_LANG=$(get_languages | fzf \
+    --height=40% \
+    --layout=reverse \
+    --border \
+    --prompt="Language > " \
+    --header="Select the programming language")
+
+  if [ -z "$SELECTED_LANG" ]; then
+    echo -e "${YELLOW}Cancelled by user${RESET}"
+    exit 0
+  fi
+
+  echo -e "${GREEN}✓ Language: ${SELECTED_LANG}${RESET}"
+  echo ""
+fi
+
+# Step 3: Select template kind
+if [ -n "$KIND_ARG" ]; then
+  SELECTED_KIND="$KIND_ARG"
+else
+  echo -e "${BLUE}[3/5]${RESET} ${YELLOW}Select template kind:${RESET}"
+
+  # Get available kinds for this language
+  KINDS=$(get_kinds_for_language "$SELECTED_LANG")
+  KIND_COUNT=$(echo "$KINDS" | wc -l | tr -d ' ')
+
+  if [ "$KIND_COUNT" -eq 1 ]; then
+    # Only one option, auto-select
+    SELECTED_KIND=$(echo "$KINDS" | head -1)
+    echo -e "${GREEN}✓ Kind: ${SELECTED_KIND} (auto-selected)${RESET}"
+  else
+    # Build fzf options with descriptions
+    FZF_INPUT=""
+    while IFS= read -r kind; do
+      desc=$(get_template_details "$SELECTED_LANG" "$kind" | cut -d'|' -f5)
+      FZF_INPUT="${FZF_INPUT}${kind}|${desc}\n"
+    done <<< "$KINDS"
+
+    SELECTED_KIND=$(echo -e "$FZF_INPUT" | fzf \
+      --height=40% \
+      --layout=reverse \
+      --border \
+      --prompt="Kind > " \
+      --delimiter="|" \
+      --with-nth=1,2 \
+      --header="Select the template kind" | cut -d'|' -f1)
+
+    if [ -z "$SELECTED_KIND" ]; then
+      echo -e "${YELLOW}Cancelled by user${RESET}"
+      exit 0
+    fi
+
+    echo -e "${GREEN}✓ Kind: ${SELECTED_KIND}${RESET}"
+  fi
+  echo ""
+fi
+
+# Get extension for selected language and kind
+EXTENSION=$(get_extension "$SELECTED_LANG" "$SELECTED_KIND")
+
+# Step 4: Get file name
+if [ -n "$NAME_ARG" ]; then
+  FILE_NAME="$NAME_ARG"
+elif [ -n "$FILE_PATH_ARG" ]; then
+  FILE_NAME=$(basename "$FILE_PATH_ARG")
+else
+  echo -e "${BLUE}[4/5]${RESET} ${YELLOW}Enter file name:${RESET}"
+
+  # Suggest a default based on kind
+  DEFAULT_NAME=""
+  case "$SELECTED_KIND" in
+    class)
+      DEFAULT_NAME="MyClass.${EXTENSION}"
+      ;;
+    interface)
+      DEFAULT_NAME="MyInterface.${EXTENSION}"
+      ;;
+    component)
+      DEFAULT_NAME="MyComponent.${EXTENSION}"
+      ;;
+    module)
+      DEFAULT_NAME="my-module.${EXTENSION}"
+      ;;
+    *)
+      DEFAULT_NAME="untitled.${EXTENSION}"
+      ;;
+  esac
+
+  # Portable read with default (works on macOS bash 3.2)
+  read -e -p "$(echo -e "  ${YELLOW}File name [${DEFAULT_NAME}]:${RESET} ")" FILE_NAME
+  FILE_NAME="${FILE_NAME:-$DEFAULT_NAME}"
+
+  if [ -z "$FILE_NAME" ]; then
+    echo -e "${RED}Error: File name is required${RESET}"
+    exit 1
+  fi
+
+  # Ensure file has correct extension
+  if [[ ! "$FILE_NAME" =~ \.${EXTENSION}$ ]]; then
+    FILE_NAME="${FILE_NAME}.${EXTENSION}"
+  fi
+
+  echo -e "${GREEN}✓ File name: ${FILE_NAME}${RESET}"
+  echo ""
+fi
+
+# Construct full file path
+FULL_PATH="${TARGET_DIR}/${FILE_NAME}"
+
+# Check if file already exists
+if [ -e "$FULL_PATH" ]; then
+  echo -e "${RED}Error: File already exists: ${FULL_PATH}${RESET}"
+  exit 1
+fi
+
+# Get template path and load template
+TEMPLATE_PATH=$(get_template_path "$SELECTED_LANG" "$SELECTED_KIND")
+
+if [ ! -f "$TEMPLATE_PATH" ]; then
+  echo -e "${RED}Error: Template not found: ${TEMPLATE_PATH}${RESET}"
+  exit 1
+fi
+
+TEMPLATE_CONTENT=$(cat "$TEMPLATE_PATH")
+
+# Replace placeholders
+FILE_CONTENT=$(replace_placeholders "$TEMPLATE_CONTENT" "$FULL_PATH" "$FILE_NAME")
+
+# Step 5: Preview and confirm
+if [ $NO_CONFIRM -eq 0 ]; then
+  echo -e "${BLUE}[5/5]${RESET} ${YELLOW}Preview and confirm:${RESET}"
+  echo ""
+  echo -e "${CYAN}File path:${RESET} ${FULL_PATH}"
+  echo -e "${CYAN}Template:${RESET} ${SELECTED_LANG}/${SELECTED_KIND}"
+  echo ""
+  echo -e "${CYAN}Content:${RESET}"
+  echo -e "${MAGENTA}╭────────────────────────────────────────╮${RESET}"
+  echo "$FILE_CONTENT" | head -20
+  if [ $(echo "$FILE_CONTENT" | wc -l) -gt 20 ]; then
+    echo -e "${MAGENTA}  ... (truncated)${RESET}"
+  fi
+  echo -e "${MAGENTA}╰────────────────────────────────────────╯${RESET}"
+  echo ""
+
+  read -p "$(echo -e ${YELLOW}Create this file? [Y/n]:${RESET} )" CONFIRM
+
+  if [[ ! "$CONFIRM" =~ ^[Yy]?$ ]]; then
+    echo -e "${YELLOW}Cancelled by user${RESET}"
+    exit 0
+  fi
+fi
+
+# Create directory if it doesn't exist
+TARGET_DIR_PATH=$(dirname "$FULL_PATH")
+if [ ! -d "$TARGET_DIR_PATH" ]; then
+  echo -e "${YELLOW}Creating directory: ${TARGET_DIR_PATH}${RESET}"
+  mkdir -p "$TARGET_DIR_PATH"
+fi
+
+# Create the file
+echo "$FILE_CONTENT" > "$FULL_PATH"
+
+# Make shell scripts executable
+if [ "$EXTENSION" = "sh" ]; then
+  chmod +x "$FULL_PATH"
+fi
+
+echo ""
+echo -e "${GREEN}╔════════════════════════════════════════╗${RESET}"
+echo -e "${GREEN}║  ✓ File created successfully!         ║${RESET}"
+echo -e "${GREEN}╚════════════════════════════════════════╝${RESET}"
+echo ""
+echo -e "${CYAN}Location:${RESET} ${FULL_PATH}"
+echo ""
+
+# Offer to open in editor
+if [ -n "$EDITOR" ]; then
+  read -p "$(echo -e ${YELLOW}Open in $EDITOR? [Y/n]:${RESET} )" OPEN_EDITOR
+  if [[ "$OPEN_EDITOR" =~ ^[Yy]?$ ]]; then
+    $EDITOR "$FULL_PATH"
+  fi
+fi

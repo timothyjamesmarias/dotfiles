@@ -13,6 +13,7 @@
 --                     * Rails: alternate, related, model, view, controller, generate, test, console
 --                     * Laravel: artisan, routes, related/model
 --                     * Gradle/Kotlin: build, test, run, clean, dev server
+--                     * CSS/SCSS: find imports (@import/@use/@forward)
 -- <leader>g*        - Git operations (via gitsigns or other git plugins)
 --                     * <leader>gh - Git history of current file
 -- <leader>x*        - Quickfix/Location list operations
@@ -98,6 +99,16 @@ vim.keymap.set("n", "<leader>fy", function()
 	vim.fn.setreg("+", path)
 	print("Copied to clipboard: " .. path)
 end, { silent = false, desc = "Copy relative file path to clipboard" })
+vim.keymap.set("n", "<leader>fD", function()
+	local path = vim.fn.expand("%:p:h")
+	vim.fn.setreg("+", path)
+	print("Copied to clipboard: " .. path)
+end, { silent = false, desc = "Copy absolute directory path to clipboard" })
+vim.keymap.set("n", "<leader>fc", function()
+	local path = vim.fn.expand("%:.:h")
+	vim.fn.setreg("+", path)
+	print("Copied to clipboard: " .. path)
+end, { silent = false, desc = "Copy relative directory path to clipboard" })
 
 function vim.getVisualSelection()
 	-- Exit visual mode to set '< and '> marks, then get the text
@@ -720,6 +731,23 @@ local function find_vue_component_references()
 	})
 end
 
+-- Helper function to find CSS/SCSS file references
+local function find_css_references()
+	local file_path = vim.fn.expand("%:p")
+	local filename_no_ext = vim.fn.fnamemodify(file_path, ":t:r") -- Without extension
+
+	-- Remove leading underscore for SCSS partials
+	local basename = filename_no_ext:gsub("^_", "")
+
+	-- Search for import/use/forward statements containing the basename
+	-- Will match: @import 'path/mobile-select', @use 'mobile-select.scss', etc.
+	require("telescope.builtin").live_grep({
+		default_text = basename,
+		glob_pattern = "*.{css,scss,sass}",
+		prompt_title = "Find CSS/SCSS Imports: " .. basename,
+	})
+end
+
 -- Ruby/Rails Project keymaps (set on filetype)
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "ruby", "eruby", "slim" },
@@ -941,10 +969,15 @@ vim.api.nvim_create_autocmd("FileType", {
 			local line = vim.fn.getline(".")
 			local col = vim.fn.col(".")
 
+			-- Debug: print what we're checking
+			vim.notify(string.format("Line: %s, Col: %d", line, col), vim.log.levels.INFO)
+
 			-- Check for closing component tag: </x-component-name>
 			local component_pattern = "</x%-([%w%.%-_]+)"
 			for component_match in line:gmatch(component_pattern) do
+				vim.notify(string.format("Found closing match: %s", component_match), vim.log.levels.INFO)
 				local tag_start, tag_end = line:find("</x%-" .. component_match:gsub("%-", "%%-"):gsub("%.", "%%."))
+				vim.notify(string.format("Tag range: %d-%d, cursor: %d", tag_start or 0, tag_end or 0, col), vim.log.levels.INFO)
 				if tag_start and col >= tag_start and col <= (tag_end + 10) then -- +10 for closing >
 					-- Try Maizzle paths
 					local maizzle_paths = {
@@ -1181,6 +1214,27 @@ vim.api.nvim_create_autocmd("FileType", {
 		-- Create a buffer-local command
 		vim.api.nvim_buf_create_user_command(0, "FindComponentReferences", find_vue_component_references, {
 			desc = "Find all references to this Vue component",
+		})
+	end,
+})
+
+-- CSS/SCSS Project keymaps
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "css", "scss", "sass" },
+	callback = function()
+		local opts = { buffer = true, silent = true, noremap = true }
+
+		-- Find all references to the current CSS/SCSS file
+		vim.keymap.set(
+			"n",
+			"<leader>pf",
+			find_css_references,
+			vim.tbl_extend("force", opts, { desc = "Project: Find CSS/SCSS imports" })
+		)
+
+		-- Create a buffer-local command
+		vim.api.nvim_buf_create_user_command(0, "FindCSSReferences", find_css_references, {
+			desc = "Find all @import/@use/@forward statements for this CSS/SCSS file",
 		})
 	end,
 })

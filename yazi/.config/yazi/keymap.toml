@@ -1,4 +1,8 @@
 [mgr]
 prepend_keymap = [
   { on = "<C-o>", run = 'shell "open ." --confirm', desc = "Open current directory in Finder" },
+  { on = "<C-t>", run = 'shell "tmux new-window -c ." --confirm', desc = "Open current directory in new tmux window" },
+  { on = "<C-a>", run = 'shell "open *" --confirm', desc = "Open all files in current directory with default programs" },
+  { on = "<C-z>", run = 'shell "cd \"$(dirname \"$1\")\" && zip -r archive-$(date +%Y%m%d-%H%M%S).zip $(for f in \"$@\"; do basename \"$f\"; done)" --confirm', desc = "Compress selected files/directories into a zip file" },
+  { on = "<C-x>", run = 'shell "unzip -d \"$(dirname \"$0\")\" \"$0\"" --confirm', desc = "Extract zip file to current directory" },
 ]
