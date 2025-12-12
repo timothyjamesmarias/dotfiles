@@ -10,6 +10,7 @@ alias re="cat ~/.recentfiles | fzf | xargs nvim"
 alias del="fd --type f | fzf -m --preview 'bat --style=numbers --color=always {}' | xargs -o rm -i"
 alias deld="fd --type d | fzf -m --preview 'bat --style=numbers --color=always {}' | xargs -o rm -rf -i"
 alias deldf="fd --type d | fzf -m --preview 'bat --style=numbers --color=always {}' | xargs -o rm -rf"
+alias nf='new-file'
 
 # Ripgrep + nvim integration
 rgnvim() {

@@ -160,7 +160,15 @@ get_template_path() {
 
 # Function to convert string to PascalCase
 to_pascal_case() {
-  echo "$1" | sed -r 's/(^|[-_])([a-z])/\U\2/g' | sed 's/[-_]//g'
+  # Works on both BSD (macOS) and GNU sed
+  # Split on delimiters and capitalize each word
+  echo "$1" | awk -F'[-_]' '{
+    result = ""
+    for(i=1; i<=NF; i++) {
+      result = result toupper(substr($i,1,1)) substr($i,2)
+    }
+    print result
+  }'
 }
 
 # Function to convert string to kebab-case
@@ -171,6 +179,11 @@ to_kebab_case() {
 # Function to convert string to snake_case
 to_snake_case() {
   echo "$1" | sed 's/\([A-Z]\)/_\L\1/g' | sed 's/^_//' | tr '-' '_' | tr '[:upper:]' '[:lower:]'
+}
+
+# Function to convert string to UPPER_SNAKE_CASE
+to_upper_snake_case() {
+  to_snake_case "$1" | tr '[:lower:]' '[:upper:]'
 }
 
 # Function to extract namespace from path
@@ -193,6 +206,7 @@ replace_placeholders() {
   local class_name=$(to_pascal_case "$file_name")
   local component_name=$(to_kebab_case "$file_name")
   local namespace=$(get_namespace_from_path "$file_path")
+  local header_guard=$(to_upper_snake_case "$file_name")
 
   # Replace placeholders
   template_content="${template_content//\{\{CLASS_NAME\}\}/$class_name}"
@@ -203,6 +217,7 @@ replace_placeholders() {
   template_content="${template_content//\{\{NAMESPACE\}\}/$namespace}"
   template_content="${template_content//\{\{TITLE\}\}/$file_name}"
   template_content="${template_content//\{\{SELECTOR\}\}/$component_name}"
+  template_content="${template_content//\{\{HEADER_GUARD\}\}/$header_guard}"
 
   echo "$template_content"
 }
