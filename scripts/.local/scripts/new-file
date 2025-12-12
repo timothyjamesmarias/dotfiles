@@ -48,11 +48,14 @@ ${YELLOW}Examples:${RESET}
   new-file                                    # Full interactive mode
   new-file src/components/Button.vue          # Quick create with path
   new-file --lang php --kind class User       # Create with options
+  # In interactive mode, use slashes for nested paths:
+  # File name: auth/forms/LoginForm.vue       → Creates nested directories
 
 ${YELLOW}Features:${RESET}
   • Interactive language and template selection with fzf
   • Smart placeholder replacement (CLASS_NAME, NAMESPACE, etc.)
-  • Directory creation if needed
+  • Nested path support - use slashes in file names
+  • Automatic directory creation
   • Git-aware operations
   • Preview templates before creation
   • Confirm before creating
@@ -362,6 +365,7 @@ else
   esac
 
   # Portable read with default (works on macOS bash 3.2)
+  echo -e "  ${CYAN}Tip: Use slashes for nested paths (e.g., forms/auth/LoginForm.${EXTENSION})${RESET}"
   read -e -p "$(echo -e "  ${YELLOW}File name [${DEFAULT_NAME}]:${RESET} ")" FILE_NAME
   FILE_NAME="${FILE_NAME:-$DEFAULT_NAME}"
 

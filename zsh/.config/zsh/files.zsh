@@ -84,17 +84,20 @@ fcss() {
 }
 
 # Create new file with fuzzy directory selection
+# Quick file creation without templates. For template-based creation, use 'new-file'
 cf() {
   local dir
   dir=$(fd --type d --exclude .git --exclude node_modules --exclude target \
     | fzf --preview "tree -C -L 2 {}") || return
 
-  read "filename?Enter new file name (relative to $dir): "
+  echo "Creating file in: $dir"
+  read "filename?File path (use / for nested dirs): "
   [[ -z "$filename" ]] && echo "Cancelled." && return
 
   local filepath="$dir/$filename"
   mkdir -p "$(dirname "$filepath")"
   touch "$filepath"
+  echo "Created: $filepath"
   nvim "$filepath"
 }
 

@@ -4,10 +4,31 @@ A Unix-style, IDE-like file creation system with modern ergonomics.
 
 ## Overview
 
-This system provides two ways to create files with templates:
+This system provides three complementary ways to create files:
 
-1. **Simple (Neovim)**: Quick file creation with default templates when opening new files in Vim
-2. **Interactive (CLI)**: Smart, IDE-like file creation with the `new-file` command
+1. **Quick & Simple (`cf`)**: Fast file creation without templates (from zsh)
+2. **Template-based (`new-file`)**: Smart, IDE-like file creation with templates
+3. **Neovim**: Automatic default templates when opening new files in Vim
+
+### When to Use Which Tool
+
+```
+cf()          → "I need a file NOW, any type, no structure needed"
+new-file      → "I'm creating a class/component/interface with proper structure"
+nvim new.vue  → "Opening a new file in vim, auto-load simple template"
+```
+
+**Examples:**
+```bash
+# Quick scratch file or config
+cf                           # Fast: pick dir → type name → edit
+
+# Structured component with template
+new-file                     # Interactive: dir → language → kind → name → preview
+
+# Ad-hoc file in vim
+nvim src/utils/helper.ts     # Auto-loads TypeScript default template
+```
 
 ## GNU Stow Setup
 
@@ -38,7 +59,7 @@ This launches an interactive wizard that walks you through:
 1. **Where** - Select target directory (current or browse)
 2. **Language** - Choose from available languages (PHP, TypeScript, Vue, etc.)
 3. **Kind** - Select template type (class, interface, component, etc.)
-4. **Name** - Enter file name with smart defaults
+4. **Name** - Enter file name (supports nested paths: `auth/forms/LoginForm.vue`)
 5. **Confirm** - Preview and confirm before creation
 
 ### Quick Mode
@@ -59,10 +80,26 @@ nvim NewComponent.vue    # Auto-loads Vue template
 nvim script.sh           # Auto-loads shell template with shebang
 ```
 
+### Quick File Creation with `cf()`
+
+For times when you don't need templates, use the `cf()` zsh function:
+
+```bash
+cf
+# Select directory with fzf
+# Enter: auth/LoginForm.vue
+# Creates nested dirs and opens in nvim immediately
+```
+
+**`cf()` vs `new-file`:**
+- `cf()` - No templates, fastest path to editing
+- `new-file` - Templates, structure, previews, smart placeholders
+
 ## Features
 
 - **Smart placeholders**: Automatically replaces `{{CLASS_NAME}}`, `{{NAMESPACE}}`, `{{COMPONENT_NAME}}`, etc.
 - **Case conversion**: Converts names to PascalCase, kebab-case, snake_case as needed
+- **Nested path support**: Use slashes in file names to create directory structures
 - **Directory creation**: Creates parent directories if they don't exist
 - **Preview**: See file content before creation
 - **Git-aware**: Works seamlessly in git repositories
