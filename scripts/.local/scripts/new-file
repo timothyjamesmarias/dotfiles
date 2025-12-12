@@ -186,14 +186,60 @@ to_upper_snake_case() {
   to_snake_case "$1" | tr '[:lower:]' '[:upper:]'
 }
 
-# Function to extract namespace from path
+# Function to extract namespace from path (language-aware)
 get_namespace_from_path() {
   local file_path="$1"
+  local lang="$2"
   local dir_path=$(dirname "$file_path")
 
-  # Convert path to namespace (e.g., src/Services/Auth -> Services\Auth)
-  # This is PHP-centric but can be adapted
-  echo "$dir_path" | sed 's|^src/||' | sed 's|/|\\|g'
+  # Handle relative paths that start with ./
+  dir_path=$(echo "$dir_path" | sed 's|^\./||')
+
+  case "$lang" in
+    java|kotlin|scala)
+      # Strip common JVM source roots (try each pattern in order)
+      # Handle absolute paths with .*/src/main/...
+      dir_path=$(echo "$dir_path" | sed 's|^.*/src/main/java/||')
+      dir_path=$(echo "$dir_path" | sed 's|^.*/src/main/kotlin/||')
+      dir_path=$(echo "$dir_path" | sed 's|^.*/src/main/scala/||')
+      dir_path=$(echo "$dir_path" | sed 's|^.*/src/test/java/||')
+      dir_path=$(echo "$dir_path" | sed 's|^.*/src/test/kotlin/||')
+      dir_path=$(echo "$dir_path" | sed 's|^.*/src/test/scala/||')
+      # Handle relative paths
+      dir_path=$(echo "$dir_path" | sed 's|^src/main/java/||')
+      dir_path=$(echo "$dir_path" | sed 's|^src/main/kotlin/||')
+      dir_path=$(echo "$dir_path" | sed 's|^src/main/scala/||')
+      dir_path=$(echo "$dir_path" | sed 's|^src/test/java/||')
+      dir_path=$(echo "$dir_path" | sed 's|^src/test/kotlin/||')
+      dir_path=$(echo "$dir_path" | sed 's|^src/test/scala/||')
+      dir_path=$(echo "$dir_path" | sed 's|^src/||')
+
+      # If we're at project root or just "src", return empty
+      if [[ "$dir_path" == "." || "$dir_path" == "" ]]; then
+        echo ""
+      else
+        # Convert path to package (dots)
+        echo "$dir_path" | sed 's|/|.|g'
+      fi
+      ;;
+    php)
+      # PHP uses backslashes for namespaces
+      # Handle absolute paths
+      dir_path=$(echo "$dir_path" | sed 's|^.*/src/||')
+      # Handle relative paths
+      dir_path=$(echo "$dir_path" | sed 's|^src/||')
+
+      if [[ "$dir_path" == "." || "$dir_path" == "" ]]; then
+        echo ""
+      else
+        echo "$dir_path" | sed 's|/|\\|g'
+      fi
+      ;;
+    *)
+      # For other languages, return empty namespace
+      echo ""
+      ;;
+  esac
 }
 
 # Function to replace placeholders in template
@@ -201,11 +247,21 @@ replace_placeholders() {
   local template_content="$1"
   local file_path="$2"
   local base_name="$3"
+  local lang="$4"
+  local namespace_override="$5"
 
   local file_name=$(basename "$base_name" | sed 's/\.[^.]*$//')
   local class_name=$(to_pascal_case "$file_name")
   local component_name=$(to_kebab_case "$file_name")
-  local namespace=$(get_namespace_from_path "$file_path")
+
+  # Use override if provided, otherwise infer from path
+  local namespace
+  if [ -n "$namespace_override" ]; then
+    namespace="$namespace_override"
+  else
+    namespace=$(get_namespace_from_path "$file_path" "$lang")
+  fi
+
   local header_guard=$(to_upper_snake_case "$file_name")
 
   # Replace placeholders
@@ -417,8 +473,29 @@ fi
 
 TEMPLATE_CONTENT=$(cat "$TEMPLATE_PATH")
 
+# Check if template uses namespace placeholder and prompt for override if needed
+NAMESPACE_OVERRIDE=""
+if grep -q '{{NAMESPACE}}' "$TEMPLATE_PATH"; then
+  # Check if this is a language that uses namespaces
+  case "$SELECTED_LANG" in
+    java|kotlin|scala|php)
+      # Infer namespace from path
+      INFERRED_NAMESPACE=$(get_namespace_from_path "$FULL_PATH" "$SELECTED_LANG")
+
+      if [ -n "$INFERRED_NAMESPACE" ]; then
+        echo -e "${CYAN}Detected namespace:${RESET} ${INFERRED_NAMESPACE}"
+        read -p "$(echo -e "${YELLOW}Override namespace? (leave empty to use detected):${RESET} ")" NAMESPACE_OVERRIDE
+        NAMESPACE_OVERRIDE="${NAMESPACE_OVERRIDE:-$INFERRED_NAMESPACE}"
+      else
+        read -p "$(echo -e "${YELLOW}Enter package/namespace (leave empty if none):${RESET} ")" NAMESPACE_OVERRIDE
+      fi
+      echo ""
+      ;;
+  esac
+fi
+
 # Replace placeholders
-FILE_CONTENT=$(replace_placeholders "$TEMPLATE_CONTENT" "$FULL_PATH" "$FILE_NAME")
+FILE_CONTENT=$(replace_placeholders "$TEMPLATE_CONTENT" "$FULL_PATH" "$FILE_NAME" "$SELECTED_LANG" "$NAMESPACE_OVERRIDE")
 
 # Step 5: Preview and confirm
 if [ $NO_CONFIRM -eq 0 ]; then

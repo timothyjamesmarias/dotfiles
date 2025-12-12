@@ -16,8 +16,10 @@ __find_kt_binary() {
   fi
 
   # Check if kt is in PATH (installed via package manager or install-deps)
-  if command -v kt &> /dev/null; then
-    KT_BIN="kt"
+  # Use whence to get the actual path, not just the command name
+  local kt_path=$(whence -p kt 2>/dev/null)
+  if [[ -n "$kt_path" ]] && [[ -x "$kt_path" ]]; then
+    KT_BIN="$kt_path"
     return 0
   fi
 

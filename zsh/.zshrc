@@ -69,7 +69,8 @@ heroku() {
 }
 
 # --- Kotlin/Gradle utilities (lazy loaded) ---
-# Load Kotlin utilities only when Kotlin/Gradle commands are used
+# Auto-detect if we're in a Kotlin project and load utilities immediately
+# Otherwise, load on directory change into a Kotlin project
 __kotlin_utils_loaded=0
 
 __load_kotlin_utils() {
@@ -80,9 +81,7 @@ __load_kotlin_utils() {
   fi
 }
 
-# Auto-detect if we're in a Kotlin project and load utilities
 __autoload_kotlin_utils() {
-  # Check if we're in a Kotlin project (has gradlew or settings.gradle.kts)
   if [[ -f "gradlew" ]] || [[ -f "settings.gradle.kts" ]] || [[ -f "build.gradle.kts" ]]; then
     __load_kotlin_utils
   fi
@@ -94,12 +93,3 @@ add-zsh-hook chpwd __autoload_kotlin_utils
 
 # Check on shell startup
 __autoload_kotlin_utils
-
-# Lazy load wrapper functions for kt CLI
-# These will load the full Kotlin utilities when called
-for cmd in kt kti ktg ktf kth ktc kta kts ktsym ktexp ktspc ktspe ktspent ktctx ktinfo ktmod ktcache; do
-  eval "$cmd() { __load_kotlin_utils && unfunction $cmd && $cmd \"\$@\"; }"
-done
-
-# Lazy load wrapper for gradle wrapper
-gw() { __load_kotlin_utils && unfunction gw && gw "$@"; }
