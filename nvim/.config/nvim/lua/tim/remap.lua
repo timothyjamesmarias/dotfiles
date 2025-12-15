@@ -294,7 +294,7 @@ vim.keymap.set("n", "<leader>sl", function()
 end, { silent = true, noremap = true, desc = "Grep string under cursor" })
 vim.keymap.set("v", "<leader>sl", function()
 	local text = vim.getVisualSelection()
-	require("telescope.builtin").grep_string({ search = text })
+	require("telescope.builtin").live_grep({ default_text = text })
 end, { silent = true, noremap = true, desc = "Grep visual selection" })
 
 -- LSP keymaps (set on LSP attach)
