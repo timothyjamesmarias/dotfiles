@@ -122,6 +122,23 @@ gwdep() {
   fi
 }
 
+# --- Run tasks with device selection ---
+# Interactive task runner (uses kt CLI with fzf)
+gwrun() {
+  kt run
+}
+
+# Android specific
+gwandroid() {
+  kt run installDebug
+}
+
+# iOS specific (requires macOS)
+gwios() {
+  local task=$(gw tasks --all 2>/dev/null | grep -i "iosSimulator" | fzf | awk '{print $1}')
+  [ -n "$task" ] && kt run "$task"
+}
+
 # --- Quick project navigation ---
 # Jump to source directories
 ktsrc() {
