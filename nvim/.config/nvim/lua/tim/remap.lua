@@ -88,7 +88,7 @@ vim.keymap.set(
 	"<cmd>!open %<CR>",
 	{ silent = true, desc = "Open current file with the default program" }
 )
-vim.keymap.set("n", "<leader>fd", "<cmd>!open %:h:h<CR>", { silent = true, desc = "Open parent directory in finder" })
+vim.keymap.set("n", "<leader>fa", "<cmd>!open %:h:h<CR>", { silent = true, desc = "Open parent directory in finder" })
 vim.keymap.set("n", "<leader>fY", function()
 	local path = vim.fn.expand("%:p")
 	vim.fn.setreg("+", path)
@@ -99,7 +99,7 @@ vim.keymap.set("n", "<leader>fy", function()
 	vim.fn.setreg("+", path)
 	print("Copied to clipboard: " .. path)
 end, { silent = false, desc = "Copy relative file path to clipboard" })
-vim.keymap.set("n", "<leader>fD", function()
+vim.keymap.set("n", "<leader>fC", function()
 	local path = vim.fn.expand("%:p:h")
 	vim.fn.setreg("+", path)
 	print("Copied to clipboard: " .. path)
@@ -181,6 +181,26 @@ end, { silent = true, desc = "Git modified files" })
 vim.keymap.set("n", "<leader>fw", function()
 	require("telescope.builtin").live_grep()
 end, { silent = true, desc = "Live grep" })
+vim.keymap.set("n", "<leader>fD", function()
+	-- Prompt for directory to search in (default to current file's directory)
+	local default_dir = vim.fn.expand("%:p:h")
+	vim.ui.input({ prompt = "Search in directory: ", default = default_dir, completion = "dir" }, function(input)
+		if input then
+			require("telescope.builtin").live_grep({
+				search_dirs = { input },
+				prompt_title = "Live Grep (" .. vim.fn.fnamemodify(input, ":~:.") .. ")",
+			})
+		end
+	end)
+end, { silent = true, desc = "Live grep in directory (prompt)" })
+vim.keymap.set("n", "<leader>fd", function()
+	-- Search in current file's directory
+	local current_dir = vim.fn.expand("%:p:h")
+	require("telescope.builtin").live_grep({
+		search_dirs = { current_dir },
+		prompt_title = "Live Grep (" .. vim.fn.fnamemodify(current_dir, ":~:.") .. ")",
+	})
+end, { silent = true, desc = "Live grep in current file's dir" })
 vim.keymap.set("n", "<leader>fk", function()
 	require("telescope.builtin").keymaps()
 end, { silent = true, desc = "Find keymaps" })
