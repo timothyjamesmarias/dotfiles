@@ -1,5 +1,20 @@
 # --- Utility functions ---
 
+# Claude Code launcher with unified menu
+cc() {
+    echo "Claude Code"
+    echo "1) New conversation"
+    echo "2) Resume previous"
+    echo "3) Continue last"
+    read "choice?> "
+    case $choice in
+        1) claude ;;
+        2) claude --resume ;;
+        3) claude --continue ;;
+        *) echo "Invalid choice" ;;
+    esac
+}
+
 # Ripgrep configuration
 export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
 
