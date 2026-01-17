@@ -13,12 +13,37 @@
 " <leader>p*        - Project/Framework commands
 " <leader>g*        - Git operations
 " <leader>x*        - Quickfix/Location list operations
+" <leader><leader>  - Quick launchers (instant fuzzy access)
 " <C-n/p>           - Buffer/Tab navigation (next/previous)
 " n/N               - Search navigation (centered)
 " ;                 - Command mode
 " ============================================================================
 
 let mapleader = " "
+
+" ============================================================================
+" Plugin Configuration
+" ============================================================================
+" Which-Key: Displays available keybindings in popup
+" Install from: Settings → Plugins → Marketplace → "Which-Key"
+set which-key
+set notimeout
+let g:WhichKey_ShowVimActions = "true"
+let g:WhichKey_DefaultDelay = 500
+
+" EasyMotion: Quick cursor jumps (requires AceJump plugin)
+" Install: IdeaVim-EasyMotion + AceJump from Marketplace
+Plug 'easymotion/vim-easymotion'
+map <leader>j <Plug>(easymotion-s)
+map <leader>J <Plug>(easymotion-f)
+map <leader>jw <Plug>(easymotion-w)
+map <leader>jb <Plug>(easymotion-b)
+
+" Commentary: Toggle comments
+Plug 'tpope/vim-commentary'
+
+" Multiple cursors
+Plug 'terryma/vim-multiple-cursors'
 
 " Basic settings
 set visualbell
@@ -400,6 +425,149 @@ nmap <leader>ju <Action>(JumpToLastChange)
 nmap <leader>jn <Action>(JumpToNextChange)
 
 " ============================================================================
+" Quick Launchers (like tmux M-* bindings)
+" ============================================================================
+" Double-leader for instant fuzzy finding (no preview, just launch)
+nmap <leader><leader>f <Action>(GotoFile)
+nmap <leader><leader>s <Action>(GotoSymbol)
+nmap <leader><leader>a <Action>(GotoAction)
+nmap <leader><leader>c <Action>(GotoClass)
+nmap <leader><leader>r <Action>(FindInPath)
+nmap <leader><leader>g <Action>(Vcs.QuickListPopupAction)
+nmap <leader><leader>b <Action>(RecentFiles)
+nmap <leader><leader>d <Action>(ActivateDatabaseToolWindow)
+nmap <leader><leader>t <Action>(ActivateTerminalToolWindow)
+nmap <leader><leader>p <Action>(ManageRecentProjects)
+
+" ============================================================================
+" Preview Actions (like fzf --preview)
+" ============================================================================
+" Quick peek without changing focus
+nmap <leader>pd <Action>(QuickDefinition)
+nmap <leader>pD <Action>(QuickTypeDefinition)
+nmap <leader>ph <Action>(QuickJavaDoc)
+nmap <leader>pi <Action>(QuickImplementations)
+nmap <leader>pe <Action>(ShowErrorDescription)
+
+" ============================================================================
+" Yank/Copy Operations (like your yank git hashes)
+" ============================================================================
+nmap <leader>yf <Action>(CopyPaths)
+nmap <leader>yF <Action>(CopyAbsolutePath)
+nmap <leader>yr <Action>(CopyReference)
+nmap <leader>yl <Action>(CopyContentRootPath)
+nmap <leader>yc <Action>(CopyElement)
+
+" ============================================================================
+" Recent/Jump Operations (like your git history navigation)
+" ============================================================================
+nmap <leader>jr <Action>(RecentLocations)
+nmap <leader>je <Action>(RecentChangedFiles)
+nmap <leader>jl <Action>(JumpToLastChange)
+nmap <leader>jn <Action>(JumpToNextChange)
+nmap <leader>jb <Action>(ShowNavBar)
+
+" ============================================================================
+" Scratchpad/Temp Files (like tmux temp windows)
+" ============================================================================
+nmap <leader>sn <Action>(NewScratchFile)
+nmap <leader>sb <Action>(Scratches.ShowRecentScratchFiles)
+nmap <leader>sc <Action>(Scratches.NewConsole)
+
+" ============================================================================
+" Context Action Menus (like your git commit action menu)
+" ============================================================================
+nmap <leader>am <Action>(Refactorings.QuickListPopupAction)
+nmap <leader>ag <Action>(Vcs.QuickListPopupAction)
+nmap <leader>ar <Action>(RunAnything)
+nmap <leader>aw <Action>(SearchEverywhere)
+nmap <leader>at <Action>(ActivateTerminalToolWindow)
+
+" ============================================================================
+" Structural Search & Advanced Find
+" ============================================================================
+nmap <leader>SS <Action>(StructuralSearchActions)
+nmap <leader>Sr <Action>(StructuralSearchPlugin.StructuralReplaceAction)
+nmap <leader>Sf <Action>(StructuralSearchPlugin.StructuralSearchAction)
+
+" ============================================================================
+" Live Templates & Code Generation (like your new-file templates)
+" ============================================================================
+nmap <leader>it <Action>(InsertLiveTemplate)
+nmap <leader>is <Action>(SurroundWith)
+nmap <leader>iw <Action>(SurroundWithLiveTemplate)
+
+" ============================================================================
+" Session/Project Management (like tmux-sessionizer)
+" ============================================================================
+nmap <leader>Ss <Action>(ManageRecentProjects)
+nmap <leader>So <Action>(OpenFile)
+nmap <leader>Sn <Action>(NewProject)
+nmap <leader>Sc <Action>(CloseProject)
+nmap <leader>Sr <Action>(ReopenRecentProjects)
+
+" ============================================================================
+" Fast Feedback Loop (continuous build/test like gww)
+" ============================================================================
+nmap <leader>rh <Action>(HotSwapAction)
+nmap <leader>ra <Action>(CompileDirty)
+nmap <leader>rw <Action>(RunDashboard.ShowConfigurations)
+
+" ============================================================================
+" Text Objects & Selection (multi-cursor like patterns)
+" ============================================================================
+nmap <leader>ma <Action>(SelectAllOccurrences)
+nmap <leader>mn <Action>(SelectNextOccurrence)
+nmap <leader>mu <Action>(UnselectPreviousOccurrence)
+nmap <leader>ms <Action>(SkipOccurrence)
+
+" ============================================================================
+" Spring/Framework Specific (context-aware like your <leader>p*)
+" ============================================================================
+" These only work in Spring projects
+nmap <leader>pS <Action>(Spring.Beans.Generate.Constructor)
+nmap <leader>pA <Action>(Spring.Beans.Generate.Autowired.Dependency)
+nmap <leader>pE <Action>(Spring.Endpoints)
+nmap <leader>pB <Action>(Spring.Beans)
+
+" ============================================================================
+" Method/Parameter Info (quick peek)
+" ============================================================================
+nmap K <Action>(QuickJavaDoc)
+nmap <leader>K <Action>(ParameterInfo)
+
+" ============================================================================
+" Compare/Diff Operations (like your git diff workflows)
+" ============================================================================
+nmap <leader>dc <Action>(Compare.SameVersion)
+nmap <leader>dC <Action>(Compare.LastVersion)
+nmap <leader>dl <Action>(Compare.Selected)
+nmap <leader>dw <Action>(Diff.ShowDiff)
+
+" ============================================================================
+" HTTP Client (for testing APIs)
+" ============================================================================
+nmap <leader>He <Action>(RestClient.RunRequest)
+nmap <leader>Hc <Action>(RestClient.RunAllRequestsInFile)
+nmap <leader>Hn <Action>(RestClient.NewRequest)
+nmap <leader>Hs <Action>(ShowHttpRequests)
+
+" ============================================================================
+" String Manipulation Plugin (if installed)
+" ============================================================================
+" Toggle case, sort, align, etc.
+nmap <leader>sm <Action>(StringManipulation.PopupChoiceAction)
+nmap <leader>st <Action>(osmedile.intellij.stringmanip.ToggleCaseAction)
+nmap <leader>ss <Action>(osmedile.intellij.stringmanip.SortAction)
+
+" ============================================================================
+" Zen/Distraction Free Mode
+" ============================================================================
+nmap <leader>zz <Action>(ToggleDistractionFreeMode)
+nmap <leader>zp <Action>(TogglePresentationMode)
+nmap <leader>zf <Action>(ToggleFullScreen)
+
+" ============================================================================
 " Misc utility mappings
 " ============================================================================
 nmap <leader>rc :g/^\s*#/d<CR>
@@ -411,3 +579,6 @@ nmap <leader>sp <Action>(ShowIntentionActions)
 
 " Close all notifications
 nmap <leader>nc <Action>(CloseAllNotifications)
+
+" Reload ideavimrc
+nmap <leader>vr :source ~/.ideavimrc<CR>
