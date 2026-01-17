@@ -84,6 +84,26 @@ users.forEach(user => { ... });
 - **But don't over-abstract**: Two similar things that change for different reasons should stay separate
 - **Three strikes rule**: If you write the same code three times, extract it into a function
 
+## Language-Specific Guidelines
+
+### Ruby
+
+- Follow community Ruby style guide (Rubocop defaults)
+- Use snake_case for methods and variables
+- Use symbols (`:symbol`) for keys when appropriate
+- Prefer `do...end` for multi-line blocks, `{ }` for single-line
+- Use safe navigation operator (`&.`) to avoid nil checks
+- Prefer `each` over `for` loops
+
+### PHP
+
+- Follow PSR-12 coding standard
+- Use snake_case for functions and variables
+- Type hint all function parameters and return types (PHP 7.4+)
+- Use strict types: `declare(strict_types=1);`
+- Prefer early returns to reduce nesting
+- Use null coalescing operator (`??`) for default values
+
 ## Examples
 
 ### Bad - Large method with nested conditionals

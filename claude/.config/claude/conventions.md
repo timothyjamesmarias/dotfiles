@@ -6,12 +6,12 @@
 
 - Use kebab-case for file names: `user-service.ts`, `data-processor.py`
 - Group related files in directories by feature/domain, not by type
-- Test files: `*.test.ts`, `*_test.py`, `*_test.go`
+- Test files: `*.test.ts`, `*_test.py`, `*_test.go`, `*_spec.rb`, `*Test.php`
 
 ### Variables and Functions
 
 - Use camelCase for variables and functions in JS/TS/Java/Kotlin
-- Use snake_case for variables and functions in Python/Rust
+- Use snake_case for variables and functions in Python/Rust/Ruby/PHP
 - Boolean variables should be prefixed with `is`, `has`, `should`, etc.
 - Avoid abbreviations unless widely understood
 

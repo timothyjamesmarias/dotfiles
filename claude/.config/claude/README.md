@@ -7,6 +7,7 @@ This directory contains shared configuration for Claude Code that can be used ac
 - `code-style.md` - Universal code style guidelines and preferences
 - `conventions.md` - Naming conventions and architectural patterns
 - `simplicity-first.md` - Principles for preferring simple, pragmatic solutions
+- `code-generation-rules.md` - Strict requirements for code quality and correctness
 - `snippets/` - Reusable code templates and patterns
 
 ## Usage
