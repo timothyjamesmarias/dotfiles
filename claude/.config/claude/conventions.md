@@ -2,12 +2,6 @@
 
 ## Naming Conventions
 
-### Files and Directories
-
-- Use kebab-case for file names: `user-service.ts`, `data-processor.py`
-- Group related files in directories by feature/domain, not by type
-- Test files: `*.test.ts`, `*_test.py`, `*_test.go`, `*_spec.rb`, `*Test.php`
-
 ### Variables and Functions
 
 - Use camelCase for variables and functions in JS/TS/Java/Kotlin
