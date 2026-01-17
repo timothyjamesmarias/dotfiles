@@ -1,0 +1,413 @@
+
+" ============================================================================
+" Keymap Organization (ported from Neovim)
+" ============================================================================
+" <leader>w/q/Q     - Basic file operations (save, close, quit)
+" <leader>h/v       - Window splits
+" <leader>e*        - Edit/open files
+" <leader>s*        - Search operations
+" <leader>f*        - Find (file finding, grep, git, etc.)
+" <leader>t*        - Tags (ctags navigation)
+" <leader>b*        - Buffer operations (navigation, switching)
+" <leader>l*        - LSP operations (definitions, references, diagnostics, etc.)
+" <leader>p*        - Project/Framework commands
+" <leader>g*        - Git operations
+" <leader>x*        - Quickfix/Location list operations
+" <C-n/p>           - Buffer/Tab navigation (next/previous)
+" n/N               - Search navigation (centered)
+" ;                 - Command mode
+" ============================================================================
+
+let mapleader = " "
+
+" Basic settings
+set visualbell
+set noerrorbells
+set ideajoin
+set idearefactormode=keep
+set relativenumber number
+set clipboard+=unnamedplus
+set commentary
+set surround
+
+" NERDTree (IdeaVim plugin)
+set NERDTree
+nmap <leader>nn :NERDTreeToggle<CR>
+nmap <leader>ns :NERDTreeFind<CR>
+let g:NERDTRreeMapActivateNode = 'l'
+let g:NERDTreeMAPJumpParent = 'h'
+
+" ============================================================================
+" Basic file operations
+" ============================================================================
+nmap <leader>w :w<CR>
+nmap <leader>q <Action>(CloseContent)
+nmap <leader>Q <Action>(Exit)
+nmap ; :
+
+" ============================================================================
+" Window splits and navigation
+" ============================================================================
+nmap <leader>hh <Action>(SplitVertically)
+nmap <leader>vv <Action>(SplitHorizontally)
+nmap <C-h> <c-w>h
+nmap <C-j> <c-w>j
+nmap <C-k> <c-w>k
+nmap <C-l> <c-w>l
+
+" ============================================================================
+" Search operations
+" ============================================================================
+" Search navigation (centered)
+nmap n nzz
+nmap N Nzz
+
+" Search in file
+nmap <leader>sf <Action>(Find)
+nmap <leader>sr <Action>(Replace)
+nmap <leader>sw <Action>(Replace)
+
+" Visual mode search
+vmap * y/<C-R>"<CR>
+vmap # y?<C-R>"<CR>
+
+" ============================================================================
+" File finding and navigation (Telescope equivalents)
+" ============================================================================
+nmap <leader>fs <Action>(GotoFile)
+nmap <leader>fr <Action>(RecentFiles)
+nmap <leader>fR <Action>(RecentFiles)
+nmap <leader>fg <Action>(Vcs.ShowTabbedFileHistory)
+nmap <leader>fm <Action>(Vcs.ShowChangelistsAction)
+nmap <leader>fw <Action>(FindInPath)
+nmap <leader>fd <Action>(FindInPath)
+nmap <leader>fD <Action>(FindInPath)
+nmap <leader>fk <Action>(GotoAction)
+nmap <leader>fb <Action>(RecentFiles)
+nmap <leader>fh <Action>(HelpTopics)
+nmap <leader>fn <Action>(SelectInProjectView)
+nmap <leader>fp <Action>(SelectInProjectView)
+nmap <leader>fo <Action>(RevealIn)
+nmap <leader>fO <Action>(RevealIn)
+
+" Copy file paths
+nmap <leader>fy <Action>(CopyPaths)
+nmap <leader>fY <Action>(CopyAbsolutePath)
+nmap <leader>fc <Action>(CopyContentRootPath)
+nmap <leader>fC <Action>(CopyContentRootPath)
+
+" ============================================================================
+" Buffer/Tab navigation
+" ============================================================================
+nmap <C-n> <Action>(NextTab)
+nmap <C-p> <Action>(PreviousTab)
+nmap <leader>ls <Action>(Switcher)
+nmap <leader>b1 <Action>(GoToTab1)
+nmap <leader>b2 <Action>(GoToTab2)
+nmap <leader>b3 <Action>(GoToTab3)
+nmap <leader>b4 <Action>(GoToTab4)
+nmap <leader>b5 <Action>(GoToTab5)
+nmap <leader>b6 <Action>(GoToTab6)
+nmap <leader>b7 <Action>(GoToTab7)
+nmap <leader>b8 <Action>(GoToTab8)
+nmap <leader>b9 <Action>(GoToTab9)
+
+" ============================================================================
+" Edit file operations
+" ============================================================================
+nmap <leader>ee <Action>(GotoFile)
+nmap <leader>eb <Action>(RecentFiles)
+
+" ============================================================================
+" Insert mode mappings
+" ============================================================================
+imap <C-e> <Esc>A
+imap <C-l> <Right>
+
+" ============================================================================
+" Tag navigation (IntelliJ navigation)
+" ============================================================================
+nmap <leader>td <Action>(GotoDeclaration)
+nmap <leader>tu <Action>(FindUsages)
+nmap <leader>ta <Action>(GotoDeclaration)
+nmap <leader>tg <Action>(GotoSymbol)
+nmap <leader>ts <Action>(JumpToLastChange)
+
+" ============================================================================
+" LSP/IntelliJ navigation and code actions
+" ============================================================================
+nmap <leader>ld <Action>(GotoDeclaration)
+nmap <leader>lD <Action>(GotoTypeDeclaration)
+nmap <leader>li <Action>(GotoImplementation)
+nmap <leader>lt <Action>(GotoTypeDeclaration)
+nmap <leader>lr <Action>(FindUsages)
+nmap <leader>lh <Action>(QuickJavaDoc)
+nmap <leader>ls <Action>(ParameterInfo)
+nmap <leader>la <Action>(ShowIntentionActions)
+nmap <leader>ln <Action>(RenameElement)
+nmap <leader>le <Action>(ShowErrorDescription)
+nmap <leader>lq <Action>(ActivateProblemsViewToolWindow)
+nmap [d <Action>(GotoPreviousError)
+nmap ]d <Action>(GotoNextError)
+nmap <leader>lo <Action>(FileStructurePopup)
+nmap <leader>lO <Action>(GotoSymbol)
+nmap <leader>lR <Action>(RestartIde)
+nmap <leader>lI <Action>(ShowProjectStructureSettings)
+
+" ============================================================================
+" Project/Framework operations
+" ============================================================================
+nmap <leader>pa <Action>(GotoRelated)
+nmap <leader>pr <Action>(GotoRelated)
+nmap <leader>pm <Action>(GotoRelated)
+nmap <leader>pv <Action>(GotoRelated)
+nmap <leader>pc <Action>(GotoRelated)
+nmap <leader>pf <Action>(FindUsages)
+nmap <leader>po <Action>(RevealIn)
+nmap <leader>pt <Action>(RunClass)
+nmap <leader>pT <Action>(RunClass)
+
+" ============================================================================
+" Git operations (gitsigns equivalents)
+" ============================================================================
+nmap <leader>gh <Action>(Vcs.ShowTabbedFileHistory)
+nmap <leader>gs <Action>(Vcs.QuickListPopupAction)
+nmap <leader>gu <Action>(Vcs.RollbackChangedLines)
+nmap <leader>gS <Action>(ChangesView.AddUnversioned)
+nmap <leader>gU <Action>(ChangesView.Revert)
+nmap <leader>gp <Action>(Compare.SameVersion)
+nmap <leader>gb <Action>(Annotate)
+nmap <leader>gB <Action>(Annotate)
+nmap <leader>gd <Action>(Compare.SameVersion)
+nmap <leader>gD <Action>(Compare.LastVersion)
+nmap ]c <Action>(VcsShowNextChangeMarker)
+nmap [c <Action>(VcsShowPrevChangeMarker)
+
+" ============================================================================
+" Quickfix/Location list (IntelliJ Problems/TODO)
+" ============================================================================
+nmap ]q <Action>(GotoNextError)
+nmap [q <Action>(GotoPreviousError)
+nmap <leader>xo <Action>(ActivateProblemsViewToolWindow)
+nmap <leader>xc <Action>(HideActiveWindow)
+nmap <leader>xx <Action>(ActivateProblemsViewToolWindow)
+nmap ]l <Action>(GotoNextError)
+nmap [l <Action>(GotoPreviousError)
+nmap <leader>xl <Action>(ActivateProblemsViewToolWindow)
+nmap <leader>xL <Action>(HideActiveWindow)
+
+" ============================================================================
+" Terminal
+" ============================================================================
+nmap <leader>tm <Action>(ActivateTerminalToolWindow)
+
+" ============================================================================
+" Run/Debug Operations
+" ============================================================================
+" <leader>r* - Run operations
+" <leader>d* - Debug operations
+nmap <leader>rr <Action>(Run)
+nmap <leader>rc <Action>(RunClass)
+nmap <leader>rf <Action>(ChooseRunConfiguration)
+nmap <leader>rt <Action>(RunTests)
+nmap <leader>rT <Action>(RerunTests)
+nmap <leader>rs <Action>(Stop)
+nmap <leader>rR <Action>(Rerun)
+
+nmap <leader>dd <Action>(Debug)
+nmap <leader>dc <Action>(DebugClass)
+nmap <leader>df <Action>(ChooseDebugConfiguration)
+nmap <leader>dt <Action>(DebugTests)
+nmap <leader>db <Action>(ToggleLineBreakpoint)
+nmap <leader>dB <Action>(ViewBreakpoints)
+nmap <leader>de <Action>(EditBreakpoint)
+nmap <leader>dm <Action>(XDebugger.MuteBreakpoints)
+
+" Debug stepping
+nmap <leader>do <Action>(StepOver)
+nmap <leader>di <Action>(StepInto)
+nmap <leader>dO <Action>(StepOut)
+nmap <leader>dr <Action>(Resume)
+nmap <leader>dv <Action>(EvaluateExpression)
+nmap <leader>dw <Action>(Debugger.AddToWatch)
+nmap <leader>dx <Action>(RunToCursor)
+
+" ============================================================================
+" Refactoring Operations
+" ============================================================================
+" <leader>R* - Refactor operations (capital R to avoid conflict with run)
+nmap <leader>Rr <Action>(RenameElement)
+nmap <leader>Rm <Action>(ExtractMethod)
+nmap <leader>Rv <Action>(IntroduceVariable)
+nmap <leader>Rf <Action>(IntroduceField)
+nmap <leader>Rc <Action>(IntroduceConstant)
+nmap <leader>Rp <Action>(IntroduceParameter)
+nmap <leader>Ri <Action>(Inline)
+nmap <leader>Rs <Action>(ChangeSignature)
+nmap <leader>RR <Action>(Refactorings.QuickListPopupAction)
+nmap <leader>Re <Action>(ExtractInterface)
+nmap <leader>RS <Action>(ExtractSuperclass)
+nmap <leader>Ro <Action>(Move)
+nmap <leader>RP <Action>(CopyElement)
+nmap <leader>Rd <Action>(SafeDelete)
+
+" ============================================================================
+" Code Generation
+" ============================================================================
+" <leader>i* - Insert/Generate code
+nmap <leader>ig <Action>(Generate)
+nmap <leader>ic <Action>(GenerateConstructor)
+nmap <leader>ig <Action>(GenerateGetter)
+nmap <leader>is <Action>(GenerateSetter)
+nmap <leader>ia <Action>(GenerateGetterAndSetter)
+nmap <leader>ie <Action>(GenerateEquals)
+nmap <leader>it <Action>(GenerateTestMethod)
+nmap <leader>iT <Action>(CreateTest)
+nmap <leader>io <Action>(OverrideMethods)
+nmap <leader>ii <Action>(ImplementMethods)
+nmap <leader>id <Action>(JavaGenerateJavadoc)
+
+" ============================================================================
+" Database Tools
+" ============================================================================
+" <leader>D* - Database operations (capital D)
+nmap <leader>DD <Action>(ActivateDatabaseToolWindow)
+nmap <leader>Dq <Action>(Console.Jdbc.Execute)
+nmap <leader>De <Action>(Console.Jdbc.Execute)
+nmap <leader>Ds <Action>(Console.Jdbc.ChooseSchema)
+nmap <leader>Dt <Action>(DatabaseView.PropertiesAction)
+nmap <leader>Dr <Action>(Console.Jdbc.RunQueryInConsole)
+nmap <leader>Df <Action>(ReformatCode)
+nmap <leader>Dc <Action>(Console.Transaction.Commit)
+nmap <leader>DR <Action>(Console.Transaction.Rollback)
+nmap <leader>Dn <Action>(Console.Jdbc.NewConsole)
+
+" ============================================================================
+" Testing & Coverage
+" ============================================================================
+" Test with coverage
+nmap <leader>tC <Action>(RunCoverage)
+nmap <leader>tc <Action>(Coverage)
+nmap <leader>tR <Action>(RerunFailedTests)
+
+" ============================================================================
+" Profiling & Performance
+" ============================================================================
+" <leader>P* - Profiler operations (capital P)
+nmap <leader>Pp <Action>(Profiler.RunProfiler)
+nmap <leader>Pa <Action>(Profiler.AttachToProcess)
+nmap <leader>Ps <Action>(Profiler.StopProfiler)
+nmap <leader>Pr <Action>(Profiler.OpenSnapshot)
+nmap <leader>PM <Action>(Memory.CalculateRetainedSize)
+nmap <leader>PH <Action>(Profiler.ShowHeapDump)
+nmap <leader>PC <Action>(Profiler.ShowCPUSnapshot)
+
+" ============================================================================
+" Tool Windows
+" ============================================================================
+" <leader>o* - Open tool windows
+nmap <leader>ot <Action>(ActivateTerminalToolWindow)
+nmap <leader>op <Action>(ActivateProjectToolWindow)
+nmap <leader>or <Action>(ActivateRunToolWindow)
+nmap <leader>od <Action>(ActivateDebugToolWindow)
+nmap <leader>oD <Action>(ActivateDatabaseToolWindow)
+nmap <leader>og <Action>(ActivateCommitToolWindow)
+nmap <leader>ov <Action>(ActivateVersionControlToolWindow)
+nmap <leader>os <Action>(ActivateStructureToolWindow)
+nmap <leader>oi <Action>(ActivateProblemsViewToolWindow)
+nmap <leader>of <Action>(ActivateFavoritesToolWindow)
+nmap <leader>oe <Action>(ActivateServicesToolWindow)
+nmap <leader>ob <Action>(ActivateBuildToolWindow)
+nmap <leader>oT <Action>(ActivateTODOToolWindow)
+nmap <leader>om <Action>(ActivateMavenToolWindow)
+nmap <leader>oG <Action>(ActivateGradleToolWindow)
+nmap <leader>ow <Action>(HideAllWindows)
+
+" ============================================================================
+" Code Analysis & Inspection
+" ============================================================================
+" <leader>a* - Analysis operations
+nmap <leader>ai <Action>(InspectCode)
+nmap <leader>aa <Action>(AnalyzeActions)
+nmap <leader>ad <Action>(ShowIntentionActions)
+nmap <leader>ae <Action>(ShowErrorDescription)
+nmap <leader>aq <Action>(InspectCodeActionInPopupMenu)
+nmap <leader>ao <Action>(OptimizeImports)
+nmap <leader>ac <Action>(CodeCleanup)
+nmap <leader>af <Action>(ReformatCode)
+nmap <leader>ar <Action>(RearrangeCode)
+nmap <leader>as <Action>(SilentCodeCleanup)
+
+" ============================================================================
+" Build & Gradle/Maven
+" ============================================================================
+" <leader>B* - Build operations (capital B)
+nmap <leader>Bb <Action>(CompileDirty)
+nmap <leader>BB <Action>(Compile)
+nmap <leader>Br <Action>(BuildProject)
+nmap <leader>BR <Action>(RebuildProject)
+nmap <leader>Bc <Action>(CleanProject)
+nmap <leader>Bm <Action>(Maven.Reimport)
+nmap <leader>Bg <Action>(Gradle.RefreshDependencies)
+nmap <leader>Be <Action>(Gradle.ExecuteTask)
+
+" ============================================================================
+" Bookmarks & Marks
+" ============================================================================
+" <leader>m* - Marks/bookmarks
+nmap <leader>mm <Action>(ToggleBookmark)
+nmap <leader>ms <Action>(ShowBookmarks)
+nmap <leader>ml <Action>(ShowBookmarks)
+nmap <leader>m1 <Action>(ToggleBookmark1)
+nmap <leader>m2 <Action>(ToggleBookmark2)
+nmap <leader>m3 <Action>(ToggleBookmark3)
+nmap <leader>m4 <Action>(ToggleBookmark4)
+nmap <leader>m5 <Action>(ToggleBookmark5)
+nmap <leader>m6 <Action>(ToggleBookmark6)
+nmap <leader>m7 <Action>(ToggleBookmark7)
+nmap <leader>m8 <Action>(ToggleBookmark8)
+nmap <leader>m9 <Action>(ToggleBookmark9)
+nmap <leader>m0 <Action>(ToggleBookmark0)
+nmap ]m <Action>(GotoNextBookmark)
+nmap [m <Action>(GotoPreviousBookmark)
+
+" ============================================================================
+" Multi-cursor & Selection
+" ============================================================================
+nmap <leader>ma <Action>(SelectAllOccurrences)
+nmap <leader>mn <Action>(SelectNextOccurrence)
+nmap <leader>mu <Action>(UnselectPreviousOccurrence)
+nmap <leader>ms <Action>(SkipOccurrence)
+
+" ============================================================================
+" Code Folding
+" ============================================================================
+nmap zc <Action>(CollapseRegion)
+nmap zo <Action>(ExpandRegion)
+nmap zC <Action>(CollapseAllRegions)
+nmap zO <Action>(ExpandAllRegions)
+nmap zr <Action>(ExpandRegionRecursively)
+nmap zm <Action>(CollapseRegionRecursively)
+
+" ============================================================================
+" Recent Locations & Navigation History
+" ============================================================================
+nmap <leader>hl <Action>(RecentLocations)
+nmap <leader>hc <Action>(RecentChangedFiles)
+nmap gb <Action>(Back)
+nmap gf <Action>(Forward)
+nmap <leader>ju <Action>(JumpToLastChange)
+nmap <leader>jn <Action>(JumpToNextChange)
+
+" ============================================================================
+" Misc utility mappings
+" ============================================================================
+nmap <leader>rc :g/^\s*#/d<CR>
+nnoremap <leader>i bi
+nmap <leader>re <Action>(GotoRelated)
+nmap <leader>sl <Action>(FindUsages)
+vmap <leader>sl y:action FindInPath<CR>
+nmap <leader>sp <Action>(ShowIntentionActions)
+
+" Close all notifications
+nmap <leader>nc <Action>(CloseAllNotifications)

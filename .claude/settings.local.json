@@ -38,7 +38,12 @@
       "Bash(~/projects/kt/target/release/kt spring:*)",
       "Bash(cargo test:*)",
       "Bash(~/dotfiles/scripts/.local/scripts/new-file:*)",
-      "Bash(zsh -c 'source /Users/timmarias/dotfiles/zsh/.zshrc && functions kt | head -5')"
+      "Bash(zsh -c 'source /Users/timmarias/dotfiles/zsh/.zshrc && functions kt | head -5')",
+      "Bash(command -v:*)",
+      "Bash(nix:*)",
+      "WebFetch(domain:gist.github.com)",
+      "Bash(mkdir:*)",
+      "WebFetch(domain:code.claude.com)"
     ],
     "deny": [],
     "ask": []

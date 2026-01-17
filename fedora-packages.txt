@@ -1,0 +1,39 @@
+# Fedora packages - one per line
+# Install: cat fedora-packages.txt | xargs sudo dnf install -y
+
+# Core CLI tools
+fzf
+ripgrep
+bat
+fd-find
+tree
+jq
+curl
+git
+git-delta
+
+# Editors & Terminal
+neovim
+tmux
+alacritty
+
+# Development tools
+universal-ctags
+stow
+
+# File manager
+# yazi (may need to install from cargo or COPR)
+
+# Image processing
+ImageMagick
+
+# Cloud & Containers
+awscli2
+kubectl
+podman
+
+# Emacs
+emacs
+
+# Fonts
+# Note: Nerd Fonts may need manual installation or from COPR
