@@ -271,3 +271,67 @@ imgconvert() {
         return 1
     fi
 }
+
+# --- Mermaid diagram utilities ---
+
+# Compile mermaid diagram to PDF in /tmp
+# Usage: mmd <file.mmd>
+mmd() {
+    local file="$1"
+
+    if [[ -z "$file" ]]; then
+        echo "Usage: mmd <file.mmd>"
+        return 1
+    fi
+
+    if [[ ! -f "$file" ]]; then
+        echo "Error: File not found: $file"
+        return 1
+    fi
+
+    local base="${file%.*}"
+    local basename="${base##*/}"
+    local output="/tmp/${basename}.pdf"
+
+    mmdc -i "$file" -o "$output"
+
+    if [[ $? -eq 0 ]]; then
+        echo "Compiled: $output"
+    else
+        echo "Error: Compilation failed"
+        return 1
+    fi
+}
+
+# Compile mermaid diagram and preview with macOS Preview
+# Usage: mmdp <file.mmd>
+mmdp() {
+    local file="$1"
+
+    if [[ -z "$file" ]]; then
+        echo "Usage: mmdp <file.mmd>"
+        return 1
+    fi
+
+    if [[ ! -f "$file" ]]; then
+        echo "Error: File not found: $file"
+        return 1
+    fi
+
+    local base="${file%.*}"
+    local basename="${base##*/}"
+    local output="/tmp/${basename}.pdf"
+
+    mmdc -i "$file" -o "$output"
+
+    if [[ $? -eq 0 ]]; then
+        echo "Compiled: $output"
+        open "$output"
+    else
+        echo "Error: Compilation failed"
+        return 1
+    fi
+}
+
+# Alias for combined compile and preview
+alias mmdc='mmdp'
