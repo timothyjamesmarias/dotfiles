@@ -22,6 +22,12 @@ alias cmf="cmd-finder"
 alias cmr="cmd-finder --rebuild"
 alias mdev='while true; do npm run dev || { [ $? -eq 130 ] && break; sleep 1; }; done'
 
+# --- Emacs aliases ---
+alias e="emacsclient -c -n"          # Open in GUI (new frame)
+alias et="emacsclient -nw"           # Open in terminal
+alias ec="emacsclient -c -n"         # Same as e (create frame)
+alias emacs="emacsclient -c -n"      # Replace regular emacs command
+
 # --- Clipboard alias (cross-platform) ---
 if [[ $(uname) == "Linux" ]]; then
   if [[ $XDG_SESSION_TYPE == "wayland" ]]; then
