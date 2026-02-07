@@ -1,6 +1,5 @@
 {
   "permissions": {
-    "defaultMode": "plan",
     "allow": [
       "WebFetch(domain:github.com)",
       "Bash(find:*)",
@@ -44,9 +43,13 @@
       "Bash(nix:*)",
       "WebFetch(domain:gist.github.com)",
       "Bash(mkdir:*)",
-      "WebFetch(domain:code.claude.com)"
+      "WebFetch(domain:code.claude.com)",
+      "WebFetch(domain:www.eesel.ai)",
+      "WebFetch(domain:alexop.dev)",
+      "WebFetch(domain:medium.com)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "defaultMode": "plan"
   }
 }
