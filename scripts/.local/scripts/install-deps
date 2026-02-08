@@ -81,7 +81,6 @@ BREW_PACKAGES=(
     "alacritty"             # GPU terminal emulator
 
     # Development tools
-    "ast-grep"              # Structural code search
     "universal-ctags"       # Code tagging
     "stow"                  # Symlink manager
 

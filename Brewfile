@@ -22,7 +22,6 @@ brew "tmux"
 brew "alacritty"
 
 # Development tools
-brew "ast-grep"
 brew "universal-ctags"
 brew "stow"
 

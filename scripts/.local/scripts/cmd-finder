@@ -18,7 +18,6 @@ SOURCE_FILES=(
   "$ZSHCONFIG/files.zsh"
   "$ZSHCONFIG/git.zsh"
   "$ZSHCONFIG/utils.zsh"
-  "$ZSHCONFIG/ast-grep.zsh"
   "$ZSHCONFIG/kotlin.zsh"
   "$ZSHCONFIG/kotlin-project-cli.zsh"
   "$ZSHCONFIG/docker.zsh"
@@ -83,7 +82,6 @@ build_cache() {
       extract_aliases "$ZSHCONFIG/files.zsh" "files"
       extract_aliases "$ZSHCONFIG/git.zsh" "git"
       extract_aliases "$ZSHCONFIG/utils.zsh" "utils"
-      extract_aliases "$ZSHCONFIG/ast-grep.zsh" "ast-grep"
       extract_aliases "$ZSHCONFIG/kotlin.zsh" "kotlin"
       extract_aliases "$ZSHCONFIG/kotlin-project-cli.zsh" "kt"
       extract_aliases "$ZSHCONFIG/docker.zsh" "docker"
@@ -92,7 +90,6 @@ build_cache() {
       extract_functions "$ZSHCONFIG/files.zsh" "files"
       extract_functions "$ZSHCONFIG/git.zsh" "git"
       extract_functions "$ZSHCONFIG/utils.zsh" "utils"
-      extract_functions "$ZSHCONFIG/ast-grep.zsh" "ast-grep"
       extract_functions "$ZSHCONFIG/kotlin.zsh" "kotlin"
       extract_functions "$ZSHCONFIG/kotlin-project-cli.zsh" "kt"
       extract_functions "$ZSHCONFIG/docker.zsh" "docker"
@@ -224,7 +221,7 @@ show_preview() {
       local search_key=$(echo "$name" | sed 's/ /<leader>/g')
       grep -A3 "\"$search_key\"" "$HOME/dotfiles/nvim/.config/nvim/lua/tim/remap.lua" 2>/dev/null | head -5
       ;;
-    git|files|utils|alias|ast-grep|kotlin|docker)
+    git|files|utils|alias|kotlin|docker)
       # Show zsh function or alias definition
       type "$name" 2>/dev/null || echo "(shell function/alias)"
       ;;

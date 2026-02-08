@@ -57,9 +57,8 @@ dotfiles/
 5. `files.zsh` - File/project search utilities
 6. `git.zsh` - Git workflows
 7. `utils.zsh` - Utility functions
-8. `ast-grep.zsh` - Structural code search
-9. `kotlin.zsh` - JVM/Gradle tooling
-10. `docker.zsh` - Container management
+8. `kotlin.zsh` - JVM/Gradle tooling
+9. `docker.zsh` - Container management
 
 ### Modular Configuration Files
 
@@ -173,10 +172,7 @@ dotfiles/
 **AWS**:
 - `awsctx [profile]` - Switch AWS profiles (fuzzy select if no arg)
 
-**Refactoring**:
-- `rr` → `refactor-rename` - Safe symbol renaming (uses the script)
-- `rri` → `refactor-rename --interactive`
-- `rrp` → `refactor-rename --preview-only`
+**File renaming**:
 - `rf` → `rename-file` - Interactive file renaming
 - `rfn` → `rename-file --no-keep-path`
 
@@ -189,41 +185,7 @@ dotfiles/
 **Configuration**:
 - `export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"` - Global rg settings
 
-#### 5. **ast-grep.zsh** - Structural Code Search
-
-**Location**: `zsh/.config/zsh/ast-grep.zsh`
-
-**Purpose**: AST-based code search for refactoring and pattern matching
-
-**Core functions**:
-- `sgi [lang] [pattern]` - Interactive structural search with fzf
-- `sgr <lang> <pattern> <replacement>` - Interactive find & replace
-
-**Language-specific shortcuts**:
-- `sgkt <pattern>` - Kotlin search
-- `sgjava <pattern>` - Java search
-- `sgts <pattern>` - TypeScript search
-- `sgjs <pattern>` - JavaScript search
-- `sgrb <pattern>` - Ruby search
-
-**Pattern templates (Kotlin)**:
-- `sgkt-fun` - Find function definitions
-- `sgkt-class` - Find class definitions
-- `sgkt-data` - Find data classes
-- `sgkt-suspend` - Find suspend functions
-- `sgkt-flow` - Find Flow types
-
-**Java patterns**:
-- `sgjava-class` - Find public classes
-- `sgjava-method` - Find public methods
-- `sgjava-interface` - Find interfaces
-
-**Utilities**:
-- `sg-fns <lang> [path]` - List all functions in codebase
-- `sgj` - Output as JSON
-- `sgc` - Count matches
-
-#### 6. **kotlin.zsh** - JVM/Gradle Development
+#### 5. **kotlin.zsh** - JVM/Gradle Development
 
 **Location**: `zsh/.config/zsh/kotlin.zsh`
 
@@ -358,42 +320,7 @@ All scripts are executable and in PATH via `.zshrc`
 
 **Usage**: `ts` (aliased) or bind to tmux key
 
-### 2. **refactor-rename**
-
-**Purpose**: Safe, interactive symbol renaming across codebase
-
-**Features**:
-- Word boundary matching by default (won't replace partial matches)
-- Multi-file selection with fzf
-- Rich previews showing context
-- Smart case matching
-- Backup files before changes
-- Git-aware
-
-**Usage**:
-```bash
-refactor-rename old_name new_name
-refactor-rename old_name new_name --type js
-refactor-rename --interactive
-refactor-rename old_name new_name --preview-only
-```
-
-**Options**:
-- `-i, --interactive` - Prompt for names
-- `-t, --type <type>` - Filter by file type
-- `-g, --glob <pattern>` - Filter by glob
-- `--no-word-boundary` - Match anywhere
-- `--preview-only` - Dry run
-- `--case-sensitive` - Exact case matching
-
-**Workflow**:
-1. Search with ripgrep
-2. Show match counts
-3. Fuzzy select files to modify (with previews)
-4. Confirm changes
-5. Apply with sed (creates backups)
-
-### 3. **rename-file**
+### 2. **rename-file**
 
 **Purpose**: Interactive file renaming with git-awareness
 
@@ -434,7 +361,7 @@ rename-file --no-keep-path     # Don't prepend path
 **Purpose**: Fuzzy search through all commands, aliases, functions, and keybindings
 
 **Sources**:
-- All zsh aliases from modular files (aliases.zsh, git.zsh, files.zsh, utils.zsh, ast-grep.zsh, kotlin.zsh, docker.zsh)
+- All zsh aliases from modular files (aliases.zsh, git.zsh, files.zsh, utils.zsh, kotlin.zsh, docker.zsh)
 - All zsh functions from those files
 - Vim keymaps (from nvim lua config)
 - Git config aliases
@@ -458,7 +385,7 @@ vim           <leader>ff     Find files
 **Purpose**: Bootstrap entire development environment
 
 **Components**:
-- **CLI tools** (via Homebrew): fzf, ripgrep, bat, fd, neovim, tmux, ast-grep, etc.
+- **CLI tools** (via Homebrew): fzf, ripgrep, bat, fd, neovim, tmux, etc.
 - **LSP servers** (via npm): TypeScript, Vue, PHP (Intelephense), Tailwind, HTML/CSS/JSON
 - **Version managers**: asdf, SDKMAN
 - **Fonts**: Nerd Fonts (JetBrains Mono, Fira Code, Hack)
@@ -684,7 +611,6 @@ Nearly every operation offers fuzzy selection:
 
 Multiple tools respect git state:
 - `rename-file` uses `git mv` for tracked files
-- `refactor-rename` searches within git repos
 - `git.zsh` functions understand staging/unstaging
 - `.gitconfig` uses delta for better diffs
 
@@ -704,7 +630,6 @@ Multiple tools respect git state:
 - Fixup commits for clean history (`gfix`)
 - Test running from shell (`gwtest`)
 - Image optimization (`imgopt`)
-- Symbol renaming (`refactor-rename`)
 - Command discovery (`cmd-finder`)
 
 ### 7. **Interactive by Default**
@@ -713,14 +638,12 @@ Multiple tools respect git state:
 
 **Examples**:
 - `docker_stop_all` - Shows containers first, asks to confirm
-- `refactor-rename` - Shows preview, asks to apply
 - `rename-file` - Shows file, lets you edit name
 - `git_stage` - Multi-select with preview
 
 ### 8. **Backup & Safety**
 
 **Patterns**:
-- `refactor-rename` creates `.bak` files
 - `--preview-only` flags for dry runs
 - Confirmation prompts for destructive ops
 - `--force-with-lease` instead of `--force`
@@ -740,7 +663,7 @@ Multiple tools respect git state:
 **Functions**:
 - Descriptive names: `git_checkout`, `docker_exec_fzf`
 - Suffix `_fzf` for interactive versions
-- Category prefixes: `git_*`, `docker_*`, `sg*` (ast-grep)
+- Category prefixes: `git_*`, `docker_*`
 
 **Aliases**:
 - Short mnemonics: `gcb` (git checkout branch), `dex` (docker exec)
@@ -748,7 +671,7 @@ Multiple tools respect git state:
 - One/two letter for common ops: `ga`, `gc`, `gs`
 
 **Scripts**:
-- Kebab-case: `tmux-sessionizer`, `refactor-rename`
+- Kebab-case: `tmux-sessionizer`
 - Descriptive: `install-deps`, `sync-macos-apps`
 
 ---
@@ -786,7 +709,6 @@ Alacritty (terminal)
 **Development**:
 - Neovim - Text editor
 - LSP servers - Language support
-- AST-grep - Structural code search
 - CTags - Code navigation
 - Delta - Git diffs
 

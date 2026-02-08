@@ -34,7 +34,6 @@ source "$ZSHCONFIG/aliases.zsh"     # Basic aliases
 source "$ZSHCONFIG/files.zsh"       # File and project search utilities
 source "$ZSHCONFIG/git.zsh"         # Git aliases and functions
 source "$ZSHCONFIG/utils.zsh"       # Utility functions
-source "$ZSHCONFIG/ast-grep.zsh"    # Structural code search (ast-grep)
 source "$ZSHCONFIG/docker.zsh"      # Docker utilities
 source "$ZSHCONFIG/heroku.zsh"      # Heroku utilities
 source "$ZSHCONFIG/ctags.zsh"       # Ctags utilities
