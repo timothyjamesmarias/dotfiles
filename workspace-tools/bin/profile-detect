@@ -1,0 +1,172 @@
+#!/usr/bin/env bash
+# Detect project type and return matching profile name
+# Usage: profile-detect [directory]
+
+set -euo pipefail
+
+# Get script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE_ROOT="$(dirname "$SCRIPT_DIR")"
+PROFILES_DIR="$WORKSPACE_ROOT/profiles"
+
+# shellcheck source=../lib/yaml-parser.sh
+source "$WORKSPACE_ROOT/lib/yaml-parser.sh"
+
+detect_project_type() {
+    local dir="${1:-.}"
+
+    # Ensure directory exists
+    if [[ ! -d "$dir" ]]; then
+        echo "Error: Directory not found: $dir" >&2
+        return 1
+    fi
+
+    cd "$dir" || return 1
+
+    # Check each profile's detection rules
+    for profile_file in "$PROFILES_DIR"/*.yaml; do
+        [[ -f "$profile_file" ]] || continue
+
+        local profile_name
+        profile_name=$(basename "$profile_file" .yaml)
+
+        # Get detection patterns from profile
+        local patterns
+        mapfile -t patterns < <(yaml_get_array "$profile_file" "detect")
+
+        # Check if any detection pattern matches
+        local all_match=1
+        for pattern in "${patterns[@]}"; do
+            # Remove any trailing/leading whitespace
+            pattern=$(echo "$pattern" | xargs)
+
+            # Check if file or directory exists
+            if [[ ! -e "$pattern" ]]; then
+                all_match=0
+                break
+            fi
+        done
+
+        # If all patterns matched, return this profile
+        if [[ $all_match -eq 1 && ${#patterns[@]} -gt 0 ]]; then
+            echo "$profile_name"
+            return 0
+        fi
+    done
+
+    # Default profile if nothing matches
+    echo "default"
+    return 0
+}
+
+show_usage() {
+    cat <<EOF
+Usage: profile-detect [OPTIONS] [DIRECTORY]
+
+Detect project type and return matching profile name.
+
+OPTIONS:
+    -h, --help          Show this help message
+    -v, --verbose       Show detection details
+    -l, --list          List available profiles
+    -p, --path          Show full path to detected profile file
+
+ARGUMENTS:
+    DIRECTORY           Directory to analyze (default: current directory)
+
+EXAMPLES:
+    # Detect project type in current directory
+    profile-detect
+
+    # Detect project type in specific directory
+    profile-detect ~/projects/myapp
+
+    # Get full path to profile file
+    profile-detect --path
+
+    # List all available profiles
+    profile-detect --list
+EOF
+}
+
+list_profiles() {
+    echo "Available profiles:"
+    for profile_file in "$PROFILES_DIR"/*.yaml; do
+        [[ -f "$profile_file" ]] || continue
+
+        local profile_name
+        profile_name=$(basename "$profile_file" .yaml)
+
+        local profile_desc
+        profile_desc=$(yaml_get_value "$profile_file" "description" 2>/dev/null || echo "No description")
+
+        printf "  %-20s %s\n" "$profile_name" "$profile_desc"
+    done
+}
+
+main() {
+    local directory="."
+    local verbose=0
+    local show_path=0
+    local list_only=0
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help)
+                show_usage
+                exit 0
+                ;;
+            -v|--verbose)
+                verbose=1
+                shift
+                ;;
+            -p|--path)
+                show_path=1
+                shift
+                ;;
+            -l|--list)
+                list_only=1
+                shift
+                ;;
+            -*)
+                echo "Error: Unknown option: $1" >&2
+                show_usage >&2
+                exit 1
+                ;;
+            *)
+                directory="$1"
+                shift
+                ;;
+        esac
+    done
+
+    # Handle list option
+    if [[ $list_only -eq 1 ]]; then
+        list_profiles
+        exit 0
+    fi
+
+    # Detect project type
+    if [[ $verbose -eq 1 ]]; then
+        echo "Analyzing directory: $directory" >&2
+        echo "Profiles directory: $PROFILES_DIR" >&2
+        echo "" >&2
+    fi
+
+    local detected_profile
+    detected_profile=$(detect_project_type "$directory")
+
+    if [[ $verbose -eq 1 ]]; then
+        echo "Detected profile: $detected_profile" >&2
+    fi
+
+    # Return profile name or path
+    if [[ $show_path -eq 1 ]]; then
+        echo "$PROFILES_DIR/${detected_profile}.yaml"
+    else
+        echo "$detected_profile"
+    fi
+}
+
+main "$@"

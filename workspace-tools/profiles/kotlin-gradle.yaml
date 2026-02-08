@@ -1,0 +1,48 @@
+name: kotlin-gradle
+description: Kotlin project with Gradle build system
+
+detect:
+  - build.gradle.kts
+  - settings.gradle.kts
+
+tmux:
+  windows:
+    - name: editor
+      panes:
+        - {cmd: "nvim"}
+
+    - name: build
+      layout: main-vertical
+      panes:
+        - {cmd: ""}
+        - {cmd: "gradle build --continuous"}
+
+    - name: test
+      panes:
+        - {cmd: "gradle test --continuous"}
+
+    - name: shell
+      panes:
+        - {cmd: ""}
+
+claude:
+  roles:
+    - name: kotlin-reviewer
+      description: Kotlin code reviewer focusing on idiomatic Kotlin
+      prompt: |
+        You are a Kotlin code reviewer. Focus on:
+        - Idiomatic Kotlin (use data classes, sealed classes, extension functions)
+        - Null safety best practices
+        - Coroutines and structured concurrency
+        - Gradle build configuration
+        - Testing with JUnit 5 and MockK
+
+    - name: kotlin-test-writer
+      description: JUnit 5 test generator for Kotlin
+      prompt: |
+        You are a Kotlin test writer using JUnit 5. Generate:
+        - Unit tests with JUnit 5 annotations
+        - Use MockK for mocking
+        - Use Kotest assertions when appropriate
+        - Test coroutines with runTest
+        - Follow Kotlin testing best practices

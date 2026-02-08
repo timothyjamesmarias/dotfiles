@@ -1,0 +1,14 @@
+name: default
+description: Default workspace profile for generic projects
+
+# No detection rules - this is the fallback profile
+
+tmux:
+  windows:
+    - name: editor
+      panes:
+        - {cmd: "nvim"}
+
+    - name: shell
+      panes:
+        - {cmd: ""}

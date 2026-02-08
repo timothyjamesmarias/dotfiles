@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# Workspace manager - entrypoint for workspace-tools system
+# Usage: ws-manager <command> [args...]
+
+set -euo pipefail
+
+# Get dotfiles root (this script is in dotfiles/scripts/.local/scripts/)
+DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+WORKSPACE_TOOLS="$DOTFILES_ROOT/workspace-tools"
+BIN_DIR="$WORKSPACE_TOOLS/bin"
+
+show_usage() {
+    cat <<EOF
+Usage: ws-manager <command> [options]
+
+Workspace management system for tmux + git + claude integration.
+
+COMMANDS:
+    detect [dir]        Detect project type and show matching profile
+    apply <profile>     Apply profile to current session
+    list                List available profiles
+    help                Show this help message
+
+EXAMPLES:
+    # Detect project type in current directory
+    ws-manager detect
+
+    # Apply rails profile to current session
+    ws-manager apply rails
+
+    # List all available profiles
+    ws-manager list
+
+    # Show help for specific command
+    ws-manager apply --help
+
+PROFILE TOOLS (use directly):
+    profile-detect      Detect project type (in $BIN_DIR)
+    profile-apply       Apply profile to session (in $BIN_DIR)
+
+See also: claude-agent, worktree-session
+EOF
+}
+
+ensure_workspace_tools() {
+    if [[ ! -d "$WORKSPACE_TOOLS" ]]; then
+        echo "Error: workspace-tools not found at: $WORKSPACE_TOOLS" >&2
+        echo "Make sure workspace-tools is set up in your dotfiles" >&2
+        exit 1
+    fi
+}
+
+main() {
+    local command="${1:-help}"
+
+    # Handle help
+    if [[ "$command" == "help" || "$command" == "--help" || "$command" == "-h" ]]; then
+        show_usage
+        exit 0
+    fi
+
+    # Ensure workspace tools exist
+    ensure_workspace_tools
+
+    case "$command" in
+        detect)
+            shift
+            exec "$BIN_DIR/profile-detect" "$@"
+            ;;
+        apply)
+            shift
+            exec "$BIN_DIR/profile-apply" "$@"
+            ;;
+        list)
+            shift
+            exec "$BIN_DIR/profile-detect" --list "$@"
+            ;;
+        *)
+            echo "Error: Unknown command: $command" >&2
+            echo "" >&2
+            show_usage >&2
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

@@ -1,0 +1,48 @@
+name: vue
+description: Vue.js application workspace
+
+detect:
+  - package.json
+  - vite.config.js
+
+tmux:
+  windows:
+    - name: editor
+      panes:
+        - {cmd: "nvim"}
+
+    - name: dev
+      layout: main-vertical
+      panes:
+        - {cmd: "npm run dev"}
+        - {cmd: ""}
+
+    - name: test
+      panes:
+        - {cmd: ""}
+
+    - name: shell
+      panes:
+        - {cmd: ""}
+
+claude:
+  roles:
+    - name: vue-reviewer
+      description: Vue.js code reviewer
+      prompt: |
+        You are a Vue.js code reviewer. Focus on:
+        - Vue 3 Composition API best practices
+        - Reactivity system (ref, reactive, computed)
+        - Component design patterns
+        - TypeScript integration
+        - Vite configuration
+        - Testing with Vitest
+
+    - name: vue-test-writer
+      description: Vitest test generator for Vue components
+      prompt: |
+        You are a Vue test writer using Vitest. Generate:
+        - Component tests with @vue/test-utils
+        - Unit tests for composables
+        - Integration tests
+        - Follow Vue testing best practices

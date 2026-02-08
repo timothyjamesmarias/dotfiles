@@ -1,0 +1,51 @@
+name: rails
+description: Ruby on Rails application workspace
+
+detect:
+  - Gemfile
+  - config/application.rb
+
+tmux:
+  windows:
+    - name: editor
+      panes:
+        - {cmd: "nvim"}
+
+    - name: server
+      panes:
+        - {cmd: "bin/rails server"}
+
+    - name: console
+      layout: main-vertical
+      panes:
+        - {cmd: "bin/rails console"}
+        - {cmd: "tail -f log/development.log"}
+
+    - name: test
+      panes:
+        - {cmd: ""}
+
+    - name: shell
+      panes:
+        - {cmd: ""}
+
+claude:
+  roles:
+    - name: rails-reviewer
+      description: Rails code reviewer focusing on Ruby best practices
+      prompt: |
+        You are a Ruby on Rails code reviewer. Focus on:
+        - Rails conventions and idioms
+        - ActiveRecord best practices
+        - Security (SQL injection, XSS, CSRF)
+        - Performance (N+1 queries, eager loading)
+        - Testing with RSpec
+
+    - name: rails-test-writer
+      description: RSpec test generator
+      prompt: |
+        You are an RSpec test writer for Rails applications. Generate:
+        - Model specs with factory_bot
+        - Request specs for API endpoints
+        - Feature specs for user interactions
+        - Follow RSpec best practices

@@ -1,0 +1,298 @@
+#!/usr/bin/env bash
+# Apply a workspace profile to current or specified tmux session
+# Usage: profile-apply <profile-name|profile-file> [session-name]
+
+set -euo pipefail
+
+# Get script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE_ROOT="$(dirname "$SCRIPT_DIR")"
+PROFILES_DIR="$WORKSPACE_ROOT/profiles"
+
+# shellcheck source=../lib/yaml-parser.sh
+source "$WORKSPACE_ROOT/lib/yaml-parser.sh"
+
+show_usage() {
+    cat <<EOF
+Usage: profile-apply [OPTIONS] <PROFILE> [SESSION]
+
+Apply a workspace profile to a tmux session.
+
+OPTIONS:
+    -h, --help          Show this help message
+    -d, --dry-run       Show what would be created without applying
+    -v, --verbose       Show detailed information
+    -c, --current       Apply to current session (default)
+
+ARGUMENTS:
+    PROFILE             Profile name (e.g., 'rails') or path to profile file
+    SESSION             Target session name (default: current session)
+
+EXAMPLES:
+    # Apply rails profile to current session
+    profile-apply rails
+
+    # Apply profile to specific session
+    profile-apply kotlin-gradle myproject
+
+    # Dry run to see what would be created
+    profile-apply --dry-run rails
+
+    # Apply profile from custom file
+    profile-apply ~/my-custom-profile.yaml
+EOF
+}
+
+resolve_profile_file() {
+    local profile="$1"
+
+    # If it's a file path, use it directly
+    if [[ -f "$profile" ]]; then
+        echo "$profile"
+        return 0
+    fi
+
+    # Try as profile name
+    local profile_file="$PROFILES_DIR/${profile}.yaml"
+    if [[ -f "$profile_file" ]]; then
+        echo "$profile_file"
+        return 0
+    fi
+
+    echo "Error: Profile not found: $profile" >&2
+    echo "Looked for: $profile_file" >&2
+    return 1
+}
+
+get_current_session() {
+    if [[ -z "${TMUX:-}" ]]; then
+        echo "Error: Not in a tmux session" >&2
+        return 1
+    fi
+
+    tmux display-message -p '#S'
+}
+
+session_exists() {
+    local session="$1"
+    tmux has-session -t "$session" 2>/dev/null
+}
+
+create_window() {
+    local session="$1"
+    local window_name="$2"
+    local window_index="$3"
+    local layout="${4:-}"
+    local dry_run="${5:-0}"
+
+    if [[ $dry_run -eq 1 ]]; then
+        echo "  Would create window: $window_name"
+        return 0
+    fi
+
+    # Create window
+    if [[ $window_index -eq 0 ]]; then
+        # Rename first window instead of creating new one
+        tmux rename-window -t "${session}:0" "$window_name"
+    else
+        tmux new-window -t "$session" -n "$window_name"
+    fi
+
+    # Apply layout if specified
+    if [[ -n "$layout" ]]; then
+        tmux select-layout -t "${session}:${window_name}" "$layout" 2>/dev/null || true
+    fi
+}
+
+create_pane() {
+    local session="$1"
+    local window_name="$2"
+    local command="$3"
+    local pane_index="$4"
+    local dry_run="${5:-0}"
+
+    if [[ $dry_run -eq 1 ]]; then
+        echo "    Would create pane with command: $command"
+        return 0
+    fi
+
+    # First pane uses the existing window, subsequent panes split
+    if [[ $pane_index -eq 0 ]]; then
+        # Send command to first pane
+        if [[ -n "$command" ]]; then
+            tmux send-keys -t "${session}:${window_name}.0" "$command" C-m
+        fi
+    else
+        # Split window and send command
+        tmux split-window -t "${session}:${window_name}" -h
+        if [[ -n "$command" ]]; then
+            tmux send-keys -t "${session}:${window_name}.${pane_index}" "$command" C-m
+        fi
+    fi
+}
+
+apply_profile() {
+    local profile_file="$1"
+    local session="$2"
+    local dry_run="${3:-0}"
+    local verbose="${4:-0}"
+
+    # Validate profile
+    if ! yaml_validate_profile "$profile_file"; then
+        return 1
+    fi
+
+    # Get profile name
+    local profile_name
+    profile_name=$(yaml_get_value "$profile_file" "name")
+
+    if [[ $verbose -eq 1 ]]; then
+        echo "Applying profile: $profile_name"
+        echo "Target session: $session"
+        echo ""
+    fi
+
+    # Check if session exists
+    if ! session_exists "$session"; then
+        echo "Error: Session not found: $session" >&2
+        return 1
+    fi
+
+    # Get number of windows to create
+    local window_count
+    window_count=$(yaml_get_tmux_window_count "$profile_file")
+
+    if [[ $window_count -eq 0 ]]; then
+        if [[ $verbose -eq 1 ]]; then
+            echo "No windows defined in profile"
+        fi
+        return 0
+    fi
+
+    if [[ $verbose -eq 1 ]]; then
+        echo "Creating $window_count window(s)..."
+    fi
+
+    # Create each window
+    for ((i=0; i<window_count; i++)); do
+        local window_name
+        window_name=$(yaml_get_window_name "$profile_file" "$i")
+
+        local layout
+        layout=$(yaml_get_window_layout "$profile_file" "$i")
+
+        if [[ $verbose -eq 1 || $dry_run -eq 1 ]]; then
+            echo "Window $((i+1)): $window_name"
+            if [[ -n "$layout" ]]; then
+                echo "  Layout: $layout"
+            fi
+        fi
+
+        # Create window
+        create_window "$session" "$window_name" "$i" "$layout" "$dry_run"
+
+        # Get panes for this window
+        local pane_commands
+        mapfile -t pane_commands < <(yaml_get_window_panes "$profile_file" "$i")
+
+        # Create panes
+        local pane_index=0
+        for cmd in "${pane_commands[@]}"; do
+            if [[ -n "$cmd" ]]; then
+                create_pane "$session" "$window_name" "$cmd" "$pane_index" "$dry_run"
+                ((pane_index++))
+            fi
+        done
+
+        # Apply layout after creating all panes
+        if [[ -n "$layout" && $dry_run -eq 0 && $pane_index -gt 1 ]]; then
+            tmux select-layout -t "${session}:${window_name}" "$layout" 2>/dev/null || true
+        fi
+    done
+
+    if [[ $dry_run -eq 0 ]]; then
+        # Select first window
+        tmux select-window -t "${session}:0"
+
+        if [[ $verbose -eq 1 ]]; then
+            echo ""
+            echo "Profile applied successfully!"
+        fi
+    else
+        echo ""
+        echo "(Dry run - no changes made)"
+    fi
+}
+
+main() {
+    local profile=""
+    local session=""
+    local dry_run=0
+    local verbose=0
+    local use_current=0
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help)
+                show_usage
+                exit 0
+                ;;
+            -d|--dry-run)
+                dry_run=1
+                shift
+                ;;
+            -v|--verbose)
+                verbose=1
+                shift
+                ;;
+            -c|--current)
+                use_current=1
+                shift
+                ;;
+            -*)
+                echo "Error: Unknown option: $1" >&2
+                show_usage >&2
+                exit 1
+                ;;
+            *)
+                if [[ -z "$profile" ]]; then
+                    profile="$1"
+                elif [[ -z "$session" ]]; then
+                    session="$1"
+                else
+                    echo "Error: Too many arguments" >&2
+                    show_usage >&2
+                    exit 1
+                fi
+                shift
+                ;;
+        esac
+    done
+
+    # Validate required arguments
+    if [[ -z "$profile" ]]; then
+        echo "Error: Profile name or file required" >&2
+        show_usage >&2
+        exit 1
+    fi
+
+    # Determine target session
+    if [[ -z "$session" || $use_current -eq 1 ]]; then
+        session=$(get_current_session) || exit 1
+    fi
+
+    # Resolve profile file
+    local profile_file
+    profile_file=$(resolve_profile_file "$profile") || exit 1
+
+    if [[ $verbose -eq 1 ]]; then
+        echo "Using profile file: $profile_file"
+        echo ""
+    fi
+
+    # Apply profile
+    apply_profile "$profile_file" "$session" "$dry_run" "$verbose"
+}
+
+main "$@"

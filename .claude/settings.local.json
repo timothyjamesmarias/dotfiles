@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(git -C /Users/timmarias/dotfiles log --oneline -20)",
+      "Bash(chmod:*)"
     ],
     "deny": [],
     "ask": [],
