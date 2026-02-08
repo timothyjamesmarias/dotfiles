@@ -2,7 +2,7 @@
 
 # Use fd (faster alternative to find)
 alias index="fd --type f --hidden --exclude .git --exclude node_modules --exclude target"
-alias ff="index | fzf | xargs nvim"
+alias ff="index | fzf --height 40% --border rounded | xargs nvim"
 alias ffa="index | fzf -m | xargs nvim"
 alias cdd='cd "$(fd --type d --hidden --exclude .git --exclude node_modules --exclude target | fzf --preview "tree -C -L 2 {}")"'
 alias t="tree -L 2 -I 'node_modules|.git|target|dist|*.lock|*.cache'"

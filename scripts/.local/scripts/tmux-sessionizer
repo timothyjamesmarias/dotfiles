@@ -10,7 +10,7 @@ if [[ ! -f "$CACHE_FILE" ]] || [[ $(find "$CACHE_FILE" -mmin +60 2>/dev/null) ]]
 fi
 
 # Choose session directory from cache
-session=$(cat "$CACHE_FILE" | fzf)
+session=$(cat "$CACHE_FILE" | fzf --height 40% --border rounded --prompt '📁 ' --pointer '▶')
 session_name=$(basename "$session" | tr . _)
 
 # Check if tmux is running

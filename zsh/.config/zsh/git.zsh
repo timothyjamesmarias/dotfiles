@@ -62,7 +62,7 @@ git_checkout() {
 git_stage() {
   if [ $# -eq 0 ]; then
     # No arguments - use fzf menu
-    git_status_cached | fzf -m | awk '{print $2}' | xargs git add
+    git_status_cached | fzf -m --reverse | awk '{print $2}' | xargs git add
   else
     # Arguments provided - stage them directly
     git add "$@"
