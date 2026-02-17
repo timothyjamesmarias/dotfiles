@@ -584,6 +584,46 @@ end, { desc = "Git: Diff this (cached)" })
 -- Git hunk text object (gitsigns)
 vim.keymap.set({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", { desc = "Git: Select hunk (text object)" })
 
+-- Open in GitHub
+local function open_in_github(line_start, line_end)
+	local file = vim.fn.expand("%:p")
+	local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
+	if vim.v.shell_error ~= 0 then
+		vim.notify("Not in a git repo", vim.log.levels.ERROR)
+		return
+	end
+	local rel_path = file:sub(#git_root + 2)
+	local branch = vim.fn.systemlist("git rev-parse --abbrev-ref HEAD")[1]
+	local repo_url = vim.fn.systemlist("gh repo view --json url -q .url")[1]
+	if vim.v.shell_error ~= 0 then
+		vim.notify("Could not get repo URL", vim.log.levels.ERROR)
+		return
+	end
+	local anchor = ""
+	if line_start then
+		if line_end and line_end ~= line_start then
+			anchor = "#L" .. line_start .. "-L" .. line_end
+		else
+			anchor = "#L" .. line_start
+		end
+	end
+	local url = repo_url .. "/blob/" .. branch .. "/" .. rel_path .. anchor
+	vim.fn.system({ "open", url })
+end
+
+vim.keymap.set("n", "<leader>go", function()
+	open_in_github()
+end, { desc = "Git: Open in GitHub" })
+
+vim.keymap.set("v", "<leader>go", function()
+	local start = vim.fn.line("v")
+	local finish = vim.fn.line(".")
+	if start > finish then
+		start, finish = finish, start
+	end
+	open_in_github(start, finish)
+end, { desc = "Git: Open in GitHub (selection)" })
+
 -- Helper function to find Rails view/partial references
 local function find_rails_view_references()
 	local file_path = vim.fn.expand("%:p")

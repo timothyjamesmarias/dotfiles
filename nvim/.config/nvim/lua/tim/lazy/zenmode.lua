@@ -3,7 +3,7 @@ return {
 	opts = {
 		window = {
 			backdrop = 1,
-			width = 120,
+			width = 80,
 			options = {
 			wrap = true,
 			linebreak = true,

@@ -6,7 +6,7 @@ CACHE_TTL=3600  # 1 hour in seconds
 
 # Build or refresh cache
 if [[ ! -f "$CACHE_FILE" ]] || [[ $(find "$CACHE_FILE" -mmin +60 2>/dev/null) ]]; then
-  find ~ ~/projects -mindepth 1 -maxdepth 2 -type d 2>/dev/null > "$CACHE_FILE"
+  find ~ ~/projects ~/notes -mindepth 1 -maxdepth 2 -type d 2>/dev/null > "$CACHE_FILE"
 fi
 
 # Choose session directory from cache
