@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(done)",
+      "Bash(git -C /Users/timmarias/dotfiles log --oneline -20)",
+      "Bash(chmod:*)",
+      "Bash(ls:*)"
+    ],
+    "deny": [],
+    "ask": [],
+    "defaultMode": "plan"
+  }
+}
