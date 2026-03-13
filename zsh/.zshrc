@@ -92,3 +92,7 @@ add-zsh-hook chpwd __autoload_kotlin_utils
 
 # Check on shell startup
 __autoload_kotlin_utils
+
+# opencode
+export PATH=/Users/timmarias/.opencode/bin:$PATH
+export PATH="$HOME/.qlot/bin:$PATH"
