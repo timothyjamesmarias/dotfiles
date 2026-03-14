@@ -114,11 +114,23 @@ if [ -f "$LEM_INSTALL_DIR/lem" ]; then
     echo "Binary location: $LEM_INSTALL_DIR/lem"
 
     # Create symlink in PATH
-    read -p "Do you want to create a symlink in /usr/local/bin? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        sudo ln -sf "$LEM_INSTALL_DIR/lem" /usr/local/bin/lem
-        echo "Symlink created. You can now run 'lem' from anywhere."
+    echo "Creating symlink for easy access..."
+
+    # Prefer ~/.local/bin as it doesn't require sudo
+    if [ -d "$HOME/.local/bin" ]; then
+        ln -sf "$LEM_INSTALL_DIR/lem" "$HOME/.local/bin/lem"
+        echo "Symlink created: ~/.local/bin/lem"
+        echo "You can now run 'lem' from anywhere."
+    else
+        # Fall back to /usr/local/bin with sudo
+        read -p "Create symlink in /usr/local/bin? (requires sudo) (y/n) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            sudo ln -sf "$LEM_INSTALL_DIR/lem" /usr/local/bin/lem
+            echo "Symlink created. You can now run 'lem' from anywhere."
+        else
+            echo "No symlink created. Run Lem with: $LEM_INSTALL_DIR/lem"
+        fi
     fi
 
     # Set up configuration
@@ -157,22 +169,88 @@ EOF
     ln -sf "$LEM_CONFIG_DIR/init.lisp" ~/.config/lem/init.lisp 2>/dev/null || true
     echo "Symlinked: ~/.config/lem/init.lisp -> $LEM_CONFIG_DIR/init.lisp"
 
+    # Create macOS .app bundle
+    echo
+    echo "=== Creating macOS Application Bundle ==="
+
+    APP_DIR="$HOME/Applications/Lem.app"
+
+    mkdir -p "$APP_DIR/Contents/MacOS"
+    mkdir -p "$APP_DIR/Contents/Resources"
+
+    # Create launcher script
+    cat > "$APP_DIR/Contents/MacOS/Lem" << 'LAUNCHER_EOF'
+#!/bin/bash
+# Lem launcher script
+export PATH="$HOME/.qlot/bin:$HOME/.local/bin:/opt/homebrew/bin:$PATH"
+LEM_DIR="$HOME/opt/lem"
+exec "$LEM_DIR/lem" "$@"
+LAUNCHER_EOF
+
+    chmod +x "$APP_DIR/Contents/MacOS/Lem"
+
+    # Create Info.plist
+    cat > "$APP_DIR/Contents/Info.plist" << 'PLIST_EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>Lem</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.lem-project.lem</string>
+    <key>CFBundleName</key>
+    <string>Lem</string>
+    <key>CFBundleDisplayName</key>
+    <string>Lem Editor</string>
+    <key>CFBundleVersion</key>
+    <string>1.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon.icns</string>
+</dict>
+</plist>
+PLIST_EOF
+
+    # Generate and install icon
+    SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+    if [ -f "$SCRIPT_DIR/lem.svg" ] && command -v rsvg-convert >/dev/null 2>&1; then
+        echo "Generating app icon from lem.svg..."
+        bash "$SCRIPT_DIR/create-lem-icon.sh" >/dev/null 2>&1 || echo "Warning: Failed to generate icon"
+    elif [ -f "$SCRIPT_DIR/Lem.icns" ]; then
+        echo "Installing app icon..."
+        cp "$SCRIPT_DIR/Lem.icns" "$APP_DIR/Contents/Resources/AppIcon.icns"
+    else
+        echo "Note: No icon found. Run create-lem-icon.sh to add the Lem logo."
+        touch "$APP_DIR/Contents/Resources/AppIcon.icns"
+    fi
+
+    # Remove quarantine attribute
+    xattr -cr "$APP_DIR" 2>/dev/null || true
+
+    echo "✅ Created Lem.app at: $APP_DIR"
+
     echo
     echo "=== Installation Complete ==="
     echo "Lem installed at: $LEM_INSTALL_DIR"
     echo "Configuration at: $LEM_CONFIG_DIR"
+    echo "macOS App: $APP_DIR"
     echo
     echo "To start Lem:"
-    echo "  lem                           # If symlink was created"
-    echo "  $LEM_INSTALL_DIR/lem         # Direct path"
+    echo "  lem                           # Command line"
+    echo "  Spotlight (Cmd+Space) → Lem   # Launch as macOS app"
+    echo "  Double-click Lem.app          # From ~/Applications"
     echo
     echo "To customize Lem:"
     echo "  Edit: $LEM_CONFIG_DIR/init.lisp"
     echo
     echo "Note: WebView support on macOS may have limitations."
     echo "Alternative frontends:"
-    echo "  make ncurses  # Terminal version (more stable)"
-    echo "  make sdl2     # Native GUI version"
+    echo "  cd $LEM_INSTALL_DIR && make ncurses  # Terminal (more stable)"
+    echo "  cd $LEM_INSTALL_DIR && make sdl2     # Native GUI"
 else
     echo "Error: Build appeared to succeed but lem binary not found."
     exit 1
