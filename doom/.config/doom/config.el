@@ -74,6 +74,13 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 (setq native-comp-deferred-compilation nil)
+
+(after! magit
+  (setq magit-pull-or-fetch 'pull)
+  (setq magit-rebase-arguments '("--autostash"))
+  (setq magit-pull-arguments '("--rebase" "--autostash")))
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 (setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode)
+(setq doom-theme 'doom-ir-black)
+(setq doom-font (font-spec :family "MonoLisa" :size 14))
