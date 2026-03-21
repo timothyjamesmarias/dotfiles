@@ -105,3 +105,17 @@
 
 (map! :leader
       :desc "Claude Code" "o c" #'claude-code)
+
+(after! writeroom-mode
+  (setq +zen-text-scale 0
+        writeroom-width 80
+        writeroom-mode-line t
+        visual-fill-column-center-text t)
+  (add-hook 'writeroom-mode-enable-hook
+            (defun +zen-enable-word-wrap-h ()
+              (visual-line-mode +1)
+              (+word-wrap-mode +1)))
+  (add-hook 'writeroom-mode-disable-hook
+            (defun +zen-disable-word-wrap-h ()
+              (visual-line-mode -1)
+              (+word-wrap-mode -1))))
