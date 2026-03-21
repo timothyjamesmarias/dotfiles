@@ -40,7 +40,7 @@
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/org/")
+(setq org-directory "~/notes/")
 
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
@@ -105,6 +105,34 @@
 
 (map! :leader
       :desc "Claude Code" "o c" #'claude-code)
+
+(defun pandoc-convert ()
+  "Convert current buffer between org and markdown via pandoc.
+Creates a new file alongside the original."
+  (interactive)
+  (let* ((src (buffer-file-name))
+         (ext (file-name-extension src))
+         (base (file-name-sans-extension src))
+         (target (pcase ext
+                   ("org" (concat base ".md"))
+                   ("md"  (concat base ".org"))
+                   (_     (user-error "Not an org or md file"))))
+         (fmt-from (pcase ext
+                     ("org" "org")
+                     ("md"  "markdown")))
+         (fmt-to (pcase ext
+                   ("org" "markdown")
+                   ("md"  "org"))))
+    (when (and (file-exists-p target)
+               (not (y-or-n-p (format "%s exists. Overwrite? " target))))
+      (user-error "Aborted"))
+    (if (zerop (call-process "pandoc" nil nil nil
+                             "-f" fmt-from "-t" fmt-to
+                             "-o" target src))
+        (progn
+          (message "Created %s" target)
+          (find-file target))
+      (user-error "Pandoc conversion failed"))))
 
 (after! writeroom-mode
   (setq +zen-text-scale 0
