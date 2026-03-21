@@ -1,0 +1,5 @@
+# {{TITLE}}
+
+{{DATE}}
+
+## Content

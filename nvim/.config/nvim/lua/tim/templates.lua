@@ -15,6 +15,14 @@ local function load_template(template_file)
 		vim.cmd("0read " .. vim.fn.fnameescape(template_path))
 		-- Delete the extra blank line at the end
 		vim.cmd("$delete")
+		-- Replace {{TITLE}} with titleized file name
+		local file_name = vim.fn.expand("%:t:r")
+		local title = file_name:gsub("[-_]", " "):gsub("(%a)([%w]*)", function(first, rest)
+			return first:upper() .. rest
+		end)
+		vim.cmd("%s/{{TITLE}}/" .. vim.fn.escape(title, "/\\") .. "/ge")
+		-- Replace {{DATE}} placeholder with today's date
+		vim.cmd("%s/{{DATE}}/" .. os.date("%Y-%m-%d") .. "/ge")
 		-- Move cursor to a sensible position (usually line 1)
 		vim.cmd("1")
 	end
@@ -30,6 +38,7 @@ local templates = {
 	{ pattern = "*.js", template = "javascript/default.js" },
 	{ pattern = "*.sh", template = "shell/default.sh" },
 	{ pattern = "*.py", template = "python/default.py" },
+	{ pattern = "*.md", template = "markdown/note.md" },
 }
 
 for _, t in ipairs(templates) do
