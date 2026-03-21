@@ -84,3 +84,24 @@
 (global-display-line-numbers-mode)
 (setq doom-theme 'doom-ir-black)
 (setq doom-font (font-spec :family "MonoLisa" :size 14))
+
+(defun claude-code ()
+  "Launch Claude Code with a session menu."
+  (interactive)
+  (let* ((choice (read-char-choice
+                  "Claude Code: [n]ew  [r]esume  [c]ontinue "
+                  '(?n ?r ?c)))
+         (cmd (pcase choice
+                (?n "claude")
+                (?r "claude --resume")
+                (?c "claude --continue")))
+         (buf (get-buffer "*claude-code*")))
+    (if (and buf (buffer-live-p buf))
+        (progn
+          (switch-to-buffer buf)
+          (vterm-send-string (concat cmd "\n")))
+      (vterm "*claude-code*")
+      (vterm-send-string (concat cmd "\n")))))
+
+(map! :leader
+      :desc "Claude Code" "o c" #'claude-code)
