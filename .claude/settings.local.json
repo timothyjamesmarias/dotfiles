@@ -20,6 +20,8 @@
       "Bash(/opt/homebrew/opt/emacs-plus@31/bin/emacs --version)",
       "Bash(/opt/homebrew/opt/emacs-plus@31/bin/emacs --batch --eval '\\(print \\(native-comp-available-p\\)\\)' 2>&1)",
       "Bash(~/.config/emacs/bin/doom doctor:*)"
+      "WebFetch(domain:lem-project.github.io)",
+      "Bash(xargs:*)"
     ],
     "deny": [],
     "ask": [],
