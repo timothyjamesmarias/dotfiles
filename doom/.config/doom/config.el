@@ -30,7 +30,7 @@
 ;; wasn't installed correctly. Font issues are rarely Doom issues!
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
-;; available. You can either set `doom-theme' or manually load a theme with the
+
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'doom-one)
 
@@ -82,29 +82,130 @@
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 (setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode)
-(setq doom-theme 'doom-ir-black)
+(setq doom-theme 'modus-vivendi)
 (setq doom-font (font-spec :family "MonoLisa" :size 14))
+(setq-default line-spacing 4)
 
-(defun claude-code ()
-  "Launch Claude Code with a session menu."
+(defun new-note ()
+  "Create a new note from template in org-directory."
   (interactive)
-  (let* ((choice (read-char-choice
-                  "Claude Code: [n]ew  [r]esume  [c]ontinue "
-                  '(?n ?r ?c)))
-         (cmd (pcase choice
-                (?n "claude")
-                (?r "claude --resume")
-                (?c "claude --continue")))
-         (buf (get-buffer "*claude-code*")))
-    (if (and buf (buffer-live-p buf))
-        (progn
-          (switch-to-buffer buf)
-          (vterm-send-string (concat cmd "\n")))
-      (vterm "*claude-code*")
-      (vterm-send-string (concat cmd "\n")))))
+  (let* ((title (read-string "Note title: "))
+         (slug (replace-regexp-in-string
+                "[^a-z0-9]+" "-"
+                (downcase title)))
+         (slug (replace-regexp-in-string
+                "^-\\|-$" "" slug))
+         (filename (expand-file-name
+                    (concat slug ".org") org-directory))
+         (date (format-time-string "%Y-%m-%d")))
+    (when (file-exists-p filename)
+      (unless (y-or-n-p (format "%s exists. Open it? " filename))
+        (user-error "Aborted")))
+    (find-file filename)
+    (when (= (buffer-size) 0)
+      (insert (format "#+title: %s\n#+date: %s\n\n* Content\n" title date))
+      (save-buffer))))
 
-(map! :leader
-      :desc "Claude Code" "o c" #'claude-code)
+(defun project-ibuffer ()
+  "Open ibuffer filtered to the current workspace's buffers."
+  (interactive)
+  (let ((bufs (+workspace-buffer-list)))
+    (ibuffer nil (format "*ibuffer:%s*" (+workspace-current-name))
+             `((predicate . (memq buf ',bufs))))))
+
+;; --- Claude Code integration ---
+
+(defun project-claude (n)
+  "Open or switch to Claude Code session N for the current project."
+  (interactive "p")
+  (let* ((project (projectile-project-name))
+         (buf-name (if (= n 1)
+                       (format "*claude:%s*" project)
+                     (format "*claude:%s<%d>*" project n)))
+         (buf (get-buffer buf-name))
+         (default-directory (projectile-project-root)))
+    (if (and buf (buffer-live-p buf))
+        (switch-to-buffer buf)
+      (vterm buf-name)
+      (vterm-send-string "claude\n"))))
+
+(defun project-claude-continue ()
+  "Open Claude Code continuing the last conversation in the current project."
+  (interactive)
+  (let* ((project (projectile-project-name))
+         (buf-name (format "*claude:%s:continue*" project))
+         (default-directory (projectile-project-root)))
+    (vterm buf-name)
+    (vterm-send-string "claude --continue\n")))
+
+(defun project-claude-resume ()
+  "Open Claude Code and pick a conversation to resume in the current project."
+  (interactive)
+  (let* ((project (projectile-project-name))
+         (buf-name (format "*claude:%s:resume*" project))
+         (default-directory (projectile-project-root)))
+    (vterm buf-name)
+    (vterm-send-string "claude --resume\n")))
+
+(defun project-claude-list ()
+  "Switch to a Claude Code buffer for the current project via completion."
+  (interactive)
+  (let* ((project (projectile-project-name))
+         (prefix (format "*claude:%s" project))
+         (bufs (seq-filter
+                (lambda (b) (string-prefix-p prefix (buffer-name b)))
+                (buffer-list))))
+    (if bufs
+        (switch-to-buffer
+         (completing-read "Claude session: " (mapcar #'buffer-name bufs) nil t))
+      (project-claude 1))))
+
+(defun project-claude-new ()
+  "Create a new Claude Code session with the next available number."
+  (interactive)
+  (let* ((project (projectile-project-name))
+         (n 1))
+    (while (get-buffer (if (= n 1)
+                           (format "*claude:%s*" project)
+                         (format "*claude:%s<%d>*" project n)))
+      (setq n (1+ n)))
+    (project-claude n)))
+
+(defun claude-prompt ()
+  "Send a one-shot prompt to Claude Code and display the result."
+  (interactive)
+  (let* ((prompt (read-string "Claude prompt: "))
+         (default-directory (projectile-project-root))
+         (buf (get-buffer-create "*claude-prompt*")))
+    (with-current-buffer buf
+      (read-only-mode -1)
+      (erase-buffer)
+      (insert (format "Prompt: %s\n\n" prompt))
+      (insert "Waiting for response...\n"))
+    (display-buffer buf)
+    (set-process-sentinel
+     (start-process "claude-prompt" buf "claude" "-p" prompt)
+     (lambda (proc _event)
+       (when (eq (process-status proc) 'exit)
+         (with-current-buffer (process-buffer proc)
+           (goto-char (point-min))
+           (when (search-forward "Waiting for response...\n" nil t)
+             (replace-match ""))
+           (read-only-mode 1)
+           (markdown-mode)))))))
+
+(after! transient
+  (transient-define-prefix project-claude-menu ()
+    "Manage Claude Code sessions."
+    [:description
+     (lambda () (format "Claude: %s" (projectile-project-name)))
+     ["Session"
+      ("n" "New"       project-claude-new)
+      ("c" "Continue"  project-claude-continue)
+      ("r" "Resume"    project-claude-resume)
+      ("l" "List"      project-claude-list)]
+     ["Quick"
+      ("p" "Prompt"    claude-prompt)]]))
 
 (defun pandoc-convert ()
   "Convert current buffer between org and markdown via pandoc.
@@ -122,7 +223,8 @@ Creates a new file alongside the original."
                      ("md"  "markdown")))
          (fmt-to (pcase ext
                    ("org" "markdown")
-                   ("md"  "org"))))
+                   ("md"  "org")
+)))
     (when (and (file-exists-p target)
                (not (y-or-n-p (format "%s exists. Overwrite? " target))))
       (user-error "Aborted"))
@@ -133,6 +235,99 @@ Creates a new file alongside the original."
           (message "Created %s" target)
           (find-file target))
       (user-error "Pandoc conversion failed"))))
+
+;; --- Project workspace system ---
+
+(defun sessionizer ()
+  "Fuzzy-pick a project and switch to its workspace."
+  (interactive)
+  (let* ((dirs (append
+                (directory-files "~/projects" t "^[^.]" t)
+                (directory-files "~/notes" t "^[^.]" t)))
+         (dirs (seq-filter #'file-directory-p dirs))
+         (choice (completing-read "Switch to: " dirs nil t)))
+    (when choice
+      (projectile-add-known-project choice)
+      (+workspace-switch (file-name-nondirectory choice) t)
+      (setq default-directory choice)
+      (doom-project-find-file choice))))
+
+(defun project-terminal (n)
+  "Open or switch to persistent terminal N for the current project.
+With no prefix, opens terminal 1. C-u 2 opens terminal 2, etc."
+  (interactive "p")
+  (let* ((project (projectile-project-name))
+         (buf-name (if (= n 1)
+                       (format "*term:%s*" project)
+                     (format "*term:%s<%d>*" project n)))
+         (buf (get-buffer buf-name))
+         (default-directory (projectile-project-root)))
+    (if (and buf (buffer-live-p buf))
+        (switch-to-buffer buf)
+      (vterm buf-name))))
+
+(defun project-terminal-list ()
+  "Switch to a project terminal via completion."
+  (interactive)
+  (let* ((project (projectile-project-name))
+         (prefix (format "*term:%s" project))
+         (bufs (seq-filter
+                (lambda (b) (string-prefix-p prefix (buffer-name b)))
+                (buffer-list))))
+    (if bufs
+        (switch-to-buffer
+         (completing-read "Terminal: " (mapcar #'buffer-name bufs) nil t))
+      (project-terminal 1))))
+
+(defun project-terminal-new ()
+  "Create a new terminal for the current project with the next available number."
+  (interactive)
+  (let* ((project (projectile-project-name))
+         (n 1))
+    (while (get-buffer (if (= n 1)
+                           (format "*term:%s*" project)
+                         (format "*term:%s<%d>*" project n)))
+      (setq n (1+ n)))
+    (project-terminal n)))
+
+(after! transient
+  (transient-define-prefix project-terminal-menu ()
+    "Manage project terminals."
+    [:description
+     (lambda () (format "Terminals: %s" (projectile-project-name)))
+     ["Open"
+      ("1" "Terminal 1" (lambda () (interactive) (project-terminal 1)))
+      ("2" "Terminal 2" (lambda () (interactive) (project-terminal 2)))
+      ("3" "Terminal 3" (lambda () (interactive) (project-terminal 3)))
+      ("4" "Terminal 4" (lambda () (interactive) (project-terminal 4)))]
+     ["Manage"
+      ("n" "New"    project-terminal-new)
+      ("l" "List"   project-terminal-list)
+      ("p" "Popup"  +vterm/toggle)]])
+
+  (transient-define-prefix project-hub ()
+    "Project context hub."
+    [:description
+     (lambda () (format "Project: %s" (projectile-project-name)))
+     ["Navigate"
+      ("f" "Find file"    projectile-find-file)
+      ("r" "Recent files" projectile-recentf)
+      ("b" "Buffers"      projectile-switch-to-buffer)
+      ("B" "Manage buffers" project-ibuffer)
+      ("d" "Dired"        projectile-dired)
+      ("s" "Search"       +default/search-project)
+      ("n" "New note"     new-note)]
+     ["Tools"
+      ("t" "Terminals"    project-terminal-menu)
+      ("g" "Magit"        magit-status)
+      ("c" "Claude Code"  project-claude-menu)
+      ("z" "Zen mode"     writeroom-mode)]]))
+
+(map! :leader
+      :desc "Jump to project" "o j" #'sessionizer
+      :desc "Project hub" "p h" #'project-hub
+      (:prefix ("n" . "notes")
+       :desc "New note" "w" #'new-note))
 
 (after! writeroom-mode
   (setq +zen-text-scale 0
