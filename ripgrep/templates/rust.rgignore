@@ -1,0 +1,2 @@
+# Rust project ignores for ripgrep
+target/

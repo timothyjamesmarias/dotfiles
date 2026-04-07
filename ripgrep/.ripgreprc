@@ -1,10 +1,5 @@
 # Global ripgrep configuration
-# Exclude common directories
+# Per-project ignores: use `rginit` to create .rgignore
 
 --glob=!.git/
 --glob=!node_modules/
---glob=!wp-content/plugins/
---glob=!wp-content/cache/
---glob=!wp-content/mu-plugins/
---glob=!public/critical-styles/
---glob=!public/css-critical/

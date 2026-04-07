@@ -1,0 +1,6 @@
+# Kotlin/Gradle project ignores for ripgrep
+build/
+.gradle/
+out/
+.idea/
+*.class

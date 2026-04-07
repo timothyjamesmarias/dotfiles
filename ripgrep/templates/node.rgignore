@@ -1,0 +1,11 @@
+# Node/JS/TS project ignores for ripgrep
+dist/
+build/
+coverage/
+.next/
+.nuxt/
+.output/
+.cache/
+*.min.js
+*.min.css
+*.map

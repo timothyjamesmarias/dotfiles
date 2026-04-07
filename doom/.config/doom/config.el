@@ -290,6 +290,142 @@ With no prefix, opens terminal 1. C-u 2 opens terminal 2, etc."
       (setq n (1+ n)))
     (project-terminal n)))
 
+(defun term--get-or-create (n)
+  "Get project terminal N buffer, creating if needed without disrupting windows."
+  (let* ((project (projectile-project-name))
+         (buf-name (if (= n 1)
+                       (format "*term:%s*" project)
+                     (format "*term:%s<%d>*" project n)))
+         (buf (get-buffer buf-name)))
+    (if (and buf (buffer-live-p buf))
+        buf
+      (let ((default-directory (projectile-project-root)))
+        (save-window-excursion
+          (vterm buf-name)
+          (get-buffer buf-name))))))
+
+;; --- Fast toggle between code and terminal ---
+
+(defvar term--last-code-buffer nil
+  "Last non-terminal buffer visited, for fast toggle.")
+
+(defun term--track-last-code-buffer ()
+  "Record the current buffer if it is not a terminal."
+  (unless (derived-mode-p 'vterm-mode)
+    (setq term--last-code-buffer (current-buffer))))
+
+(add-hook 'buffer-list-update-hook #'term--track-last-code-buffer)
+
+(defun term-fast-toggle ()
+  "Toggle between the last code buffer and the most recent project terminal."
+  (interactive)
+  (if (derived-mode-p 'vterm-mode)
+      (when (and term--last-code-buffer
+                 (buffer-live-p term--last-code-buffer))
+        (switch-to-buffer term--last-code-buffer))
+    (let* ((project (projectile-project-name))
+           (prefix (format "*term:%s" project))
+           (term-buf (cl-find-if
+                      (lambda (b)
+                        (and (string-prefix-p prefix (buffer-name b))
+                             (buffer-live-p b)))
+                      (buffer-list))))
+      (if term-buf
+          (switch-to-buffer term-buf)
+        (project-terminal 1)))))
+
+(map! :n "M-o" #'term-fast-toggle
+      :i "M-o" #'term-fast-toggle)
+
+(after! vterm
+  (define-key vterm-mode-map (kbd "M-o") #'term-fast-toggle))
+
+;; --- Terminal layouts ---
+
+(defun term-popup-toggle ()
+  "Toggle a persistent bottom terminal for the current project."
+  (interactive)
+  (let* ((term-buf (term--get-or-create 1))
+         (win (get-buffer-window term-buf)))
+    (if win
+        (delete-window win)
+      (display-buffer-in-side-window
+       term-buf
+       '((side . bottom)
+         (slot . 0)
+         (window-height . 0.3)))
+      (select-window (get-buffer-window term-buf))
+      (set-window-dedicated-p (selected-window) t))))
+
+(defun term-layout-below ()
+  "Split window with terminal in the bottom third."
+  (interactive)
+  (let ((term-buf (term--get-or-create 1)))
+    (select-window (split-window-below (floor (* (window-height) 0.7))))
+    (switch-to-buffer term-buf)
+    (set-window-dedicated-p (selected-window) t)))
+
+(defun term-layout-right ()
+  "Split window with terminal on the right."
+  (interactive)
+  (let ((term-buf (term--get-or-create 1)))
+    (select-window (split-window-right))
+    (switch-to-buffer term-buf)
+    (set-window-dedicated-p (selected-window) t)))
+
+(defun term-layout-grid ()
+  "Create a 2x2 grid of terminals 1-4."
+  (interactive)
+  (delete-other-windows)
+  (let* ((b1 (term--get-or-create 1))
+         (b2 (term--get-or-create 2))
+         (b3 (term--get-or-create 3))
+         (b4 (term--get-or-create 4))
+         (w1 (selected-window))
+         (w2 (split-window-right))
+         (w3 (progn (select-window w1) (split-window-below)))
+         (w4 (progn (select-window w2) (split-window-below))))
+    (set-window-buffer w1 b1)
+    (set-window-buffer w2 b2)
+    (set-window-buffer w3 b3)
+    (set-window-buffer w4 b4)
+    (dolist (w (list w1 w2 w3 w4))
+      (set-window-dedicated-p w t))
+    (select-window w1)))
+
+;; --- Broadcast ---
+
+(defun term-broadcast (command)
+  "Send COMMAND to all vterm buffers in the current project."
+  (interactive "sCommand to broadcast: ")
+  (let* ((project (projectile-project-name))
+         (prefix (format "*term:%s" project))
+         (bufs (seq-filter
+                (lambda (b)
+                  (and (string-prefix-p prefix (buffer-name b))
+                       (buffer-live-p b)
+                       (with-current-buffer b
+                         (derived-mode-p 'vterm-mode))))
+                (buffer-list)))
+         (count 0))
+    (if (null bufs)
+        (message "No terminals for project %s" project)
+      (dolist (buf bufs)
+        (with-current-buffer buf
+          (vterm-send-string command)
+          (vterm-send-return)
+          (setq count (1+ count))))
+      (message "Sent to %d terminal(s)" count))))
+
+;; --- Window dedication ---
+
+(defun term-toggle-dedication ()
+  "Toggle whether the current window is dedicated to its buffer."
+  (interactive)
+  (let ((dedicated (not (window-dedicated-p))))
+    (set-window-dedicated-p (selected-window) dedicated)
+    (message "Window %s" (if dedicated "dedicated" "undedicated"))))
+
 (after! transient
   (transient-define-prefix project-terminal-menu ()
     "Manage project terminals."
@@ -301,9 +437,14 @@ With no prefix, opens terminal 1. C-u 2 opens terminal 2, etc."
       ("3" "Terminal 3" (lambda () (interactive) (project-terminal 3)))
       ("4" "Terminal 4" (lambda () (interactive) (project-terminal 4)))]
      ["Manage"
-      ("n" "New"    project-terminal-new)
-      ("l" "List"   project-terminal-list)
-      ("p" "Popup"  +vterm/toggle)]])
+      ("n" "New"       project-terminal-new)
+      ("l" "List"      project-terminal-list)
+      ("p" "Popup"     term-popup-toggle)]
+     ["Layout"
+      ("h" "Below"     term-layout-below)
+      ("j" "Right"     term-layout-right)
+      ("k" "Grid"      term-layout-grid)
+      ("x" "Broadcast" term-broadcast)]])
 
   (transient-define-prefix project-hub ()
     "Project context hub."
@@ -326,8 +467,25 @@ With no prefix, opens terminal 1. C-u 2 opens terminal 2, etc."
 (map! :leader
       :desc "Jump to project" "o j" #'sessionizer
       :desc "Project hub" "p h" #'project-hub
+      :desc "Window dedication" "w d" #'term-toggle-dedication
+      (:prefix "t"
+       :desc "Terminal 1"    "1" (cmd! (project-terminal 1))
+       :desc "Terminal 2"    "2" (cmd! (project-terminal 2))
+       :desc "Terminal 3"    "3" (cmd! (project-terminal 3))
+       :desc "Terminal 4"    "4" (cmd! (project-terminal 4))
+       :desc "New terminal"  "n" #'project-terminal-new
+       :desc "List terminals" "a" #'project-terminal-list
+       :desc "Popup toggle"  "t" #'term-popup-toggle
+       :desc "Layout: below" "h" #'term-layout-below
+       :desc "Layout: right" "j" #'term-layout-right
+       :desc "Layout: grid"  "k" #'term-layout-grid
+       :desc "Broadcast"     "x" #'term-broadcast
+       :desc "Terminal menu" "e" #'project-terminal-menu)
       (:prefix ("n" . "notes")
        :desc "New note" "w" #'new-note))
+
+(after! lsp-mode
+  (add-to-list 'lsp-language-id-configuration '(web-mode . "vue")))
 
 (after! writeroom-mode
   (setq +zen-text-scale 0

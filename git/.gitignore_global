@@ -2,3 +2,5 @@ tags
 .claude/
 .format
 .tool-versions
+.project.conf
+.rgignore

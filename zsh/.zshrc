@@ -12,7 +12,7 @@ fi
 
 # --- Basic environment setup ---
 export LANG=en_US.UTF-8
-export EDITOR="emacsclient"
+export EDITOR="nvim"
 
 # --- Shell behavior ---
 chmod +x "$HOME/.local/scripts"
@@ -34,6 +34,8 @@ source "$ZSHCONFIG/aliases.zsh"     # Basic aliases
 source "$ZSHCONFIG/files.zsh"       # File and project search utilities
 source "$ZSHCONFIG/git.zsh"         # Git aliases and functions
 source "$ZSHCONFIG/utils.zsh"       # Utility functions
+source "$ZSHCONFIG/ripgrep.zsh"    # Ripgrep config and rginit
+source "$ZSHCONFIG/project.zsh"    # Per-project config and JetBrains launcher
 source "$ZSHCONFIG/docker.zsh"      # Docker utilities
 source "$ZSHCONFIG/heroku.zsh"      # Heroku utilities
 source "$ZSHCONFIG/ctags.zsh"       # Ctags utilities

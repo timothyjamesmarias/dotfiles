@@ -15,9 +15,6 @@ cc() {
     esac
 }
 
-# Ripgrep configuration
-export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
-
 # AWS profile switcher
 awsctx () {
 	profile=${1:-noop}

@@ -1,0 +1,14 @@
+# WordPress project ignores for ripgrep
+wp-content/plugins/
+wp-content/cache/
+wp-content/mu-plugins/
+wp-content/uploads/
+wp-content/upgrade/
+wp-content/themes/genesis-block-theme/
+wp-content/wp-rocket-config/
+wp-content/wordpress-seo/admin/
+public/critical-styles/
+public/css-critical/
+vendor/
+*.min.js
+*.min.css

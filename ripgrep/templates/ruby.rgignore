@@ -1,0 +1,8 @@
+# Ruby project ignores for ripgrep
+vendor/bundle/
+.bundle/
+tmp/
+log/
+coverage/
+public/assets/
+public/packs/

@@ -1,0 +1,12 @@
+# Python project ignores for ripgrep
+__pycache__/
+.venv/
+venv/
+.env/
+dist/
+build/
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
+.tox/
+htmlcov/

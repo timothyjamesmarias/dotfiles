@@ -1,0 +1,3 @@
+# PHP project ignores for ripgrep
+vendor/
+.phpunit.cache/
