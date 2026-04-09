@@ -237,7 +237,13 @@ alias gf='git pull --rebase'
 alias gfa='git fetch && gf'
 alias gcl='git clone'
 alias gpo='git push origin'
-alias gpu='git push -u origin HEAD'
+gpu() {
+  if git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then
+    git push
+  else
+    git push -u origin HEAD
+  fi
+}
 alias gpf='git push --force-with-lease'
 alias gco='git checkout'
 alias gb='git checkout -b'
