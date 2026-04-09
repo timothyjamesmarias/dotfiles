@@ -43,7 +43,9 @@
       "Bash(python3 -c \"import sys,json,base64; d=json.load\\(sys.stdin\\); print\\(base64.b64decode\\(d.get\\('content',''\\)\\).decode\\(\\)[:3000]\\)\")",
       "Bash(curl -s \"https://api.github.com/repos/hechtcarmel/jetbrains-index-mcp-plugin/readme\")",
       "Bash(curl -s \"https://api.github.com/repos/puddinging/idea-mcp-plugin/readme\")",
-      "Bash(curl -s \"https://api.github.com/repos/JetBrains/mcp-jetbrains/readme\")"
+      "Bash(curl -s \"https://api.github.com/repos/JetBrains/mcp-jetbrains/readme\")",
+      "WebSearch",
+      "Bash(grep -E \"\\\\.\\(sh|bash\\)$\")"
     ],
     "deny": [],
     "ask": [],
