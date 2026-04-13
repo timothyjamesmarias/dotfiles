@@ -43,6 +43,26 @@ jb() {
     "$ide" "${1:-.}"
 }
 
+# Open the configured project URL in the default browser
+# Optional arg: path suffix appended to the URL (e.g. `wb /admin`)
+wb() {
+    local url
+    url=$(_project_conf_get url)
+
+    if [[ -z "$url" ]]; then
+        echo "No 'url' key found in .project.conf"
+        echo "Add one with: echo 'url=http://localhost:3000' >> .project.conf"
+        return 1
+    fi
+
+    if [[ -n "$1" ]]; then
+        # Strip trailing slash from url and leading slash from suffix to avoid doubles
+        url="${url%/}/${1#/}"
+    fi
+
+    open "$url"
+}
+
 # Initialize .project.conf in current directory
 project-init() {
     if [[ -f ".project.conf" ]]; then
