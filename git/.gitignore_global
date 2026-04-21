@@ -4,3 +4,4 @@ tags
 .tool-versions
 .project.conf
 .rgignore
+.fdignore

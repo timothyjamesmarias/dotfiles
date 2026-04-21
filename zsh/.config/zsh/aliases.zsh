@@ -21,6 +21,7 @@ alias dcd="docker compose down"
 alias cmf="cmd-finder"
 alias cmr="cmd-finder --rebuild"
 alias mdev='while true; do npm run dev || { [ $? -eq 130 ] && break; sleep 1; }; done'
+alias -g ...='../..'
 
 # --- Emacs aliases ---
 alias e="emacsclient -c -n"          # Open in GUI (new frame)
