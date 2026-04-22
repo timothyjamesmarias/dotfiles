@@ -11,7 +11,7 @@
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 (setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode)
-(setq doom-theme 'doom-material-dark)
+(setq doom-theme 'doom-monokai-spectrum)
 (setq doom-font (font-spec :family "MonoLisa" :size 14))
 (setq-default line-spacing 4)
 
