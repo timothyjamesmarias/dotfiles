@@ -3,6 +3,10 @@
 (setq display-line-numbers-type t)
 (setq org-directory "~/notes/")
 (setq native-comp-deferred-compilation nil)
+(after! evil
+  (define-key evil-insert-state-map (kbd "C-h") #'delete-backward-char)
+  (define-key evil-ex-completion-map (kbd "C-h") #'delete-backward-char)
+  (define-key evil-ex-search-keymap (kbd "C-h") #'delete-backward-char))
 
 (after! magit
   (setq magit-pull-or-fetch 'pull)
