@@ -131,12 +131,20 @@ Falls back gracefully when one or both scopes are unavailable."
 (defun +tim/cycle-buffer (direction)
   "Cycle to the next (1) or previous (-1) project×workspace buffer."
   (let* ((bufs (+tim/project-workspace-buffers))
-         (bufs (seq-filter (lambda (b)
-                             (and (not (string-prefix-p " " (buffer-name b)))
-                                  (if (fboundp 'doom-real-buffer-p)
-                                      (doom-real-buffer-p b)
-                                    t)))
-                           bufs)))
+         (bufs (seq-filter
+                (lambda (b)
+                  (and (not (string-prefix-p " " (buffer-name b)))
+                       (not (with-current-buffer b
+                              (derived-mode-p 'vterm-mode
+                                              'term-mode
+                                              'eshell-mode
+                                              'shell-mode
+                                              'comint-mode
+                                              'magit-mode)))
+                       (if (fboundp 'doom-real-buffer-p)
+                           (doom-real-buffer-p b)
+                         t)))
+                bufs)))
     (if (or (null bufs) (<= (length bufs) 1))
         (if (> direction 0) (next-buffer) (previous-buffer))
       (let* ((cur (current-buffer))
