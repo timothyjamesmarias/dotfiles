@@ -1,78 +1,7 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
-;; Place your private configuration here! Remember, you do not need to run 'doom
-;; sync' after modifying this file!
-
-
-;; Some functionality uses this to identify you, e.g. GPG configuration, email
-;; clients, file templates and snippets. It is optional.
-;; (setq user-full-name "John Doe"
-;;       user-mail-address "john@doe.com")
-
-;; Doom exposes five (optional) variables for controlling fonts in Doom:
-;;
-;; - `doom-font' -- the primary font to use
-;; - `doom-variable-pitch-font' -- a non-monospace font (where applicable)
-;; - `doom-big-font' -- used for `doom-big-font-mode'; use this for
-;;   presentations or streaming.
-;; - `doom-symbol-font' -- for symbols
-;; - `doom-serif-font' -- for the `fixed-pitch-serif' face
-;;
-;; See 'C-h v doom-font' for documentation and more examples of what they
-;; accept. For example:
-;;
-;;(setq doom-font (font-spec :family "Fira Code" :size 12 :weight 'semi-light)
-;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
-;;
-;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
-;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
-;; refresh your font settings. If Emacs still can't find your font, it likely
-;; wasn't installed correctly. Font issues are rarely Doom issues!
-
-;; There are two ways to load a theme. Both assume the theme is installed and
-
-;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
-
-;; This determines the style of line numbers in effect. If set to `nil', line
-;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
-
-;; If you use `org' and don't want your org files in the default location below,
-;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/notes/")
-
-
-;; Whenever you reconfigure a package, make sure to wrap your config in an
-;; `with-eval-after-load' block, otherwise Doom's defaults may override your
-;; settings. E.g.
-;;
-;;   (with-eval-after-load 'PACKAGE
-;;     (setq x y))
-;;
-;; The exceptions to this rule:
-;;
-;;   - Setting file/directory variables (like `org-directory')
-;;   - Setting variables which explicitly tell you to set them before their
-;;     package is loaded (see 'C-h v VARIABLE' to look them up).
-;;   - Setting doom variables (which start with 'doom-' or '+').
-;;
-;; Here are some additional functions/macros that will help you configure Doom.
-;;
-;; - `load!' for loading external *.el files relative to this one
-;; - `add-load-path!' for adding directories to the `load-path', relative to
-;;   this file. Emacs searches the `load-path' when you load packages with
-;;   `require' or `use-package'.
-;; - `map!' for binding new keys
-;;
-;; To get information about any of these functions/macros, move the cursor over
-;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
-;; This will open documentation for it, including demos of how they are used.
-;; Alternatively, use `C-h o' to look up a symbol (functions, variables, faces,
-;; etc).
-;;
-;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
-;; they are implemented.
 (setq native-comp-deferred-compilation nil)
 
 (after! magit
@@ -162,6 +91,74 @@ Falls back gracefully when one or both scopes are unavailable."
 
 (map! :n "C-n" #'+tim/next-project-workspace-buffer
       :n "C-p" #'+tim/previous-project-workspace-buffer)
+
+(defun +tim/maizzle-component-at-point ()
+  "Return filesystem path for a Maizzle/Laravel component tag at point, or nil."
+  (save-excursion
+    (let* ((line (thing-at-point 'line t))
+           (root (or (doom-project-root) default-directory)))
+      (when line
+        (cond
+         ((string-match "</?x-\\([[:alnum:]._-]+\\)" line)
+          (let* ((name (match-string 1 line))
+                 (dotted (split-string name "\\.")))
+            (cl-loop for candidate in
+                     (append
+                      (when (> (length dotted) 1)
+                        (list (format "components/%s/%s.html"
+                                      (mapconcat #'identity (butlast dotted) "/")
+                                      (car (last dotted)))))
+                      (list (format "components/%s.html" name)
+                            (format "components/%s/index.html" name)
+                            (format "resources/views/components/%s.blade.php"
+                                    (replace-regexp-in-string "\\." "/" name))))
+                     for abs = (expand-file-name candidate root)
+                     when (file-readable-p abs) return abs)))
+         ((string-match "<component[[:space:]]+src=\"\\([^\"]+\\)\"" line)
+          (let ((abs (expand-file-name (match-string 1 line) root)))
+            (when (file-readable-p abs) abs))))))))
+
+(defun +tim/maizzle-lookup-file-handler (&optional _identifier)
+  "Lookup handler for `+lookup/file' in Maizzle/Blade buffers."
+  (when-let ((path (+tim/maizzle-component-at-point)))
+    (find-file path)
+    t))
+
+(set-lookup-handlers! '(web-mode html-mode mhtml-mode php-mode)
+  :file #'+tim/maizzle-lookup-file-handler)
+
+(defun +tim/maizzle-find-references ()
+  "Grep project for `<x-NAME>` usages of the current Maizzle component."
+  (interactive)
+  (let* ((file (buffer-file-name))
+         (rel  (and file (file-relative-name file (doom-project-root))))
+         (name (and rel (string-match "components/\\(.+\\)\\.html\\'" rel)
+                    (match-string 1 rel))))
+    (unless name (user-error "Not in components/*.html"))
+    (setq name
+          (cond ((string-match "\\(.+\\)/index\\'" name) (match-string 1 name))
+                ((string-match "\\(.+\\)/\\(.+\\)\\'" name)
+                 (concat (match-string 1 name) "." (match-string 2 name)))
+                (t name)))
+    (consult-ripgrep (doom-project-root) (format "<x-%s" name))))
+
+(defun +tim/tag-find-all ()
+  "Pick between dumb-jump definition, rg usages, tags, and xref history."
+  (interactive)
+  (let* ((choices '(("Definition (lookup chain)" . +lookup/definition)
+                    ("Usages (ripgrep)"          . +default/search-project-for-symbol-at-point)
+                    ("All tags"                  . projectile-find-tag)
+                    ("Jump history"              . xref-go-back)))
+         (pick (completing-read "Find: " (mapcar #'car choices) nil t)))
+    (call-interactively (cdr (assoc pick choices)))))
+
+(map! :leader
+      (:prefix ("t" . "tags")
+       :desc "Definition at point" "d" #'+lookup/definition
+       :desc "Usages (rg)"         "u" #'+default/search-project-for-symbol-at-point
+       :desc "Browse all tags"     "g" #'projectile-find-tag
+       :desc "Jump history"        "s" #'xref-go-back
+       :desc "Find all"            "a" #'+tim/tag-find-all))
 
 (after! writeroom-mode
   (setq +zen-text-scale 0
