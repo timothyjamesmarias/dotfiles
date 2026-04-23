@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # install-packages - Simple, declarative package installation
-# Works on macOS (Homebrew) and Linux (Fedora)
+# Works on macOS (Homebrew)
 
 set -e
 
@@ -52,33 +52,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     echo ""
     log_info "To update packages: brew bundle --file=~/dotfiles/Brewfile"
     log_info "To cleanup unlisted: brew bundle cleanup --file=~/dotfiles/Brewfile --force"
-
-elif [[ -f /etc/fedora-release ]]; then
-    # Fedora Linux
-    log_info "Platform: Fedora Linux"
-
-    if [ -f "fedora-packages.txt" ]; then
-        log_info "Installing packages from fedora-packages.txt..."
-
-        # Read packages and install
-        grep -v '^#' fedora-packages.txt | grep -v '^$' | while read -r package; do
-            if ! rpm -q "$package" &> /dev/null; then
-                log_info "Installing $package..."
-                sudo dnf install -y "$package" || log_warn "Failed to install $package"
-            else
-                log_success "$package already installed"
-            fi
-        done
-
-        log_success "Packages installed"
-    else
-        log_error "fedora-packages.txt not found!"
-        exit 1
-    fi
-
-    echo ""
-    log_info "To update packages: sudo dnf upgrade -y"
-
 else
     log_error "Unsupported operating system: $OSTYPE"
     exit 1

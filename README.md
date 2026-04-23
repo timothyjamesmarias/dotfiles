@@ -12,7 +12,6 @@ Personal development environment configuration.
 
 This installs all required packages declaratively:
 - **macOS**: Uses `Brewfile` (Homebrew bundle)
-- **Linux**: Uses `fedora-packages.txt` (dnf)
 
 ### 2. Symlink Dotfiles (via Stow)
 
@@ -29,7 +28,6 @@ Using asdf/sdkman (managed separately):
 # Install sdkman (for JVM languages)
 curl -s "https://get.sdkman.io" | bash
 
-# asdf is already installed via Brewfile/fedora-packages.txt
 # Add language plugins as needed:
 asdf plugin add nodejs
 asdf plugin add ruby
@@ -50,19 +48,6 @@ brew bundle cleanup --file=~/dotfiles/Brewfile --force
 # Add new package
 echo 'brew "package-name"' >> ~/dotfiles/Brewfile
 brew bundle --file=~/dotfiles/Brewfile
-```
-
-### Linux (Fedora)
-
-```bash
-# Add new package
-echo 'package-name' >> ~/dotfiles/fedora-packages.txt
-
-# Install
-./install-packages
-
-# Update all packages
-sudo dnf upgrade -y
 ```
 
 ## Philosophy
