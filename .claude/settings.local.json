@@ -45,7 +45,8 @@
       "Bash(curl -s \"https://api.github.com/repos/puddinging/idea-mcp-plugin/readme\")",
       "Bash(curl -s \"https://api.github.com/repos/JetBrains/mcp-jetbrains/readme\")",
       "WebSearch",
-      "Bash(grep -E \"\\\\.\\(sh|bash\\)$\")"
+      "Bash(grep -E \"\\\\.\\(sh|bash\\)$\")",
+      "Bash(grep -nE '^\\\\s*[a-z][a-z+!-]*\\\\s*\\(;|$\\)' /Users/tim/dotfiles/doom/.config/doom/init.el)"
     ],
     "deny": [],
     "ask": [],
