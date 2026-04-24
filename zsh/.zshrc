@@ -31,14 +31,9 @@ source "$ZSHCONFIG/prompt.zsh"      # Prompt and vi mode indicator
 source "$ZSHCONFIG/ssh.zsh"         # SSH agent setup
 source "$ZSHCONFIG/keybindings.zsh" # Custom keybindings
 source "$ZSHCONFIG/aliases.zsh"     # Basic aliases
-source "$ZSHCONFIG/files.zsh"       # File and project search utilities
 source "$ZSHCONFIG/git.zsh"         # Git aliases and functions
 source "$ZSHCONFIG/utils.zsh"       # Utility functions
 source "$ZSHCONFIG/ripgrep.zsh"    # Ripgrep config and rginit
-source "$ZSHCONFIG/project.zsh"    # Per-project config and JetBrains launcher
-source "$ZSHCONFIG/docker.zsh"      # Docker utilities
-source "$ZSHCONFIG/heroku.zsh"      # Heroku utilities
-source "$ZSHCONFIG/ctags.zsh"       # Ctags utilities
 
 # --- FZF integration ---
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
@@ -56,45 +51,4 @@ sdkman_init() {
   fi
 }
 
-# Lazy load aliases for common SDKMAN commands
-for cmd in gradle java kotlin sdk mvn; do
-  alias $cmd="sdkman_init && $cmd"
-done
-
-# --- Heroku autocomplete (lazy loaded) ---
-heroku() {
-  unfunction heroku
-  HEROKU_AC_ZSH_SETUP_PATH=/Users/timmarias/Library/Caches/heroku/autocomplete/zsh_setup
-  [[ -f "$HEROKU_AC_ZSH_SETUP_PATH" ]] && source "$HEROKU_AC_ZSH_SETUP_PATH"
-  heroku "$@"
-}
-
-# --- Kotlin/Gradle utilities (lazy loaded) ---
-# Auto-detect if we're in a Kotlin project and load utilities immediately
-# Otherwise, load on directory change into a Kotlin project
-__kotlin_utils_loaded=0
-
-__load_kotlin_utils() {
-  if [[ "$__kotlin_utils_loaded" -eq 0 ]]; then
-    source "$ZSHCONFIG/kotlin.zsh" 2>/dev/null
-    source "$ZSHCONFIG/kotlin-project-cli.zsh" 2>/dev/null
-    __kotlin_utils_loaded=1
-  fi
-}
-
-__autoload_kotlin_utils() {
-  if [[ -f "gradlew" ]] || [[ -f "settings.gradle.kts" ]] || [[ -f "build.gradle.kts" ]]; then
-    __load_kotlin_utils
-  fi
-}
-
-# Hook into directory changes
-autoload -U add-zsh-hook
-add-zsh-hook chpwd __autoload_kotlin_utils
-
-# Check on shell startup
-__autoload_kotlin_utils
-
-# opencode
-export PATH=/Users/timmarias/.opencode/bin:$PATH
 export PATH="$HOME/.qlot/bin:$PATH"
