@@ -258,6 +258,59 @@ open that file at the current line."
        :desc "Open in default app" "x" #'+macos/open-in-default-program
        :desc "Open with app…"      "w" #'+tim/macos-open-with))
 
+(defun +tim/slugify-string (str)
+  "Slugify STR: downcase, strip non-alphanumeric to hyphens, trim edges."
+  (let* ((s (downcase str))
+         (s (replace-regexp-in-string "[^a-z0-9]+" "-" s))
+         (s (replace-regexp-in-string "\\`-+\\|-+\\'" "" s)))
+    s))
+
+(defun +tim/slugify-rename-file ()
+  "Rename the current buffer's file to its slugified form."
+  (interactive)
+  (let* ((file (or (buffer-file-name)
+                   (user-error "Buffer is not visiting a file")))
+         (dir (file-name-directory file))
+         (base (file-name-sans-extension (file-name-nondirectory file)))
+         (ext (file-name-extension file t))
+         (slug (+tim/slugify-string base))
+         (new (expand-file-name (concat slug ext) dir)))
+    (when (string= file new)
+      (user-error "Filename is already slugified"))
+    (when (file-exists-p new)
+      (user-error "Target already exists: %s" new))
+    (when (y-or-n-p (format "Rename to %s?" (file-name-nondirectory new)))
+      (if (vc-backend file)
+          (vc-rename-file file new)
+        (rename-file file new t)
+        (set-visited-file-name new t t)))))
+
+(defun +tim/dired-slugify-files ()
+  "Slugify marked files in dired (or file at point)."
+  (interactive)
+  (let ((files (dired-get-marked-files)))
+    (dolist (file files)
+      (let* ((dir (file-name-directory file))
+             (base (file-name-sans-extension (file-name-nondirectory file)))
+             (ext (file-name-extension file t))
+             (slug (+tim/slugify-string base))
+             (new (expand-file-name (concat slug ext) dir)))
+        (unless (string= file new)
+          (if (file-exists-p new)
+              (message "Skipping %s — target exists" (file-name-nondirectory new))
+            (if (vc-backend file)
+                (vc-rename-file file new)
+              (rename-file file new t))))))
+    (revert-buffer)))
+
+(map! :leader
+      (:prefix "f"
+       :desc "Slugify filename" "-" #'+tim/slugify-rename-file))
+
+(after! dired
+  (map! :map dirvish-mode-map
+        :n "gs" #'+tim/dired-slugify-files))
+
 (after! writeroom-mode
   (setq +zen-text-scale 0
         writeroom-width 80
