@@ -12,7 +12,7 @@ fi
 
 # --- Basic environment setup ---
 export LANG=en_US.UTF-8
-export EDITOR="nvim"
+export EDITOR="emacsclient"
 
 # --- Shell behavior ---
 chmod +x "$HOME/.local/scripts"
