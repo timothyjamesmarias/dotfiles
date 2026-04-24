@@ -25,7 +25,31 @@
 
 ;; --- Vterm ---
 (after! vterm
-  (define-key vterm-mode-map (kbd "M-o") #'term-fast-toggle))
+  (define-key vterm-mode-map (kbd "M-o") #'term-fast-toggle)
+
+  (defun tim/vterm-dnd--paths (data)
+    "Return a list of file path strings from a drag-n-drop event DATA."
+    (cond
+     ((stringp data) (list data))
+     ((and (consp data) (symbolp (car data)) (stringp (cadr data)))
+      (list (cadr data)))
+     ((and (consp data) (consp (car data)))
+      (mapcar (lambda (x) (if (consp x) (or (cdr-safe x) (cadr x)) x)) data))
+     ((listp data)
+      (seq-filter #'stringp data))))
+
+  (defun tim/vterm-dnd (event)
+    "Insert a dropped file's path at the vterm prompt instead of opening it."
+    (interactive "e")
+    (dolist (f (tim/vterm-dnd--paths (nth 2 event)))
+      (let ((path (if (string-match "\\`file://" f)
+                      (url-unhex-string (substring f (match-end 0)))
+                    f)))
+        (vterm-insert (concat (shell-quote-argument path) " ")))))
+
+  (define-key vterm-mode-map [drag-n-drop] #'tim/vterm-dnd)
+  (define-key vterm-mode-map [M-drag-n-drop] #'tim/vterm-dnd)
+  (define-key vterm-mode-map [s-drag-n-drop] #'tim/vterm-dnd))
 
 ;; --- Tags ---
 (defun +tim/tag-find-all ()

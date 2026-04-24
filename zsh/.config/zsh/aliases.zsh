@@ -17,6 +17,11 @@ alias dcd="docker compose down"
 alias mdev='while true; do npm run dev || { [ $? -eq 130 ] && break; sleep 1; }; done'
 alias -g ...='../..'
 
+# In vterm, fully reset the grid (including scrollback) on `clear`.
+if [[ "$INSIDE_EMACS" == *vterm* ]]; then
+  alias clear='printf "\e[H\e[2J\e[3J"'
+fi
+
 # --- Emacs aliases ---
 alias e="emacsclient -c -n"          # Open in GUI (new frame)
 alias et="emacsclient -nw"           # Open in terminal
