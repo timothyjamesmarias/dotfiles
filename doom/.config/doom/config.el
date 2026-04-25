@@ -93,3 +93,5 @@
 (load! "modules/macos")
 (load! "modules/maizzle")
 (load! "modules/notes")
+(load! "modules/framework-detect")
+(load! "modules/rails-nav")

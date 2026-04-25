@@ -47,7 +47,9 @@
       "WebSearch",
       "Bash(grep -E \"\\\\.\\(sh|bash\\)$\")",
       "Bash(grep -nE '^\\\\s*[a-z][a-z+!-]*\\\\s*\\(;|$\\)' /Users/tim/dotfiles/doom/.config/doom/init.el)",
-      "Bash(emacs --batch --eval '\\(progn \\(require \\(quote doom-start\\) nil t\\) \\(describe-key \\(kbd \"SPC f s\"\\)\\)\\)')"
+      "Bash(emacs --batch --eval '\\(progn \\(require \\(quote doom-start\\) nil t\\) \\(describe-key \\(kbd \"SPC f s\"\\)\\)\\)')",
+      "Bash(grep -E \"\\\\.\\(sh|py|rb|ts|js\\)$|^d\")",
+      "Bash(wc:*)"
     ],
     "deny": [],
     "ask": [],
