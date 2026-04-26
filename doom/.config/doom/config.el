@@ -4,7 +4,7 @@
 (setq org-directory "~/notes/")
 (setq native-comp-deferred-compilation nil)
 (setq display-line-numbers-type 'relative)
-(setq doom-theme 'doom-tomorrow-night)
+(setq doom-theme 'doom-ir-black)
 (setq doom-font (font-spec :family "MonoLisa" :size 14))
 (setq-default line-spacing 4)
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
