@@ -50,7 +50,15 @@
       "Bash(emacs --batch --eval '\\(progn \\(require \\(quote doom-start\\) nil t\\) \\(describe-key \\(kbd \"SPC f s\"\\)\\)\\)')",
       "Bash(grep -E \"\\\\.\\(sh|py|rb|ts|js\\)$|^d\")",
       "Bash(wc:*)",
-      "Skill(keybindings-help)"
+      "Skill(keybindings-help)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:docs.doomemacs.org)",
+      "Bash(emacs --batch -f 'eval' \"\\(progn \\(require 'eglot\\) \\(describe-variable 'eglot--managed-mode\\)\\)\")",
+      "Read(//tmp/**)",
+      "Bash(grep:*)",
+      "Bash(npm list:*)",
+      "Bash(find /Users/timmarias/projects/urgent-care-locations/app/assets/stylesheets -name '*.scss' -exec sh -c 'lines=$\\(wc -l < \"$1\"\\); if [ \"$lines\" -gt 150 ]; then echo \"$1\"; fi' _ '{}' ';')",
+      "Bash(find /Users/timmarias/dotfiles -type f \\\\\\( -name \"*.el\" -o -name \"*.py\" -o -name \"*.ts\" -o -name \"*.js\" \\\\\\) -exec grep -l \"scss\\\\|sass.*selector\\\\|bem\\\\|nested.*selector\" {} \\\\;)"
     ],
     "deny": [],
     "ask": [],
