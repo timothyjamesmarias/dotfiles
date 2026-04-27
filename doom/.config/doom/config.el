@@ -137,3 +137,4 @@
 (load! "modules/framework-detect")
 (load! "modules/rails-nav")
 (load! "modules/claude")
+(load! "modules/database")

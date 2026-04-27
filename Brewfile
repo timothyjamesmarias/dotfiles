@@ -39,11 +39,14 @@ brew "kubectl"
 # Language servers
 brew "kotlin-lsp"
 
+# JVM (required for ejc-sql JDBC bridge)
+brew "leiningen"
+
 # Version managers
 brew "asdf"
 
 # Emacs (optimized for macOS)
-brew "emacs-plus@30"
+# brew "emacs-plus@30"
 
 # Optional: GUI applications
 # cask "alacritty"
