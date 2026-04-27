@@ -49,7 +49,9 @@
 
   (define-key vterm-mode-map [drag-n-drop] #'tim/vterm-dnd)
   (define-key vterm-mode-map [M-drag-n-drop] #'tim/vterm-dnd)
-  (define-key vterm-mode-map [s-drag-n-drop] #'tim/vterm-dnd))
+  (define-key vterm-mode-map [s-drag-n-drop] #'tim/vterm-dnd)
+
+  (add-hook 'vterm-mode-hook #'with-editor-export-editor))
 
 ;; --- Tags ---
 (defun +tim/tag-find-all ()
@@ -134,3 +136,4 @@
 (load! "modules/notes")
 (load! "modules/framework-detect")
 (load! "modules/rails-nav")
+(load! "modules/claude")

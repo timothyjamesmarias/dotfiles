@@ -65,7 +65,13 @@
       "Bash(/Applications/Emacs.app/Contents/MacOS/Emacs --batch --eval '\\(princ emacs-version\\)')",
       "Bash(dd:*)",
       "Bash(kotlin-lsp --help)",
-      "Bash(echo \"---EXIT: $?\")"
+      "Bash(echo \"---EXIT: $?\")",
+      "WebFetch(domain:gist.github.com)",
+      "Bash(git show:*)",
+      "Bash(emacsclient --help)",
+      "Bash(emacsclient:*)",
+      "Read(//Users/timmarias/Library/LaunchAgents/**)",
+      "Bash(launchctl list:*)"
     ],
     "deny": [],
     "ask": [],
