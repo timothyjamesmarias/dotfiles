@@ -4,6 +4,7 @@
 (setq org-directory "~/notes/")
 (setq native-comp-deferred-compilation nil)
 (setq display-line-numbers-type 'relative)
+(setq server-name "doom")
 (setq doom-theme 'doom-ir-black)
 (setq doom-font (font-spec :family "MonoLisa" :size 14))
 (setq-default line-spacing 4)
@@ -51,7 +52,12 @@
   (define-key vterm-mode-map [M-drag-n-drop] #'tim/vterm-dnd)
   (define-key vterm-mode-map [s-drag-n-drop] #'tim/vterm-dnd)
 
-  (add-hook 'vterm-mode-hook #'with-editor-export-editor))
+  (defun tim/with-editor-export-maybe ()
+    "Export EDITOR into vterm unless this is a Claude Code buffer."
+    (unless (string= (buffer-name) +tim/claude-buffer-name)
+      (with-editor-export-editor)))
+
+  (add-hook 'vterm-mode-hook #'tim/with-editor-export-maybe))
 
 ;; --- Tags ---
 (defun +tim/tag-find-all ()

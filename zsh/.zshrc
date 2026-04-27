@@ -12,7 +12,7 @@ fi
 
 # --- Basic environment setup ---
 export LANG=en_US.UTF-8
-export EDITOR="emacsclient"
+export EDITOR="emacsclient --socket-name=doom"
 
 # --- Shell behavior ---
 chmod +x "$HOME/.local/scripts"

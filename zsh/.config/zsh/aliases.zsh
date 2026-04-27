@@ -23,10 +23,10 @@ if [[ "$INSIDE_EMACS" == *vterm* ]]; then
 fi
 
 # --- Emacs aliases ---
-alias e="emacsclient -c -n"          # Open in GUI (new frame)
-alias et="emacsclient -nw"           # Open in terminal
-alias ec="emacsclient -c -n"         # Same as e (create frame)
-alias emacs="emacsclient -c -n"      # Replace regular emacs command
+alias e="emacsclient --socket-name=doom -c -n"          # Open in GUI (new frame)
+alias et="emacsclient --socket-name=doom -nw"           # Open in terminal
+alias ec="emacsclient --socket-name=doom -c -n"         # Same as e (create frame)
+alias emacs="emacsclient --socket-name=doom -c -n"      # Replace regular emacs command
 
 # --- Clipboard alias (cross-platform) ---
 if [[ $(uname) == "Linux" ]]; then
