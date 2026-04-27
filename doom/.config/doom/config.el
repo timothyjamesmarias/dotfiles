@@ -132,6 +132,13 @@
          :desc "Reconnect"         "R" #'eglot-reconnect
          :desc "Shutdown"          "q" #'eglot-shutdown)))
 
+;; --- Projectile ---
+(setq projectile-switch-project-action #'projectile-dired)
+
+(after! orderless
+  (setq orderless-matching-styles
+        '(orderless-literal orderless-regexp orderless-flex)))
+
 ;; --- Custom modules ---
 (load! "modules/buffers")
 (load! "modules/docker")
