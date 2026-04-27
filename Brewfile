@@ -36,6 +36,9 @@ brew "awscli"
 brew "docker"
 brew "kubectl"
 
+# Language servers
+brew "kotlin-lsp"
+
 # Version managers
 brew "asdf"
 

@@ -85,6 +85,45 @@
               (visual-line-mode -1)
               (+word-wrap-mode -1))))
 
+;; --- Eglot (LSP) ---
+;; Server overrides — must be outside (after! eglot) to register before first use.
+;; set-eglot-client! handles deferred loading internally.
+(set-eglot-client! '(kotlin-mode kotlin-ts-mode) '("kotlin-lsp" "--stdio"))
+(set-eglot-client! '(php-mode php-ts-mode) '("intelephense" "--stdio"))
+
+(after! eglot
+  ;; Suppress chatty capabilities that clog the event loop.
+  ;; Tree-sitter handles highlighting; custom handlers cover navigation gaps.
+  (setq eglot-ignored-server-capabilities
+        '(:inlayHintProvider              ; visual noise + CPU on every scroll
+          :documentHighlightProvider       ; server round-trip on every cursor move
+          :colorProvider                   ; redundant with Doom defaults
+          :codeLensProvider                ; persistent overhead, rarely useful
+          :semanticTokensProvider          ; tree-sitter handles highlighting
+          :documentOnTypeFormattingProvider)) ; fires on every keystroke
+
+  ;; Throttle change notifications — default 0.5s is aggressive during fast edits
+  (setq eglot-send-changes-idle-time 0.75)
+
+  ;; Don't extend eglot xref to non-managed buffers
+  (setq eglot-extend-to-xref nil)
+
+  ;; Single-line eldoc — reduce rendering cost on every cursor pause
+  (setq eldoc-echo-area-use-multiline-p nil)
+
+  (map! :leader
+        (:prefix ("l" . "lsp")
+         :desc "Rename"            "r" #'eglot-rename
+         :desc "Code actions"      "a" #'eglot-code-actions
+         :desc "Format buffer"     "f" #'eglot-format-buffer
+         :desc "Format region"     "F" #'eglot-format
+         :desc "Implementations"   "i" #'eglot-find-implementation
+         :desc "Type definition"   "t" #'eglot-find-typeDefinition
+         :desc "Workspace symbols" "s" #'consult-eglot-symbols
+         :desc "Diagnostics"       "d" #'flymake-show-buffer-diagnostics
+         :desc "Reconnect"         "R" #'eglot-reconnect
+         :desc "Shutdown"          "q" #'eglot-shutdown)))
+
 ;; --- Custom modules ---
 (load! "modules/buffers")
 (load! "modules/docker")
