@@ -136,6 +136,9 @@
 ;; --- Projectile ---
 (setq +workspaces-switch-project-function #'dired)
 
+(after! projectile
+  (advice-add #'projectile-visit-project-tags-table :override #'ignore))
+
 (after! orderless
   (setq orderless-matching-styles
         '(orderless-literal orderless-regexp orderless-flex)))
