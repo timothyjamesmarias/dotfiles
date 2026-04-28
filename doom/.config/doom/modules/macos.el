@@ -27,5 +27,20 @@
 
 (map! :leader
       (:prefix "o"
-       :desc "Open in default app" "x" #'+macos/open-in-default-program
-       :desc "Open with app…"      "w" #'+tim/macos-open-with))
+       :desc "Open in default app"      "x" #'+macos/open-in-default-program
+       :desc "Open with app…"           "w" #'+tim/macos-open-with
+       :desc "Reveal in Finder"         "f" #'+macos/reveal-in-finder
+       :desc "Reveal project in Finder" "F" #'+macos/reveal-project-in-finder))
+
+(defun +tim/treemacs-reveal-in-finder ()
+  "Reveal the treemacs node at point in Finder (uses `open -R')."
+  (interactive)
+  (+tim/--macos-require)
+  (require 'treemacs)
+  (if-let ((path (treemacs--prop-at-point :path)))
+      (call-process "open" nil 0 nil "-R" (expand-file-name path))
+    (user-error "No treemacs node at point")))
+
+(after! treemacs
+  (map! :map treemacs-mode-map
+        :desc "Reveal in Finder" "C-c f" #'+tim/treemacs-reveal-in-finder))
