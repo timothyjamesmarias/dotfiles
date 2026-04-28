@@ -20,6 +20,7 @@ If the buffer already exists with a live process, just switch to it."
           (select-window (split-window-right))
           (switch-to-buffer buf))
       (when buf (kill-buffer buf))
+      (require 'vterm)
       (let* ((default-directory (or dir default-directory))
              (editor (format "%s --socket-name=%s"
                              (shell-quote-argument
@@ -28,7 +29,6 @@ If the buffer already exists with a live process, just switch to it."
                               (expand-file-name server-name server-socket-dir))))
              (vterm-environment (append (list (concat "EDITOR=" editor))
                                         vterm-environment)))
-        (require 'vterm)
         (select-window (split-window-right))
         (let ((vterm-buffer-name +tim/claude-buffer-name)
               (vterm-shell cmd))
