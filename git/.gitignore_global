@@ -5,3 +5,4 @@ tags
 .project.conf
 .rgignore
 .fdignore
+.dir-locals.el
