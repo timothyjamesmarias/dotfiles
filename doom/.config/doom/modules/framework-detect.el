@@ -36,4 +36,4 @@ Accepted values: rails, laravel, spring-boot.")
     (pcase (+tim/detect-framework root)
       ('rails (+tim/rails-nav-mode +1)))))
 
-(add-hook 'find-file-hook #'+tim/framework-activate-h)
+(add-hook 'after-change-major-mode-hook #'+tim/framework-activate-h)

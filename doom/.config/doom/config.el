@@ -6,6 +6,7 @@
 (setq display-line-numbers-type 'relative)
 (setq server-name "doom")
 (setq doom-theme 'doom-ir-black)
+(setq doom-modeline-minor-modes t)
 (setq doom-font (font-spec :family "MonoLisa" :size 14))
 (setq-default line-spacing 4)
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
