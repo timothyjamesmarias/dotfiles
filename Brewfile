@@ -25,9 +25,6 @@ brew "alacritty"
 brew "universal-ctags"
 brew "stow"
 
-# File manager
-brew "yazi"
-
 # Image processing
 brew "imagemagick"
 

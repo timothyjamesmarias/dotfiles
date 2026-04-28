@@ -134,7 +134,7 @@
          :desc "Shutdown"          "q" #'eglot-shutdown)))
 
 ;; --- Projectile ---
-(setq projectile-switch-project-action #'projectile-dired)
+(setq +workspaces-switch-project-function #'dired)
 
 (after! orderless
   (setq orderless-matching-styles
