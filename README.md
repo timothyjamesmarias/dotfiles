@@ -1,59 +1,52 @@
 # Dotfiles
 
-Personal development environment configuration.
+Personal dev environment, centered on Doom Emacs with a small layer of zsh utilities for terminal work.
+
+## Layout
+
+GNU Stow packages — each top-level dir maps into `$HOME`:
+
+| Package        | Target                              |
+| -------------- | ----------------------------------- |
+| `alacritty/`   | `~/.alacritty.toml`                 |
+| `claude/`      | `~/.claude/keybindings.json`        |
+| `doom/`        | `~/.config/doom/`                   |
+| `editorconfig/`| `~/.editorconfig`                   |
+| `git/`         | `~/.gitconfig`, `~/.gitignore_global` |
+| `ideavim/`     | `~/.ideavimrc` (JetBrains)          |
+| `ripgrep/`     | `~/.ripgreprc`                      |
+| `scripts/`     | `~/.local/scripts/`                 |
+| `zsh/`         | `~/.zshrc`, `~/.config/zsh/`        |
+
+Not stowed:
+- `nixos/` — server config (see `nixos/README.md`)
+- `templates/` — file templates consumed by `doom/.config/doom/modules/files.el` (see `templates/README.md`)
+- `project-ideas/` — design notes
 
 ## Setup
 
-### 1. Install Packages
-
 ```bash
-./install-packages
+./install-packages                                    # Brewfile via Homebrew
+stow alacritty claude doom editorconfig git ideavim ripgrep scripts zsh
 ```
 
-This installs all required packages declaratively:
-- **macOS**: Uses `Brewfile` (Homebrew bundle)
+Doom is bootstrapped separately — see https://github.com/doomemacs/doomemacs.
 
-### 2. Symlink Dotfiles (via Stow)
+## Where things live
 
-```bash
-cd ~/dotfiles
-stow alacritty ctags git nvim scripts tmux zsh
-```
-
-### 3. Install Language Toolchains
-
-Using asdf/sdkman (managed separately):
-
-```bash
-# Install sdkman (for JVM languages)
-curl -s "https://get.sdkman.io" | bash
-
-# Add language plugins as needed:
-asdf plugin add nodejs
-asdf plugin add ruby
-# etc.
-```
-
-## Managing Packages
-
-### macOS (Homebrew)
-
-```bash
-# Install/update packages
-brew bundle --file=~/dotfiles/Brewfile
-
-# Remove packages not in Brewfile
-brew bundle cleanup --file=~/dotfiles/Brewfile --force
-
-# Add new package
-echo 'brew "package-name"' >> ~/dotfiles/Brewfile
-brew bundle --file=~/dotfiles/Brewfile
-```
+- **Editor**: Doom Emacs. Config in `doom/.config/doom/`. Custom modules under `modules/` cover Claude Code, database (ejc-sql), Docker, file templates, framework detection, GitHub, macOS, Maizzle/Blade, notes, Rails navigation, and buffer cycling.
+- **Shell**: zsh modules in `zsh/.config/zsh/`:
+  - `prompt.zsh` — vi-mode indicator + git branch
+  - `ssh.zsh` — auto-loads ssh keys
+  - `keybindings.zsh` — vi mode, history nav, edit-command-line
+  - `aliases.zsh` — basics + emacsclient aliases (`e`, `et`, `ec`)
+  - `git.zsh` — fzf-driven git workflows (`gcb`, `ga`, `gcmsg`, `glog`, `gdf`, `grl`, worktrees, `gclaude`)
+  - `utils.zsh` — `imgopt`, `imgconvert`
+  - `ripgrep.zsh` — `rginit` for per-project `.rgignore` from `ripgrep/templates/`
+- **Git**: editor is `emacsclient --socket-name=doom`, pager is delta, conflict style is diff3.
 
 ## Philosophy
 
-- **Brewfile/package lists**: Declarative package management (version-controlled)
-- **Stow**: Dotfile symlinking
-- **asdf/sdkman**: Language version management (per-project)
-- **Native configs**: Shell, Emacs, Neovim (no abstraction layers)
-- **Simple**: Use platform-native tools, no complex meta-layers
+- Emacs for most work; zsh stays small and composable
+- Native configs, no abstraction layers
+- Stow for symlinking, asdf/sdkman for language versions

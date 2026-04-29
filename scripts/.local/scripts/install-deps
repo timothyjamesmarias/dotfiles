@@ -76,7 +76,6 @@ BREW_PACKAGES=(
     "git-delta"             # Better git diffs
 
     # Editors & Terminal
-    "neovim"                # Text editor
     "tmux"                  # Terminal multiplexer
     "alacritty"             # GPU terminal emulator
 
@@ -350,28 +349,6 @@ install_custom_rust_tools() {
     log_success "Custom Rust tools installation complete"
 }
 
-install_neovim_dependencies() {
-    log_info "Setting up Neovim dependencies..."
-
-    # Create necessary directories
-    mkdir -p ~/.local/share/nvim
-    mkdir -p ~/.local/state/nvim
-    mkdir -p ~/.cache/nvim
-
-    # Install pynvim for Python integration
-    if command_exists pip3; then
-        pip3 install --user pynvim || log_warn "Failed to install pynvim"
-    fi
-
-    # Install neovim npm package
-    if command_exists npm; then
-        npm install -g neovim || log_warn "Failed to install neovim npm package"
-    fi
-
-    log_success "Neovim dependencies installed"
-    log_info "Run 'nvim' to install plugins via lazy.nvim"
-}
-
 stow_dotfiles() {
     log_info "Stowing dotfiles..."
 
@@ -383,11 +360,13 @@ stow_dotfiles() {
     # Stow all directories
     STOW_DIRS=(
         "alacritty"
-        "ctags"
+        "claude"
+        "doom"
+        "editorconfig"
         "git"
-        "nvim"
+        "ideavim"
+        "ripgrep"
         "scripts"
-        "tmux"
         "zsh"
     )
 
@@ -412,7 +391,6 @@ show_help() {
     echo "  --lsp         Install LSP servers only"
     echo "  --fonts       Install fonts only"
     echo "  --version-mgr Install version managers (asdf, sdkman)"
-    echo "  --nvim        Setup Neovim dependencies"
     echo "  --kotlin      Install Kotlin/Gradle tools (kt CLI)"
     echo "  --stow        Stow dotfiles to home directory"
     echo "  --help        Show this help message"
@@ -443,7 +421,6 @@ main() {
                 install_lsp_servers
                 install_version_managers
                 install_fonts
-                install_neovim_dependencies
                 install_custom_rust_tools
                 ;;
             --cli)
@@ -457,9 +434,6 @@ main() {
                 ;;
             --version-mgr)
                 install_version_managers
-                ;;
-            --nvim)
-                install_neovim_dependencies
                 ;;
             --kotlin)
                 install_custom_rust_tools
@@ -485,7 +459,6 @@ main() {
     echo "Next steps:"
     echo "  1. Restart your shell or run: source ~/.zshrc"
     echo "  2. Run 'install-deps --stow' to symlink dotfiles"
-    echo "  3. Open Neovim to install plugins: nvim"
     echo ""
 }
 

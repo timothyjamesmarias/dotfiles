@@ -105,13 +105,13 @@ If added later, likely shape:
 - Sidecar event channel (Unix socket) for push notifications
 - Analyzers invoked by watchers or explicitly, output piped through a SARIF normalizer
 
-For v1, diagnostics stay where they already work well: LSP in neovim, watch-mode compilers in terminals, CI for batch checks.
+For v1, diagnostics stay where they already work well: LSP in doom emacs, watch-mode compilers in terminals, CI for batch checks.
 
 ## Extensibility Surface
 
 Because tools integrate with the data, not with each other, the same substrate feeds:
 
-- Editor plugins (neovim, anything that reads SQLite)
+- Editor plugins (doom emacs, anything that reads SQLite)
 - Shell tools: `find-dead-code`, `impact-analysis`, `semantic-grep`
 - CI gates: "fail if this commit references a deprecated symbol"
 - LLM context providers: precise structured code context instead of blind file dumps
@@ -126,7 +126,7 @@ Each of these is a weekend project once the substrate exists. None of them coord
 
 - **Which languages ship first?** Ruby/Rails is probably the highest-value target given the Rails-heavy workflow. PHP/Laravel and Vue/TS follow. Kotlin is useful but smaller surface.
 - **Daemon or pure CLI?** Start stateless; add daemon only if cold-start becomes measurable pain.
-- **Neovim integration shape?** Thin Lua wrapper calling the CLI, or replace parts of the existing LSP layer? Start with the former.
+- **Doom emacs integration shape?** Thin elisp wrapper calling the CLI, or replace parts of the existing LSP layer? Start with the former.
 - **Template ↔ host language linking.** Blade `<x-foo>` → `App\View\Components\Foo` resolution requires knowing framework conventions. Per-framework config files? Convention-over-configuration with overrides?
 - **Multi-project / cross-project queries.** Does a monorepo live in one DB or many? `ATTACH DATABASE` makes either workable.
 

@@ -3,7 +3,7 @@
 	email = timothyjamesmarias@gmail.com
 [core]
 	autocrlf = input
-  editor = nvim
+  editor = emacsclient --socket-name=doom
   pager = delta
 	excludesfile = ~/.gitignore_global
 [delta]
@@ -15,6 +15,3 @@
   hyperlinks = true
 [merge]
   conflictstyle = diff3
-	tool = nvimdiff
-[mergetool "nvimdiff"]
-	cmd = nvim -d \"$LOCAL\" \"$MERGED\" \"$REMOTE\"
