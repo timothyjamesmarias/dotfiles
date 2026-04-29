@@ -32,8 +32,15 @@
     (find-file path)
     t))
 
-(set-lookup-handlers! '(web-mode html-mode mhtml-mode php-mode)
-  :file #'+tim/maizzle-lookup-file-handler)
+;; :file must be registered manually (Doom bug: make-list 5 truncates cl-mapc,
+;; skipping :file and :xref-backend handlers entirely).
+(defun +tim/maizzle-nav-mode-setup-h ()
+  "Register :file handler for gf on Maizzle component tags."
+  (if +tim/maizzle-nav-mode
+      (add-hook '+lookup-file-functions #'+tim/maizzle-lookup-file-handler nil 'local)
+    (remove-hook '+lookup-file-functions #'+tim/maizzle-lookup-file-handler 'local)))
+
+(add-hook '+tim/maizzle-nav-mode-hook #'+tim/maizzle-nav-mode-setup-h)
 
 (defun +tim/maizzle-find-references ()
   "Grep project for `<x-NAME>` usages of the current Maizzle component."
