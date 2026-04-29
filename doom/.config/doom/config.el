@@ -143,6 +143,52 @@
   (setq orderless-matching-styles
         '(orderless-literal orderless-regexp orderless-flex)))
 
+;; --- Kotlin tree-sitter highlighting ---
+;; The upstream kotlin-ts-mode has a broken string interpolation query
+;; ("$"/"${"/"}" nodes don't exist in the grammar) that silently kills
+;; fontification for everything after it.  We remove that rule and add
+;; proper annotation, function-call, and property highlighting.
+(after! kotlin-ts-mode
+  (defvar +kotlin-ts--annotation-rules
+    (treesit-font-lock-rules
+     :language 'kotlin :feature 'annotation :override t
+     '((annotation (user_type (type_identifier) @font-lock-preprocessor-face))
+       (annotation (constructor_invocation
+                    (user_type (type_identifier) @font-lock-preprocessor-face))))))
+
+  (defvar +kotlin-ts--property-rules
+    (treesit-font-lock-rules
+     :language 'kotlin :feature 'property :override t
+     '((navigation_expression
+        (navigation_suffix (simple_identifier) @font-lock-property-use-face)))))
+
+  (defvar +kotlin-ts--function-rules
+    (treesit-font-lock-rules
+     :language 'kotlin :feature 'function :override t
+     '((call_expression (simple_identifier) @font-lock-function-call-face)
+       (call_expression
+        (navigation_expression
+         (navigation_suffix
+          (simple_identifier) @font-lock-function-call-face)))))))
+
+(advice-add 'kotlin-ts-mode :after
+            (defun +kotlin-ts-mode--enhance-h (&rest _)
+              "Fix broken upstream rules and add richer highlighting."
+              (when (boundp '+kotlin-ts--annotation-rules)
+                ;; Remove rule 3 (broken string interp query) from upstream
+                (setq-local treesit-font-lock-settings
+                            (append (cl-subseq treesit-font-lock-settings 0 3)
+                                    (cl-subseq treesit-font-lock-settings 4)
+                                    +kotlin-ts--annotation-rules
+                                    +kotlin-ts--property-rules
+                                    +kotlin-ts--function-rules))
+                (setq-local treesit-font-lock-feature-list
+                            '((comment number string definition)
+                              (keyword builtin type constant variable)
+                              (escape-sequence function property)
+                              (annotation)))
+                (treesit-font-lock-recompute-features))))
+
 ;; --- Custom modules ---
 (load! "modules/buffers")
 (load! "modules/docker")

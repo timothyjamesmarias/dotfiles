@@ -71,7 +71,11 @@
       "Bash(emacsclient --help)",
       "Bash(emacsclient:*)",
       "Read(//Users/timmarias/Library/LaunchAgents/**)",
-      "Bash(launchctl list:*)"
+      "Bash(launchctl list:*)",
+      "Read(//Users/timmarias/.config/emacs/**)",
+      "Read(//Users/timmarias/.config/emacs/straight/repos/tree-sitter-langs/queries/**)",
+      "Bash(/Applications/Emacs.app/Contents/MacOS/Emacs --batch --eval ':*)",
+      "Bash(/Applications/Emacs.app/Contents/MacOS/Emacs:*)"
     ],
     "deny": [],
     "ask": [],
