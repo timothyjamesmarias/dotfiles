@@ -201,3 +201,4 @@
 (load! "modules/rails-nav")
 (load! "modules/claude")
 (load! "modules/database")
+(load! "modules/ebooks")
