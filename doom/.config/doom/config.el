@@ -278,3 +278,4 @@ Works from markdown fenced blocks, org src blocks, .mmd files, or region."
 (load! "modules/claude")
 (load! "modules/database")
 (load! "modules/ebooks")
+(load! "modules/elfeed")
