@@ -189,6 +189,82 @@
                               (annotation)))
                 (treesit-font-lock-recompute-features))))
 
+;; --- Mermaid ---
+(use-package! ob-mermaid
+  :defer t
+  :config
+  (setq ob-mermaid-cli-path (executable-find "mmdc")
+        ob-mermaid-default-config-file
+        (expand-file-name "mermaid-config.json" doom-user-dir)))
+
+(after! org
+  (add-hook 'org-babel-after-execute-hook
+            (defun +mermaid-redisplay-images-h ()
+              (when (org-in-src-block-p)
+                (org-redisplay-inline-images)))))
+
+(use-package! mermaid-mode
+  :defer t
+  :mode "\\.mmd\\'")
+
+(defun +mermaid/preview ()
+  "Render the mermaid diagram at point in a side buffer.
+Works from markdown fenced blocks, org src blocks, .mmd files, or region."
+  (interactive)
+  (let* ((src (or (+mermaid--extract-fenced-block)
+                  (+mermaid--extract-org-block)
+                  (when (use-region-p)
+                    (buffer-substring-no-properties (region-beginning) (region-end)))
+                  (when (string-suffix-p ".mmd" (or (buffer-file-name) ""))
+                    (buffer-substring-no-properties (point-min) (point-max)))))
+         (mmdc (or (executable-find "mmdc")
+                   (user-error "mmdc not found — install @mermaid-js/mermaid-cli")))
+         (infile (make-temp-file "mermaid-" nil ".mmd"))
+         (outfile (concat (file-name-sans-extension infile) ".svg"))
+         (config (expand-file-name "mermaid-config.json" doom-user-dir)))
+    (unless src (user-error "No mermaid diagram found at point"))
+    (with-temp-file infile (insert src))
+    (let ((exit (call-process mmdc nil "*mermaid-errors*" nil
+                              "-i" infile "-o" outfile
+                              "-c" config)))
+      (unless (and (zerop exit) (file-exists-p outfile))
+        (pop-to-buffer "*mermaid-errors*")
+        (user-error "mmdc failed (exit %d)" exit)))
+    (let ((buf (get-buffer-create "*mermaid-preview*")))
+      (with-current-buffer buf
+        (let ((inhibit-read-only t))
+          (erase-buffer)
+          (insert-image (create-image outfile 'svg nil
+                                      :max-width (/ (frame-pixel-width) 2)))
+          (goto-char (point-min))
+          (special-mode)))
+      (display-buffer buf '(display-buffer-in-side-window
+                            (side . right) (window-width . 0.45))))))
+
+(defun +mermaid--extract-fenced-block ()
+  "Extract mermaid source from a markdown fenced block at point."
+  (save-excursion
+    (let ((pos (point)))
+      (goto-char (point-min))
+      (catch 'found
+        (while (re-search-forward "^```mermaid\\s-*$" nil t)
+          (let ((start (line-beginning-position 2)))
+            (when (re-search-forward "^```\\s-*$" nil t)
+              (let ((end (line-beginning-position)))
+                (when (and (<= start pos) (<= pos (line-end-position)))
+                  (throw 'found (buffer-substring-no-properties start end)))))))))))
+
+(defun +mermaid--extract-org-block ()
+  "Extract mermaid source from an org src block at point."
+  (when (and (derived-mode-p 'org-mode) (org-in-src-block-p))
+    (let ((info (org-babel-get-src-block-info 'light)))
+      (when (string= (car info) "mermaid")
+        (nth 1 info)))))
+
+(map! :leader
+      (:prefix ("M" . "mermaid")
+       :desc "Preview diagram" "p" #'+mermaid/preview))
+
 ;; --- Custom modules ---
 (load! "modules/buffers")
 (load! "modules/docker")

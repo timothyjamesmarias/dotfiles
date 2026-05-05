@@ -75,7 +75,11 @@
       "Read(//Users/timmarias/.config/emacs/**)",
       "Read(//Users/timmarias/.config/emacs/straight/repos/tree-sitter-langs/queries/**)",
       "Bash(/Applications/Emacs.app/Contents/MacOS/Emacs --batch --eval ':*)",
-      "Bash(/Applications/Emacs.app/Contents/MacOS/Emacs:*)"
+      "Bash(/Applications/Emacs.app/Contents/MacOS/Emacs:*)",
+      "WebFetch(domain:codeberg.org)",
+      "WebFetch(domain:erick.navarro.io)",
+      "Bash(emacs:*)",
+      "Bash(/opt/homebrew/bin/emacs:*)"
     ],
     "deny": [],
     "ask": [],
