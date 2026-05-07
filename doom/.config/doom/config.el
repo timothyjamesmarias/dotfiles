@@ -11,7 +11,14 @@
 (setq-default line-spacing 4)
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 (global-display-line-numbers-mode)
-(setq fancy-splash-image "~/.config/doom/emacs-e-logo.png")
+(defun my-custom-banner ()
+  (let ((banner-file (expand-file-name "~/.config/doom/splash.txt")))
+    (propertize
+     (with-temp-buffer
+       (insert-file-contents banner-file)
+       (buffer-string))
+     'face '+dashboard-banner)))
+(setq +dashboard-ascii-banner-fn #'my-custom-banner)
 
 ;; --- Evil ---
 (after! evil
