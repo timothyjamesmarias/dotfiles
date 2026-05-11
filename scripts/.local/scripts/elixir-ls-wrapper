@@ -1,0 +1,13 @@
+#!/bin/zsh
+export PATH="/opt/homebrew/bin:$PATH"
+ELS_DIR="$(dirname "$(readlink -f "$(which elixir-ls)")")"
+export MIX_ENV=prod
+export ELS_MODE=language_server
+
+# Install/update deps quietly
+echo "" | elixir "$ELS_DIR/quiet_install.exs" >/dev/null 2>/tmp/elixir-ls.log || exit 1
+
+# Launch the language server
+exec elixir \
+  --erl "-kernel standard_io_encoding latin1 +sbwt none +sbwtdcpu none +sbwtdio none" \
+  "$ELS_DIR/launch.exs" 2>>/tmp/elixir-ls.log

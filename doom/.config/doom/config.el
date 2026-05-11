@@ -106,6 +106,7 @@
 ;; set-eglot-client! handles deferred loading internally.
 (set-eglot-client! '(kotlin-mode kotlin-ts-mode) '("kotlin-lsp" "--stdio"))
 (set-eglot-client! '(php-mode php-ts-mode) '("intelephense" "--stdio"))
+(set-eglot-client! '(elixir-mode elixir-ts-mode heex-ts-mode) '("elixir-ls-wrapper"))
 
 (after! eglot
   ;; Suppress chatty capabilities that clog the event loop.

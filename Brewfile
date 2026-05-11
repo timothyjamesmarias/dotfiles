@@ -34,6 +34,7 @@ brew "docker"
 brew "kubectl"
 
 # Language servers
+brew "elixir-ls"
 brew "kotlin-lsp"
 
 # JVM (required for ejc-sql JDBC bridge)
