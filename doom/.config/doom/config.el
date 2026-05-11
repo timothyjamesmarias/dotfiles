@@ -8,7 +8,7 @@
 (setq doom-theme 'doom-ir-black)
 (setq doom-modeline-minor-modes t)
 (setq doom-font (font-spec :family "MonoLisa" :size 14))
-(setq-default line-spacing 4)
+(setq-default line-spacing 0.3)
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 (global-display-line-numbers-mode)
 (defun my-custom-banner ()
@@ -19,6 +19,7 @@
        (buffer-string))
      'face '+dashboard-banner)))
 (setq +dashboard-ascii-banner-fn #'my-custom-banner)
+(setq treemacs-width 50)
 
 ;; --- Evil ---
 (after! evil

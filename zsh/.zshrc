@@ -51,4 +51,5 @@ sdkman_init() {
   fi
 }
 
+export PATH="$PATH:$HOME/Library/Android/sdk/platform-tools"
 export PATH="$HOME/.qlot/bin:$PATH"
