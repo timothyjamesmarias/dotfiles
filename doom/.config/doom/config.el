@@ -274,6 +274,21 @@ Works from markdown fenced blocks, org src blocks, .mmd files, or region."
       (:prefix ("M" . "mermaid")
        :desc "Preview diagram" "p" #'+mermaid/preview))
 
+;; --- Clojure / CIDER ---
+;; Override Doom's +clojure/open-repl which uses a blocking while-loop
+;; that freezes Emacs during nREPL connection.  Let CIDER handle it
+;; asynchronously — it already pops the REPL buffer on connect.
+(after! cider
+  (defun +clojure/open-repl (&optional arg type)
+    "Open a Cider REPL without blocking Emacs."
+    (interactive "P")
+    (let ((type (or type 'clj)))
+      (if-let* ((buffer (cider-current-repl type)))
+          (pop-to-buffer buffer)
+        (if (eq type 'clj)
+            (cider-jack-in-clj arg)
+          (cider-jack-in-cljs arg))))))
+
 ;; --- Custom modules ---
 (load! "modules/buffers")
 (load! "modules/docker")
