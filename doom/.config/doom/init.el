@@ -92,7 +92,7 @@
        ;;ansible
        ;;biblio            ; Writes a PhD for you (citation needed)
        ;;collab            ; buffers with friends
-       ;;debugger          ; stepping through code, to help you add bugs
+       ;; debugger          ; stepping through code, to help you add bugs
        direnv
        docker
        ;;editorconfig      ; let someone else argue about tabs vs spaces
@@ -182,12 +182,12 @@
        ;;zig               ; C, but simpler
 
        :email
-       ;;(mu4e +org +gmail)
+       (mu4e +org +gmail)
        ;;notmuch
        ;;(wanderlust +gmail)
 
        :app
-       ;;calendar
+       calendar
        ;;emms
        ;;everywhere        ; *leave* Emacs!? You must be joking
        ;;irc               ; how neckbeards socialize
