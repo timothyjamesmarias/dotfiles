@@ -4,6 +4,7 @@
 
 # Taps
 tap "d12frosted/emacs-plus"
+tap "nikitabobko/tap"
 
 # Core CLI tools
 brew "fzf"
@@ -24,6 +25,7 @@ brew "alacritty"
 # Development tools
 brew "universal-ctags"
 brew "stow"
+brew "duti"
 
 # Image processing
 brew "imagemagick"
@@ -49,3 +51,4 @@ brew "asdf"
 # Optional: GUI applications
 # cask "alacritty"
 cask "karabiner-elements"
+cask "aerospace"

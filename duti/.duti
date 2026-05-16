@@ -1,0 +1,44 @@
+# Default file associations
+# Format: bundle_id  extension  role
+# Run: duti ~/.duti
+
+# Plain text → Emacs
+org.gnu.Emacs  .txt   all
+org.gnu.Emacs  .md    all
+org.gnu.Emacs  .org   all
+org.gnu.Emacs  .log   all
+
+# Config files → Emacs
+org.gnu.Emacs  .json  all
+org.gnu.Emacs  .yaml  all
+org.gnu.Emacs  .yml   all
+org.gnu.Emacs  .toml  all
+org.gnu.Emacs  .ini   all
+org.gnu.Emacs  .conf  all
+org.gnu.Emacs  .env   all
+
+# Code → Emacs
+org.gnu.Emacs  .el    all
+org.gnu.Emacs  .clj   all
+org.gnu.Emacs  .cljs  all
+org.gnu.Emacs  .edn   all
+org.gnu.Emacs  .rb    all
+org.gnu.Emacs  .py    all
+org.gnu.Emacs  .js    all
+org.gnu.Emacs  .ts    all
+org.gnu.Emacs  .kt    all
+org.gnu.Emacs  .java  all
+org.gnu.Emacs  .sh    all
+org.gnu.Emacs  .zsh   all
+org.gnu.Emacs  .nix   all
+org.gnu.Emacs  .php   all
+org.gnu.Emacs  .ex    all
+org.gnu.Emacs  .exs   all
+# .html excluded — macOS protects the public.html UTI handler
+org.gnu.Emacs  .css   all
+org.gnu.Emacs  .scss  all
+org.gnu.Emacs  .xml   all
+org.gnu.Emacs  .sql   all
+org.gnu.Emacs  .tf    all
+org.gnu.Emacs  .swift all
+org.gnu.Emacs  .dart  all

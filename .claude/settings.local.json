@@ -97,7 +97,9 @@
       "Bash(/Users/timmarias/.asdf/shims/elixir --version)",
       "Bash(echo \"exit: $?\")",
       "Read(//private/var/log/karabiner/**)",
-      "Read(//var/log/karabiner/**)"
+      "Read(//var/log/karabiner/**)",
+      "Bash(stow aerospace:*)",
+      "Bash(stow duti:*)"
     ],
     "deny": [],
     "ask": [],
