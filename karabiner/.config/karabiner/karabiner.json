@@ -68,6 +68,28 @@
                                 "conditions": [{ "type": "variable_if", "name": "f_symbol_layer", "value": 1 }]
                             }
                         ]
+                    },
+                    {
+                        "description": "C-w = delete word backward (outside Emacs/terminals)",
+                        "manipulators": [
+                            {
+                                "type": "basic",
+                                "from": { "key_code": "w", "modifiers": { "mandatory": ["control"] } },
+                                "to": [{ "key_code": "delete_or_backspace", "modifiers": ["left_option"] }],
+                                "conditions": [
+                                    {
+                                        "type": "frontmost_application_unless",
+                                        "bundle_identifiers": [
+                                            "^org\\.gnu\\.Emacs",
+                                            "^io\\.alacritty",
+                                            "^com\\.apple\\.Terminal",
+                                            "^com\\.mitchellh\\.ghostty",
+                                            "^net\\.kovidgoyal\\.kitty"
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 ]
             },
