@@ -289,6 +289,15 @@ Works from markdown fenced blocks, org src blocks, .mmd files, or region."
             (cider-jack-in-clj arg)
           (cider-jack-in-cljs arg))))))
 
+;; --- Structural Editing (evil-cleverparens) ---
+(use-package! evil-cleverparens
+  :hook ((emacs-lisp-mode . evil-cleverparens-mode)
+         (clojure-mode . evil-cleverparens-mode)
+         (clojurescript-mode . evil-cleverparens-mode)
+         (lisp-mode . evil-cleverparens-mode))
+  :config
+  (setq evil-cleverparens-use-s-and-S nil))
+
 ;; --- Custom modules ---
 (load! "modules/buffers")
 (load! "modules/docker")

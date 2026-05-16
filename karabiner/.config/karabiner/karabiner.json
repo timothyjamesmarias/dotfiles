@@ -1,0 +1,79 @@
+{
+    "profiles": [
+        {
+            "complex_modifications": {
+                "rules": [
+                    {
+                        "description": "f (dual-role): hold = symbol layer, tap = f",
+                        "manipulators": [
+                            {
+                                "type": "basic",
+                                "from": { "key_code": "f" },
+                                "to": [{ "set_variable": { "name": "f_symbol_layer", "value": 1 } }],
+                                "to_after_key_up": [{ "set_variable": { "name": "f_symbol_layer", "value": 0 } }],
+                                "to_if_alone": [{ "key_code": "f" }],
+                                "parameters": { "basic.to_if_alone_timeout_milliseconds": 150 }
+                            }
+                        ]
+                    },
+                    {
+                        "description": "Symbol layer: right home row = parens, brackets, braces, angles",
+                        "manipulators": [
+                            {
+                                "type": "basic",
+                                "from": { "key_code": "j" },
+                                "to": [{ "key_code": "9", "modifiers": ["left_shift"] }],
+                                "conditions": [{ "type": "variable_if", "name": "f_symbol_layer", "value": 1 }]
+                            },
+                            {
+                                "type": "basic",
+                                "from": { "key_code": "k" },
+                                "to": [{ "key_code": "0", "modifiers": ["left_shift"] }],
+                                "conditions": [{ "type": "variable_if", "name": "f_symbol_layer", "value": 1 }]
+                            },
+                            {
+                                "type": "basic",
+                                "from": { "key_code": "l" },
+                                "to": [{ "key_code": "open_bracket" }],
+                                "conditions": [{ "type": "variable_if", "name": "f_symbol_layer", "value": 1 }]
+                            },
+                            {
+                                "type": "basic",
+                                "from": { "key_code": "semicolon" },
+                                "to": [{ "key_code": "close_bracket" }],
+                                "conditions": [{ "type": "variable_if", "name": "f_symbol_layer", "value": 1 }]
+                            },
+                            {
+                                "type": "basic",
+                                "from": { "key_code": "h" },
+                                "to": [{ "key_code": "open_bracket", "modifiers": ["left_shift"] }],
+                                "conditions": [{ "type": "variable_if", "name": "f_symbol_layer", "value": 1 }]
+                            },
+                            {
+                                "type": "basic",
+                                "from": { "key_code": "quote" },
+                                "to": [{ "key_code": "close_bracket", "modifiers": ["left_shift"] }],
+                                "conditions": [{ "type": "variable_if", "name": "f_symbol_layer", "value": 1 }]
+                            },
+                            {
+                                "type": "basic",
+                                "from": { "key_code": "u" },
+                                "to": [{ "key_code": "comma", "modifiers": ["left_shift"] }],
+                                "conditions": [{ "type": "variable_if", "name": "f_symbol_layer", "value": 1 }]
+                            },
+                            {
+                                "type": "basic",
+                                "from": { "key_code": "i" },
+                                "to": [{ "key_code": "period", "modifiers": ["left_shift"] }],
+                                "conditions": [{ "type": "variable_if", "name": "f_symbol_layer", "value": 1 }]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "name": "Default",
+            "selected": true,
+            "virtual_hid_keyboard": { "keyboard_type_v2": "ansi" }
+        }
+    ]
+}

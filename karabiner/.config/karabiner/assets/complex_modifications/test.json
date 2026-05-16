@@ -1,0 +1,15 @@
+{
+  "title": "Test rule",
+  "rules": [
+    {
+      "description": "TEST: right_shift = escape",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": { "key_code": "right_shift" },
+          "to": [{ "key_code": "escape" }]
+        }
+      ]
+    }
+  ]
+}

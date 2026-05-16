@@ -1,0 +1,164 @@
+{
+  "global": {
+    "ask_for_confirmation_before_quitting": true,
+    "check_for_updates_on_startup": true,
+    "show_in_menu_bar": true,
+    "show_profile_name_in_menu_bar": false,
+    "unsafe_ui": false
+  },
+  "profiles": [
+    {
+      "name": "Default",
+      "selected": true,
+      "complex_modifications": {
+        "parameters": {
+          "basic.simultaneous_threshold_milliseconds": 50,
+          "basic.to_delayed_action_delay_milliseconds": 500,
+          "basic.to_if_alone_timeout_milliseconds": 1000,
+          "basic.to_if_held_down_threshold_milliseconds": 500
+        },
+        "rules": [
+          {
+            "description": "f + right home row = symbols (parens, brackets, braces, angles)",
+            "manipulators": [
+              {
+                "type": "basic",
+                "from": {
+                  "simultaneous": [
+                    { "key_code": "f" },
+                    { "key_code": "j" }
+                  ],
+                  "simultaneous_options": {
+                    "key_down_order": "insensitive",
+                    "key_up_order": "insensitive",
+                    "key_up_when": "any",
+                    "to_after_key_up": []
+                  }
+                },
+                "to": [{ "key_code": "9", "modifiers": ["left_shift"] }]
+              },
+              {
+                "type": "basic",
+                "from": {
+                  "simultaneous": [
+                    { "key_code": "f" },
+                    { "key_code": "k" }
+                  ],
+                  "simultaneous_options": {
+                    "key_down_order": "insensitive",
+                    "key_up_order": "insensitive",
+                    "key_up_when": "any",
+                    "to_after_key_up": []
+                  }
+                },
+                "to": [{ "key_code": "0", "modifiers": ["left_shift"] }]
+              },
+              {
+                "type": "basic",
+                "from": {
+                  "simultaneous": [
+                    { "key_code": "f" },
+                    { "key_code": "l" }
+                  ],
+                  "simultaneous_options": {
+                    "key_down_order": "insensitive",
+                    "key_up_order": "insensitive",
+                    "key_up_when": "any",
+                    "to_after_key_up": []
+                  }
+                },
+                "to": [{ "key_code": "open_bracket" }]
+              },
+              {
+                "type": "basic",
+                "from": {
+                  "simultaneous": [
+                    { "key_code": "f" },
+                    { "key_code": "semicolon" }
+                  ],
+                  "simultaneous_options": {
+                    "key_down_order": "insensitive",
+                    "key_up_order": "insensitive",
+                    "key_up_when": "any",
+                    "to_after_key_up": []
+                  }
+                },
+                "to": [{ "key_code": "close_bracket" }]
+              },
+              {
+                "type": "basic",
+                "from": {
+                  "simultaneous": [
+                    { "key_code": "f" },
+                    { "key_code": "h" }
+                  ],
+                  "simultaneous_options": {
+                    "key_down_order": "insensitive",
+                    "key_up_order": "insensitive",
+                    "key_up_when": "any",
+                    "to_after_key_up": []
+                  }
+                },
+                "to": [{ "key_code": "open_bracket", "modifiers": ["left_shift"] }]
+              },
+              {
+                "type": "basic",
+                "from": {
+                  "simultaneous": [
+                    { "key_code": "f" },
+                    { "key_code": "quote" }
+                  ],
+                  "simultaneous_options": {
+                    "key_down_order": "insensitive",
+                    "key_up_order": "insensitive",
+                    "key_up_when": "any",
+                    "to_after_key_up": []
+                  }
+                },
+                "to": [{ "key_code": "close_bracket", "modifiers": ["left_shift"] }]
+              },
+              {
+                "type": "basic",
+                "from": {
+                  "simultaneous": [
+                    { "key_code": "f" },
+                    { "key_code": "u" }
+                  ],
+                  "simultaneous_options": {
+                    "key_down_order": "insensitive",
+                    "key_up_order": "insensitive",
+                    "key_up_when": "any",
+                    "to_after_key_up": []
+                  }
+                },
+                "to": [{ "key_code": "comma", "modifiers": ["left_shift"] }]
+              },
+              {
+                "type": "basic",
+                "from": {
+                  "simultaneous": [
+                    { "key_code": "f" },
+                    { "key_code": "i" }
+                  ],
+                  "simultaneous_options": {
+                    "key_down_order": "insensitive",
+                    "key_up_order": "insensitive",
+                    "key_up_when": "any",
+                    "to_after_key_up": []
+                  }
+                },
+                "to": [{ "key_code": "period", "modifiers": ["left_shift"] }]
+              }
+            ]
+          }
+        ]
+      },
+      "devices": [],
+      "fn_function_keys": [],
+      "simple_modifications": [],
+      "virtual_hid_keyboard": {
+        "keyboard_type_v2": "ansi"
+      }
+    }
+  ]
+}

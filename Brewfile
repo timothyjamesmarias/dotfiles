@@ -48,3 +48,4 @@ brew "asdf"
 
 # Optional: GUI applications
 # cask "alacritty"
+cask "karabiner-elements"
