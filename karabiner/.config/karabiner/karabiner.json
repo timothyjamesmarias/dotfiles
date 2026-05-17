@@ -20,7 +20,7 @@
                         ]
                     },
                     {
-                        "description": "Symbol layer: right home row = parens, brackets, braces, angles",
+                        "description": "Symbol layer: right home row + extras",
                         "manipulators": [
                             {
                                 "type": "basic",
@@ -68,6 +68,18 @@
                                 "type": "basic",
                                 "from": { "key_code": "i" },
                                 "to": [{ "key_code": "period", "modifiers": ["left_shift"] }],
+                                "conditions": [{ "type": "variable_if", "name": "z_symbol_layer", "value": 1 }]
+                            },
+                            {
+                                "type": "basic",
+                                "from": { "key_code": "o" },
+                                "to": [{ "key_code": "hyphen" }],
+                                "conditions": [{ "type": "variable_if", "name": "z_symbol_layer", "value": 1 }]
+                            },
+                            {
+                                "type": "basic",
+                                "from": { "key_code": "m" },
+                                "to": [{ "key_code": "hyphen", "modifiers": ["left_shift"] }],
                                 "conditions": [{ "type": "variable_if", "name": "z_symbol_layer", "value": 1 }]
                             }
                         ]
