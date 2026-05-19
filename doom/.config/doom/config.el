@@ -5,7 +5,7 @@
 (setq native-comp-deferred-compilation nil)
 (setq display-line-numbers-type 'relative)
 (setq server-name "doom")
-(setq doom-theme 'doom-ir-black)
+(setq doom-theme 'doom-gruvbox)
 (setq doom-modeline-minor-modes t)
 (setq doom-font (font-spec :family "MonoLisa" :size 14))
 (setq-default line-spacing 0.3)
