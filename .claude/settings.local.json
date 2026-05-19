@@ -99,7 +99,10 @@
       "Read(//private/var/log/karabiner/**)",
       "Read(//var/log/karabiner/**)",
       "Bash(stow aerospace:*)",
-      "Bash(stow duti:*)"
+      "Bash(stow duti:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": [],
