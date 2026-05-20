@@ -302,6 +302,7 @@ Works from markdown fenced blocks, org src blocks, .mmd files, or region."
 (load! "modules/buffers")
 (load! "modules/docker")
 (load! "modules/files")
+(load! "modules/ripgrep")
 (load! "modules/github")
 (load! "modules/macos")
 (load! "modules/notes")

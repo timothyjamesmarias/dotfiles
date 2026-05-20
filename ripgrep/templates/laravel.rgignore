@@ -1,0 +1,16 @@
+# Laravel project ignores for ripgrep
+node_modules/
+vendor/
+storage/app/
+storage/framework/
+storage/logs/
+bootstrap/cache/
+public/build/
+public/hot
+public/storage/
+public/vendor/
+.phpunit.cache/
+.phpunit.result.cache
+*.min.js
+*.min.css
+*.map

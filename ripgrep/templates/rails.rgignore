@@ -1,0 +1,24 @@
+# Rails project ignores for ripgrep
+node_modules/
+vendor/bundle/
+vendor/cache/
+.bundle/
+tmp/
+log/
+coverage/
+storage/
+public/assets/
+public/packs/
+public/packs-test/
+public/vite/
+public/vite-dev/
+public/vite-test/
+db/*.sqlite3
+db/*.sqlite3-journal
+db/schema.rb
+db/structure.sql
+.byebug_history
+.yarn/
+*.min.js
+*.min.css
+*.map

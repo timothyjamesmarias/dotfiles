@@ -1,14 +1,24 @@
 # WordPress project ignores for ripgrep
+wp-admin/
+wp-includes/
 wp-content/plugins/
-wp-content/cache/
 wp-content/mu-plugins/
+wp-content/cache/
 wp-content/uploads/
 wp-content/upgrade/
-wp-content/themes/genesis-block-theme/
 wp-content/wp-rocket-config/
-wp-content/wordpress-seo/admin/
+wp-content/languages/
+wp-content/wordpress-seo/
+
+# Ignore all themes, then re-allow the ones we care about below.
+# node_modules / vendor inside the allowed themes are re-excluded.
+wp-content/themes/*
+{{THEMES}}
+
+vendor/
+node_modules/
 public/critical-styles/
 public/css-critical/
-vendor/
 *.min.js
 *.min.css
+*.map
