@@ -61,7 +61,7 @@ Used when proposing candidate custom themes from `wp-content/themes/`.")
   content)
 
 (defun +tim/rginit (&optional template)
-  "Create .rgignore and .fdignore in the current project from TEMPLATE.
+  "Create a .rgignore in the current project from TEMPLATE.
 Interactively, prompt for a template with completion. Templates may contain
 {{THEMES}} placeholders, which are resolved by prompting."
   (interactive)
@@ -76,16 +76,14 @@ Interactively, prompt for a template with completion. Templates may contain
               (user-error "Unknown template: %s" name)))
          (dir (or (and (fboundp 'doom-project-root) (doom-project-root))
                   default-directory))
-         (rgignore (expand-file-name ".rgignore" dir))
-         (fdignore (expand-file-name ".fdignore" dir)))
-    (when (or (file-exists-p rgignore) (file-exists-p fdignore))
-      (unless (y-or-n-p (format "Overwrite existing ignore files in %s? " dir))
+         (rgignore (expand-file-name ".rgignore" dir)))
+    (when (file-exists-p rgignore)
+      (unless (y-or-n-p (format "Overwrite existing .rgignore in %s? " dir))
         (user-error "Cancelled")))
     (let* ((raw (with-temp-buffer
                   (insert-file-contents template-file)
                   (buffer-string)))
            (expanded (+tim/rgignore--expand raw dir)))
-      (with-temp-file rgignore (insert expanded))
-      (with-temp-file fdignore (insert expanded)))
-    (message "Created .rgignore and .fdignore from '%s' template in %s"
+      (with-temp-file rgignore (insert expanded)))
+    (message "Created .rgignore from '%s' template in %s"
              name (abbreviate-file-name dir))))

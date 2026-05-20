@@ -135,10 +135,10 @@ rginit() {
         return 1
     fi
 
-    if [[ -f ".rgignore" ]] || [[ -f ".fdignore" ]]; then
-        echo "Ignore files already exist:"
-        [[ -f ".rgignore" ]] && echo "--- .rgignore ---" && cat .rgignore
-        [[ -f ".fdignore" ]] && echo "--- .fdignore ---" && cat .fdignore
+    if [[ -f ".rgignore" ]]; then
+        echo ".rgignore already exists:"
+        echo "--- .rgignore ---"
+        cat .rgignore
         echo ""
         read "response?Overwrite? (y/N): "
         if [[ ! "$response" =~ ^[Yy]$ ]]; then
@@ -152,6 +152,5 @@ rginit() {
     expanded="$(_rgignore_expand "$raw")"
 
     print -r -- "$expanded" > .rgignore
-    print -r -- "$expanded" > .fdignore
-    echo "Created .rgignore and .fdignore from '$template_name' template"
+    echo "Created .rgignore from '$template_name' template"
 }
