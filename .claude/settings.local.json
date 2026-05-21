@@ -102,7 +102,9 @@
       "Bash(stow duti:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:api.github.com)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Read(//private/var/folders/**)",
+      "Bash(rg --files --hidden --glob '!.git')"
     ],
     "deny": [],
     "ask": [],

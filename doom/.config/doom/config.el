@@ -146,7 +146,16 @@
 (setq +workspaces-switch-project-function #'dired)
 
 (after! projectile
-  (advice-add #'projectile-visit-project-tags-table :override #'ignore))
+  (advice-add #'projectile-visit-project-tags-table :override #'ignore)
+  ;; Use `rg --files` so projectile honors .gitignore AND .rgignore (and
+  ;; .ignore) in one pass. Falls back to projectile's default if rg is missing.
+  (when (executable-find "rg")
+    (setq projectile-indexing-method 'alien
+          ;; Projectile prefers fd via `projectile-git-use-fd' when available,
+          ;; which would bypass `projectile-git-command' (and our .rgignore).
+          projectile-git-use-fd nil
+          projectile-git-command "rg --files -0 --hidden --glob '!.git'"
+          projectile-git-submodule-command nil)))
 
 (after! orderless
   (setq orderless-matching-styles
