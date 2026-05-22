@@ -116,6 +116,36 @@ Reusable across frameworks — pair with a framework-specific resolver."
             (when (and sym (string-match-p "\\`[a-zA-Z_-][a-zA-Z0-9_-]*\\'" sym))
               sym))))))))
 
+;;; Tree-sitter utilities (shared across frameworks)
+
+(defun +dwim-nav-treesit-string-at-point ()
+  "Return full content of the enclosing string via tree-sitter, or nil.
+Walks up from point to find a string_content node.  Returns the
+string without quotes, e.g. \"blog/by_category\"."
+  (when (and (fboundp 'treesit-node-at)
+             (fboundp 'treesit-parser-list)
+             (treesit-parser-list))
+    (let ((node (treesit-node-at (point))))
+      (while (and node
+                  (not (equal (treesit-node-type node) "string_content")))
+        (setq node (treesit-node-parent node)))
+      (when node
+        (treesit-node-text node t)))))
+
+(defun +dwim-nav-treesit-ivar-at-point ()
+  "Return instance variable at point via tree-sitter (e.g. \"@user\"), or nil.
+Only works in tree-sitter modes with an `instance_variable' node type."
+  (when (and (fboundp 'treesit-node-at)
+             (fboundp 'treesit-parser-list)
+             (treesit-parser-list))
+    (let ((node (treesit-node-at (point))))
+      ;; The cursor might be on the @ or the name part — walk up if needed
+      (when (and node
+                 (not (equal (treesit-node-type node) "instance_variable")))
+        (setq node (treesit-node-parent node)))
+      (when (and node (equal (treesit-node-type node) "instance_variable"))
+        (treesit-node-text node t)))))
+
 ;;; Internal helpers
 
 (defun +dwim-nav--applicable-rules (framework)
@@ -275,3 +305,6 @@ chain fails (`user-error')."
 
 (add-hook 'ruby-mode-hook #'+dwim-nav--disable-etags-backend-h)
 (add-hook 'ruby-ts-mode-hook #'+dwim-nav--disable-etags-backend-h)
+(add-hook 'slim-mode-hook #'+dwim-nav--disable-etags-backend-h)
+(add-hook 'haml-mode-hook #'+dwim-nav--disable-etags-backend-h)
+(add-hook 'web-mode-hook #'+dwim-nav--disable-etags-backend-h)

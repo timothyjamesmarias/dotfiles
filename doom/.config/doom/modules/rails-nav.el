@@ -12,10 +12,14 @@
 ;;; Partial path resolution
 
 (defun +tim/rails-partial-file-handler (_identifier)
-  "Resolve a partial path to its underscore-prefixed file.
-E.g. 'shared/sidebar' → app/views/shared/_sidebar.slim.
-Handles both render calls and bare path strings."
-  (let* ((path (thing-at-point 'filename t))
+  "Resolve a render path to its view file.
+Tries both partial (underscore-prefixed) and full template paths.
+E.g. 'shared/sidebar' → app/views/shared/_sidebar.slim
+     'blog/by_category' → app/views/blog/by_category.html.slim
+Uses tree-sitter to extract the full string content (handles paths
+with /) when available, falls back to `thing-at-point'."
+  (let* ((path (or (+dwim-nav-treesit-string-at-point)
+                   (thing-at-point 'filename t)))
          (root (doom-project-root)))
     (when (and path root (not (string-empty-p path)))
       (let* ((parts (split-string path "/"))
@@ -26,14 +30,16 @@ Handles both render calls and bare path strings."
                                 (when dir-parts (concat (string-join dir-parts "/") "/")))
                         root)))
         (when (file-directory-p view-dir)
-          (cl-loop for ext in '("slim" "haml" "erb"
-                                "html.slim" "html.haml" "html.erb"
-                                "text.erb" "json.jbuilder" "turbo_stream.erb")
-                   for candidate = (expand-file-name
-                                    (format "_%s.%s" basename ext)
-                                    view-dir)
-                   when (file-exists-p candidate)
-                   return candidate))))))
+          (catch 'found
+            (dolist (prefix '("_" ""))
+              (dolist (ext '("slim" "haml" "erb"
+                             "html.slim" "html.haml" "html.erb"
+                             "text.erb" "json.jbuilder" "turbo_stream.erb"))
+                (let ((candidate (expand-file-name
+                                  (format "%s%s.%s" prefix basename ext)
+                                  view-dir)))
+                  (when (file-exists-p candidate)
+                    (throw 'found candidate)))))))))))
 
 (defun +tim/rails-partial-dwim-handler (_identifier)
   "DWIM handler: resolve partial path and jump."
@@ -234,10 +240,11 @@ Specifically: cursor is on a `def method_name` line."
 ;;; Rule registration
 
 (+dwim-nav-rule! rails-partial
-  :modes (web-mode slim-mode haml-mode html-mode mhtml-mode)
+  :modes (web-mode slim-mode haml-mode html-mode mhtml-mode ruby-mode ruby-ts-mode)
   :frameworks (rails)
   :predicate (lambda ()
-               (let ((path (thing-at-point 'filename t)))
+               (let ((path (or (+dwim-nav-treesit-string-at-point)
+                               (thing-at-point 'filename t))))
                  (and path (not (string-empty-p path)))))
   :handler #'+tim/rails-partial-dwim-handler
   :priority 10
@@ -345,24 +352,65 @@ Delegates to `projectile-rails-goto-constant-at-point'."
           "\\)\\b")
   "Regex matching Rails callback declaration lines.")
 
+(defun +tim/rails--association-symbol-at-cursor ()
+  "Determine which association symbol to resolve based on cursor position.
+If cursor is on a `through:` or `source:` value, use that symbol.
+Otherwise use the primary association symbol (first :symbol after the keyword).
+Returns (SYMBOL . CONTEXT) where CONTEXT is `primary', `through', or `source'."
+  (let* ((line (thing-at-point 'line t))
+         (sym (thing-at-point 'symbol t))
+         (col (- (point) (line-beginning-position))))
+    (when (and sym line)
+      ;; Check if cursor is on a through: or source: value
+      (cond
+       ((and (string-match "through:\\s-*:\\([a-zA-Z0-9_]+\\)" line)
+             (let ((start (match-beginning 1))
+                   (end (match-end 1)))
+               (<= start col)
+               (< col end)))
+        (cons (match-string 1 line) 'through))
+       ((and (string-match "source:\\s-*:\\([a-zA-Z0-9_]+\\)" line)
+             (let ((start (match-beginning 1))
+                   (end (match-end 1)))
+               (<= start col)
+               (< col end)))
+        (cons (match-string 1 line) 'source))
+       ;; Default: primary association symbol
+       ((string-match
+         "^[[:space:]]*\\(belongs_to\\|has_one\\|has_many\\|has_and_belongs_to_many\\)\\s-+:\\([a-zA-Z0-9_]+\\)"
+         line)
+        (cons (match-string 2 line) 'primary))))))
+
 (defun +tim/rails-association-dwim-handler (_identifier)
-  "Jump from association declaration to the associated model file."
+  "Jump from association declaration to the associated model file.
+Cursor-aware: if on a `through:` or `source:` value, resolves that
+association instead of the primary one."
   (let ((line (thing-at-point 'line t)))
     (when (string-match
            "^[[:space:]]*\\(belongs_to\\|has_one\\|has_many\\|has_and_belongs_to_many\\)\\s-+:\\([a-zA-Z0-9_]+\\)"
            line)
       (let* ((keyword (match-string 1 line))
-             (symbol (match-string 2 line))
+             (cursor-info (+tim/rails--association-symbol-at-cursor))
+             (symbol (car cursor-info))
+             (context (cdr cursor-info))
              (root (doom-project-root))
              (explicit-class
-              (when (string-match "class_name:\\s-*['\"]\\([^'\"]+\\)['\"]" line)
+              (when (and (eq context 'primary)
+                         (string-match "class_name:\\s-*['\"]\\([^'\"]+\\)['\"]" line))
                 (match-string 1 line)))
+             ;; through/source values are always singular association names
+             ;; primary symbols need singularization for has_many
              (model-name
               (cond
                (explicit-class
                 (downcase (replace-regexp-in-string "::" "/" explicit-class)))
-               ((member keyword '("has_many" "has_and_belongs_to_many"))
+               ((and (eq context 'primary)
+                     (member keyword '("has_many" "has_and_belongs_to_many")))
                 (inflection-singularize-string symbol))
+               ;; through: value — singularize (e.g., :taggings → tagging)
+               ((eq context 'through)
+                (inflection-singularize-string symbol))
+               ;; source: value and belongs_to/has_one — already singular
                (t symbol)))
              (file (expand-file-name (format "app/models/%s.rb" model-name) root)))
         (when (file-exists-p file)
@@ -431,10 +479,35 @@ Delegates to `projectile-rails-goto-constant-at-point'."
 
 ;;; Instance variable resolution in views
 
+(defun +tim/rails--ivar-at-point ()
+  "Extract instance variable name at point, including the @.
+Uses tree-sitter when available (returns \"@search_terms\" directly
+from the `instance_variable' node).  Falls back to checking the
+character before `thing-at-point' bounds for template modes.
+Returns e.g. \"@search_terms\" or nil."
+  (or
+   ;; Tree-sitter path (ruby-ts-mode)
+   (+dwim-nav-treesit-ivar-at-point)
+   ;; Fallback for non-ts modes (web-mode, slim-mode, etc.)
+   (let* ((bounds (bounds-of-thing-at-point 'symbol))
+          (sym (and bounds (buffer-substring-no-properties (car bounds) (cdr bounds)))))
+     (when sym
+       (cond
+        ;; @ is included in the symbol (some modes)
+        ((string-prefix-p "@" sym) sym)
+        ;; @@ class variable
+        ((and (> (car bounds) (1+ (point-min)))
+              (= (char-before (car bounds)) ?@)
+              (= (char-before (1- (car bounds))) ?@))
+         (concat "@@" sym))
+        ;; @ is before the symbol boundary
+        ((and (> (car bounds) (point-min))
+              (= (char-before (car bounds)) ?@))
+         (concat "@" sym)))))))
+
 (defun +tim/rails-ivar-in-view-dwim-handler (_identifier)
   "Jump from @ivar in a view to its assignment in the controller."
-  (when-let* ((sym (thing-at-point 'symbol t))
-              (ivar (concat "@" sym))
+  (when-let* ((ivar (+tim/rails--ivar-at-point))
               (info (+tim/rails--view-to-controller))
               (controller-file (car info))
               (action (cdr info)))
@@ -472,13 +545,78 @@ Delegates to `projectile-rails-goto-constant-at-point'."
                (and (buffer-file-name)
                     (string-match-p "app/views/" (buffer-file-name))
                     (not (string-match-p "/_[^/]*\\'" (buffer-file-name)))
-                    (let ((bounds (bounds-of-thing-at-point 'symbol)))
-                      (and bounds
-                           (> (car bounds) (point-min))
-                           (= (char-before (car bounds)) ?@)))))
+                    (+tim/rails--ivar-at-point)))
   :handler #'+tim/rails-ivar-in-view-dwim-handler
   :priority 30
   :label "Rails @ivar→controller")
+
+;;; Instance variable resolution in Ruby files
+
+(defun +tim/rails--controller-view-dir ()
+  "If in a controller, return the corresponding views directory or nil.
+E.g. app/controllers/blog_controller.rb → app/views/blog/."
+  (when-let* ((file (buffer-file-name))
+              (root (doom-project-root)))
+    (when (string-match "app/controllers/\\(.+\\)_controller\\.rb\\'" file)
+      (let ((dir (expand-file-name
+                  (format "app/views/%s/" (match-string 1 file))
+                  root)))
+        (when (file-directory-p dir) dir)))))
+
+(defun +tim/rails-ivar-in-ruby-dwim-handler (_identifier)
+  "Jump from @ivar in a Ruby file: show assignment + view usages as candidates."
+  (when-let ((ivar (+tim/rails--ivar-at-point)))
+    (let ((candidates nil)
+          (ivar-re (regexp-quote ivar))
+          (root (doom-project-root)))
+      ;; 1. Find assignments in current buffer
+      (save-excursion
+        (goto-char (point-min))
+        (while (re-search-forward
+                (format "%s\\s-*\\(||\\)?=[^=]" ivar-re) nil t)
+          (push (list :label (format "%s:%d (assignment)"
+                                     (file-name-nondirectory (buffer-file-name))
+                                     (line-number-at-pos))
+                      :file (buffer-file-name)
+                      :line (line-number-at-pos))
+                candidates)))
+      ;; 2. Find usages in view templates (search all views, not just controller-specific)
+      (let ((views-dir (expand-file-name "app/views/" root)))
+        (when (file-directory-p views-dir)
+          (with-temp-buffer
+            (when (zerop (call-process "rg" nil t nil
+                                       "--line-number" "--no-heading" "--with-filename"
+                                       ivar-re views-dir))
+              (goto-char (point-min))
+              (while (not (eobp))
+                (let ((line (buffer-substring-no-properties
+                             (line-beginning-position) (line-end-position))))
+                  (when (string-match "\\`\\(.+\\):\\([0-9]+\\):" line)
+                    (let ((file (match-string 1 line))
+                          (lnum (string-to-number (match-string 2 line))))
+                      (push (list :label (format "%s:%d (view)"
+                                                 (file-relative-name file root)
+                                                 lnum)
+                                  :file file
+                                  :line lnum)
+                            candidates))))
+                (forward-line 1))))))
+      ;; Return results
+      (when candidates
+        (setq candidates (nreverse candidates))
+        (if (= (length candidates) 1)
+            (progn
+              (+dwim-nav--jump-to (car candidates))
+              (+dwim-nav-result-jumped))
+          (+dwim-nav-result-candidates candidates))))))
+
+(+dwim-nav-rule! rails-ivar-in-ruby
+  :modes (ruby-mode ruby-ts-mode)
+  :frameworks (rails)
+  :predicate #'+tim/rails--ivar-at-point
+  :handler #'+tim/rails-ivar-in-ruby-dwim-handler
+  :priority 30
+  :label "Rails @ivar")
 
 ;;; gf handler (stays on +lookup-file-functions, separate from dwim-nav)
 
