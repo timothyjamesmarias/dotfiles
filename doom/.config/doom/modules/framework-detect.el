@@ -12,6 +12,11 @@ Accepted values: rails, laravel, spring-boot.")
   :lighter " Rails"
   :group 'tim)
 
+(define-minor-mode +tim/laravel-nav-mode
+  "Minor mode enabling Laravel-specific lookup handlers."
+  :lighter " Laravel"
+  :group 'tim)
+
 (define-minor-mode +tim/maizzle-nav-mode
   "Minor mode enabling Maizzle-specific lookup handlers."
   :lighter " Maizzle"
@@ -45,6 +50,7 @@ Accepted values: rails, laravel, spring-boot.")
   (when-let ((root (doom-project-root)))
     (pcase (+tim/detect-framework root)
       ('rails (+tim/rails-nav-mode +1))
+      ('laravel (+tim/laravel-nav-mode +1))
       ('maizzle (+tim/maizzle-nav-mode +1)))))
 
 (add-hook 'after-change-major-mode-hook #'+tim/framework-activate-h)

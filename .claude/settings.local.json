@@ -104,7 +104,9 @@
       "WebFetch(domain:api.github.com)",
       "Bash(curl:*)",
       "Read(//private/var/folders/**)",
-      "Bash(rg --files --hidden --glob '!.git')"
+      "Bash(rg --files --hidden --glob '!.git')",
+      "Read(//Users/timmarias/.emacs.d/.local/straight/repos/**)",
+      "Read(//Users/timmarias/**)"
     ],
     "deny": [],
     "ask": [],

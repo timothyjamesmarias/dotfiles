@@ -179,26 +179,41 @@ Handles BEM nested selectors (e.g. &__content inside .block)."
        ((string-match "controller:\\s-*[:'\"]+\\([a-z_/]+\\)" line)
         (cons (match-string 1 line) nil))))))
 
+(defun +tim/rails--on-action-def-p ()
+  "Return non-nil if point is on or inside a controller action definition.
+Specifically: cursor is on a `def method_name` line."
+  (save-excursion
+    (beginning-of-line)
+    (looking-at-p "^[[:space:]]*def[[:space:]]+[a-zA-Z_]")))
+
 (defun +tim/rails-routes-dwim-handler (_identifier)
   "DWIM handler: jump between controller actions and route definitions."
   (let ((root (doom-project-root)))
     (cond
-     ;; In a controller → jump to routes.rb
+     ;; On a `def action` line in a controller → jump to routes.rb
      ((when-let ((info (+tim/rails--controller-info)))
         (let* ((controller (car info))
                (action (cdr info))
                (routes-file (expand-file-name "config/routes.rb" root))
                (pattern (if action
-                            (format "%s\\|%s#%s"
+                            (format "%s#%s\\|%s.*%s"
+                                    controller action
                                     (file-name-nondirectory controller)
-                                    controller action)
+                                    action)
                           (file-name-nondirectory controller))))
           (when (file-exists-p routes-file)
-            (find-file routes-file)
-            (goto-char (point-min))
-            (when (re-search-forward pattern nil t)
-              (beginning-of-line))
-            (+dwim-nav-result-jumped)))))
+            ;; Search without opening the file first — only jump if found
+            (let ((found nil))
+              (with-temp-buffer
+                (insert-file-contents routes-file)
+                (goto-char (point-min))
+                (when (re-search-forward pattern nil t)
+                  (setq found (line-number-at-pos))))
+              (when found
+                (find-file routes-file)
+                (goto-char (point-min))
+                (forward-line (1- found))
+                (+dwim-nav-result-jumped)))))))
      ;; In routes.rb → jump to controller
      ((when-let* ((ref (+tim/rails--route-ref-at-point))
                   (controller (car ref))
@@ -240,12 +255,230 @@ Handles BEM nested selectors (e.g. &__content inside .block)."
   :modes (ruby-mode ruby-ts-mode)
   :frameworks (rails)
   :predicate (lambda ()
-               (or (+tim/rails--controller-info)
+               (or (and (+tim/rails--controller-info)
+                        (+tim/rails--on-action-def-p))
                    (and (buffer-file-name)
                         (string-match-p "routes\\.rb\\'" (buffer-file-name)))))
   :handler #'+tim/rails-routes-dwim-handler
   :priority 10
   :label "Rails routes")
+
+;;; View → Controller jumping
+
+(defun +tim/rails--view-to-controller ()
+  "From a view file, return (CONTROLLER-FILE . ACTION) or nil."
+  (when-let* ((file (buffer-file-name))
+              (root (doom-project-root)))
+    (when (string-match "app/views/\\(.+\\)/\\([^_][^/]*\\)\\." file)
+      (let* ((controller-path (match-string 1 file))
+             (action (match-string 2 file))
+             (controller-file (expand-file-name
+                               (format "app/controllers/%s_controller.rb"
+                                       controller-path)
+                               root)))
+        (when (file-exists-p controller-file)
+          (cons controller-file action))))))
+
+(defun +tim/rails-view-controller-dwim-handler (_identifier)
+  "DWIM handler: from a view file, jump to the controller action."
+  (when-let ((info (+tim/rails--view-to-controller)))
+    (find-file (car info))
+    (goto-char (point-min))
+    (when (cdr info)
+      (when (re-search-forward
+             (format "^[[:space:]]*def[[:space:]]+%s\\b" (regexp-quote (cdr info)))
+             nil t)
+        (beginning-of-line)))
+    (+dwim-nav-result-jumped)))
+
+(+dwim-nav-rule! rails-view-controller
+  :modes (web-mode slim-mode haml-mode html-mode mhtml-mode)
+  :frameworks (rails)
+  :predicate (lambda ()
+               (when-let ((file (buffer-file-name)))
+                 (and (string-match-p "app/views/" file)
+                      ;; Not a partial (partials start with _)
+                      (not (string-match-p "/_[^/]*\\'" file)))))
+  :handler #'+tim/rails-view-controller-dwim-handler
+  :priority 15
+  :label "Rails view→controller")
+
+;;; Constant → File jumping (via projectile-rails)
+
+(defun +tim/rails-constant-dwim-handler (_identifier)
+  "DWIM handler: jump to the file defining the Ruby constant at point.
+Delegates to `projectile-rails-goto-constant-at-point'."
+  (condition-case nil
+      (progn
+        (projectile-rails-goto-constant-at-point)
+        (+dwim-nav-result-jumped))
+    ((error user-error) nil)))
+
+(+dwim-nav-rule! rails-constant
+  :modes (ruby-mode ruby-ts-mode)
+  :frameworks (rails)
+  :predicate (lambda ()
+               (when-let ((sym (thing-at-point 'symbol t)))
+                 (string-match-p "\\`\\(::\\)?[A-Z][a-zA-Z0-9_:]*\\'" sym)))
+  :handler #'+tim/rails-constant-dwim-handler
+  :priority 40
+  :label "Rails constant")
+
+;;; Keyword-based navigation (associations, callbacks, layouts)
+
+(defvar +tim/rails--association-keywords-re
+  "^[[:space:]]*\\(belongs_to\\|has_one\\|has_many\\|has_and_belongs_to_many\\)\\b"
+  "Regex matching Rails association declaration lines.")
+
+(defvar +tim/rails--callback-keywords-re
+  (concat "^[[:space:]]*\\("
+          (mapconcat #'identity
+                     '("before_validation" "after_validation"
+                       "before_save" "around_save" "after_save"
+                       "before_create" "around_create" "after_create"
+                       "before_update" "around_update" "after_update"
+                       "before_destroy" "around_destroy" "after_destroy"
+                       "after_commit" "after_create_commit"
+                       "after_update_commit" "after_destroy_commit"
+                       "after_initialize" "after_find" "after_touch")
+                     "\\|")
+          "\\)\\b")
+  "Regex matching Rails callback declaration lines.")
+
+(defun +tim/rails-association-dwim-handler (_identifier)
+  "Jump from association declaration to the associated model file."
+  (let ((line (thing-at-point 'line t)))
+    (when (string-match
+           "^[[:space:]]*\\(belongs_to\\|has_one\\|has_many\\|has_and_belongs_to_many\\)\\s-+:\\([a-zA-Z0-9_]+\\)"
+           line)
+      (let* ((keyword (match-string 1 line))
+             (symbol (match-string 2 line))
+             (root (doom-project-root))
+             (explicit-class
+              (when (string-match "class_name:\\s-*['\"]\\([^'\"]+\\)['\"]" line)
+                (match-string 1 line)))
+             (model-name
+              (cond
+               (explicit-class
+                (downcase (replace-regexp-in-string "::" "/" explicit-class)))
+               ((member keyword '("has_many" "has_and_belongs_to_many"))
+                (inflection-singularize-string symbol))
+               (t symbol)))
+             (file (expand-file-name (format "app/models/%s.rb" model-name) root)))
+        (when (file-exists-p file)
+          (find-file file)
+          (+dwim-nav-result-jumped))))))
+
+(defun +tim/rails-callback-dwim-handler (_identifier)
+  "Jump from callback symbol to its method definition in current buffer."
+  (when-let ((sym (thing-at-point 'symbol t)))
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward
+             (format "^[[:space:]]*def[[:space:]]+%s\\b" (regexp-quote sym))
+             nil t)
+        (beginning-of-line)
+        (+dwim-nav-result-jumped)))))
+
+(defun +tim/rails-layout-dwim-handler (_identifier)
+  "Jump from `layout \"name\"` to the layout template file."
+  (let ((line (thing-at-point 'line t)))
+    (when (string-match "layout[[:space:]]+['\"]\\([^'\"]+\\)['\"]" line)
+      (let* ((name (match-string 1 line))
+             (root (doom-project-root))
+             (dir (expand-file-name "app/views/layouts/" root)))
+        (when (file-directory-p dir)
+          (cl-loop for ext in '("html.slim" "html.haml" "html.erb"
+                                "slim" "haml" "erb")
+                   for candidate = (expand-file-name (format "%s.%s" name ext) dir)
+                   when (file-exists-p candidate)
+                   return (progn
+                            (find-file candidate)
+                            (+dwim-nav-result-jumped))))))))
+
+(+dwim-nav-rule! rails-association
+  :modes (ruby-mode ruby-ts-mode)
+  :frameworks (rails)
+  :predicate (lambda ()
+               (save-excursion
+                 (beginning-of-line)
+                 (looking-at-p +tim/rails--association-keywords-re)))
+  :handler #'+tim/rails-association-dwim-handler
+  :priority 25
+  :label "Rails association")
+
+(+dwim-nav-rule! rails-callback
+  :modes (ruby-mode ruby-ts-mode)
+  :frameworks (rails)
+  :predicate (lambda ()
+               (save-excursion
+                 (beginning-of-line)
+                 (looking-at-p +tim/rails--callback-keywords-re)))
+  :handler #'+tim/rails-callback-dwim-handler
+  :priority 25
+  :label "Rails callback")
+
+(+dwim-nav-rule! rails-layout
+  :modes (ruby-mode ruby-ts-mode)
+  :frameworks (rails)
+  :predicate (lambda ()
+               (save-excursion
+                 (beginning-of-line)
+                 (looking-at-p "^[[:space:]]*layout[[:space:]]+['\"]")))
+  :handler #'+tim/rails-layout-dwim-handler
+  :priority 25
+  :label "Rails layout")
+
+;;; Instance variable resolution in views
+
+(defun +tim/rails-ivar-in-view-dwim-handler (_identifier)
+  "Jump from @ivar in a view to its assignment in the controller."
+  (when-let* ((sym (thing-at-point 'symbol t))
+              (ivar (concat "@" sym))
+              (info (+tim/rails--view-to-controller))
+              (controller-file (car info))
+              (action (cdr info)))
+    (let ((assignment-re (format "%s\\s-*\\(||\\)?=[^=]" (regexp-quote ivar)))
+          (action-re (format "^[[:space:]]*def[[:space:]]+%s\\b" (regexp-quote action)))
+          (found-line nil))
+      ;; Search within the controller action method first
+      (with-temp-buffer
+        (insert-file-contents controller-file)
+        (goto-char (point-min))
+        (when (re-search-forward action-re nil t)
+          (while (and (not found-line)
+                      (not (eobp))
+                      (re-search-forward
+                       (concat "\\(" assignment-re "\\)\\|\\(^[[:space:]]*def[[:space:]]\\)")
+                       nil t))
+            (if (match-string 2)
+                (goto-char (point-max))  ; hit next def, stop
+              (setq found-line (line-number-at-pos)))))
+        ;; Fallback: search entire file (before_action, etc.)
+        (unless found-line
+          (goto-char (point-min))
+          (when (re-search-forward assignment-re nil t)
+            (setq found-line (line-number-at-pos)))))
+      (when found-line
+        (find-file controller-file)
+        (goto-char (point-min))
+        (forward-line (1- found-line))
+        (+dwim-nav-result-jumped)))))
+
+(+dwim-nav-rule! rails-ivar-in-view
+  :modes (web-mode slim-mode haml-mode html-mode mhtml-mode)
+  :frameworks (rails)
+  :predicate (lambda ()
+               (and (buffer-file-name)
+                    (string-match-p "app/views/" (buffer-file-name))
+                    (not (string-match-p "/_[^/]*\\'" (buffer-file-name)))
+                    (let ((bounds (bounds-of-thing-at-point 'symbol)))
+                      (and bounds
+                           (> (car bounds) (point-min))
+                           (= (char-before (car bounds)) ?@)))))
+  :handler #'+tim/rails-ivar-in-view-dwim-handler
+  :priority 30
+  :label "Rails @ivar→controller")
 
 ;;; gf handler (stays on +lookup-file-functions, separate from dwim-nav)
 

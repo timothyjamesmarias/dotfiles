@@ -263,3 +263,15 @@ chain fails (`user-error')."
 (map! :nv "gd" #'+dwim/navigate)
 (after! eglot
   (map! :map eglot-mode-map :nv "gd" #'+dwim/navigate))
+
+;;; Suppress built-in etags prompts in modes without LSP.
+;; Emacs registers etags--xref-backend globally.  In buffers without
+;; eglot, it becomes the only xref backend and prompts for a TAGS file.
+;; Our dwim-nav rules and dumb-jump handle navigation instead.
+(defun +dwim-nav--disable-etags-backend-h ()
+  "Remove the built-in etags xref backend from this buffer."
+  (setq-local xref-backend-functions
+              (remove #'etags--xref-backend xref-backend-functions)))
+
+(add-hook 'ruby-mode-hook #'+dwim-nav--disable-etags-backend-h)
+(add-hook 'ruby-ts-mode-hook #'+dwim-nav--disable-etags-backend-h)
