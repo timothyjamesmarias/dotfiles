@@ -237,6 +237,83 @@ Specifically: cursor is on a `def method_name` line."
             (beginning-of-line))
           (+dwim-nav-result-jumped)))))))
 
+;;; Render call resolution
+
+(defun +tim/rails--render-target ()
+  "Extract the render target from the current line.
+Returns (TYPE . VALUE) where TYPE is one of:
+  `template'  — explicit template path (string)
+  `action'    — action name (symbol or keyword arg)
+  `partial'   — explicit partial path (string)
+Or nil if not on a render call."
+  (let ((line (thing-at-point 'line t)))
+    (when (and line (string-match-p "\\brender\\b" line))
+      (cond
+       ;; render template: "users/show"
+       ((string-match "render\\s-+template:\\s-*['\"]\\([^'\"]+\\)['\"]" line)
+        (cons 'template (match-string 1 line)))
+       ;; render partial: "shared/sidebar" — handled by existing partial rule
+       ((string-match "render\\s-+partial:\\s-*['\"]\\([^'\"]+\\)['\"]" line)
+        (cons 'partial (match-string 1 line)))
+       ;; render action: :edit
+       ((string-match "render\\s-+action:\\s-*:\\([a-zA-Z0-9_]+\\)" line)
+        (cons 'action (match-string 1 line)))
+       ;; render :edit (bare symbol after render)
+       ((string-match "render\\s-+:\\([a-zA-Z0-9_]+\\)" line)
+        (cons 'action (match-string 1 line)))
+       ;; render "path/to/template" — already handled by partial rule via tree-sitter
+       ))))
+
+(defun +tim/rails--find-view-template (controller-path action root)
+  "Find the view template for CONTROLLER-PATH and ACTION under ROOT.
+Returns file path or nil."
+  (let ((view-dir (expand-file-name
+                   (format "app/views/%s/" controller-path) root)))
+    (when (file-directory-p view-dir)
+      (catch 'found
+        (dolist (ext '("html.slim" "html.haml" "html.erb"
+                       "slim" "haml" "erb"
+                       "json.jbuilder" "turbo_stream.erb"))
+          (let ((candidate (expand-file-name
+                            (format "%s.%s" action ext) view-dir)))
+            (when (file-exists-p candidate)
+              (throw 'found candidate))))))))
+
+(defun +tim/rails-render-dwim-handler (_identifier)
+  "Jump from a render call to the target view template."
+  (when-let ((target (+tim/rails--render-target))
+             (root (doom-project-root)))
+    (let ((type (car target))
+          (value (cdr target)))
+      (pcase type
+        ('action
+         ;; render :edit or render action: :new
+         ;; Resolve relative to current controller
+         (when-let* ((info (+tim/rails--controller-info))
+                     (controller (car info))
+                     (file (+tim/rails--find-view-template controller value root)))
+           (find-file file)
+           (+dwim-nav-result-jumped)))
+        ('template
+         ;; render template: "users/show"
+         ;; Resolve as a full path under app/views/
+         (let* ((parts (split-string value "/"))
+                (action (car (last parts)))
+                (dir-path (string-join (butlast parts) "/")))
+           (when-let ((file (+tim/rails--find-view-template dir-path action root)))
+             (find-file file)
+             (+dwim-nav-result-jumped))))))))
+
+(+dwim-nav-rule! rails-render
+  :modes (ruby-mode ruby-ts-mode)
+  :frameworks (rails)
+  :predicate (lambda ()
+               (when-let ((target (+tim/rails--render-target)))
+                 (memq (car target) '(action template))))
+  :handler #'+tim/rails-render-dwim-handler
+  :priority 10
+  :label "Rails render")
+
 ;;; Rule registration
 
 (+dwim-nav-rule! rails-partial
