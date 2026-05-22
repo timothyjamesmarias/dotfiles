@@ -315,6 +315,7 @@ Works from markdown fenced blocks, org src blocks, .mmd files, or region."
 (load! "modules/github")
 (load! "modules/macos")
 (load! "modules/notes")
+(load! "modules/dwim-nav")
 (load! "modules/framework-detect")
 (load! "modules/maizzle")
 (load! "modules/rails-nav")

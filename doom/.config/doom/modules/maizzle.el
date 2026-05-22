@@ -42,6 +42,19 @@
 
 (add-hook '+tim/maizzle-nav-mode-hook #'+tim/maizzle-nav-mode-setup-h)
 
+;;; DWIM navigation rule
+
+(+dwim-nav-rule! maizzle-component
+  :modes (web-mode html-mode mhtml-mode)
+  :frameworks (maizzle)
+  :predicate #'+tim/maizzle-component-at-point
+  :handler (lambda (_identifier)
+             (when-let ((path (+tim/maizzle-component-at-point)))
+               (find-file path)
+               (+dwim-nav-result-jumped)))
+  :priority 10
+  :label "Maizzle component")
+
 (defun +tim/maizzle-find-references ()
   "Grep project for `<x-NAME>` usages of the current Maizzle component."
   (interactive)

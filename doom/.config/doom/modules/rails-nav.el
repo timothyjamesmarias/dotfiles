@@ -1,6 +1,15 @@
-;;; modules/rails-nav.el --- Rails navigation via +lookup dispatch -*- lexical-binding: t; -*-
+;;; modules/rails-nav.el --- Rails navigation via dwim-nav rules -*- lexical-binding: t; -*-
+;;
+;; Registers context-aware navigation rules for Rails projects:
+;;   - Partial file resolution (render "shared/sidebar" → _sidebar.slim)
+;;   - SCSS class lookup from templates (with BEM nested selector support)
+;;   - Controller ↔ routes.rb bidirectional jumping
+;;
+;; CSS class extraction is provided by `+dwim-nav-css-class-at-point'
+;; in dwim-nav.el (shared across frameworks).  Rails-specific resolver
+;; functions live here.
 
-;;; Partial path resolution (gd + gf)
+;;; Partial path resolution
 
 (defun +tim/rails-partial-file-handler (_identifier)
   "Resolve a partial path to its underscore-prefixed file.
@@ -24,45 +33,15 @@ Handles both render calls and bare path strings."
                                     (format "_%s.%s" basename ext)
                                     view-dir)
                    when (file-exists-p candidate)
-                   return (progn (find-file candidate) t)))))))
+                   return candidate))))))
 
-;;; SCSS-from-template handler
+(defun +tim/rails-partial-dwim-handler (_identifier)
+  "DWIM handler: resolve partial path and jump."
+  (when-let ((file (+tim/rails-partial-file-handler nil)))
+    (find-file file)
+    (+dwim-nav-result-jumped)))
 
-(defun +tim/rails--css-class-at-point ()
-  "Extract CSS class name at point in a view template, or nil."
-  (save-excursion
-    (let ((line (thing-at-point 'line t)))
-      (when line
-        (cond
-         ;; Slim: .class-name or div.class-name
-         ((and (derived-mode-p 'slim-mode)
-               (string-match "\\.\\([a-zA-Z_-][a-zA-Z0-9_-]*\\)" line))
-          (let ((classes (save-match-data
-                           (let (result (start 0))
-                             (while (string-match "\\.\\([a-zA-Z_-][a-zA-Z0-9_-]*\\)" line start)
-                               (push (match-string 1 line) result)
-                               (setq start (match-end 0)))
-                             (nreverse result)))))
-            (if (= (length classes) 1)
-                (car classes)
-              (completing-read "Class: " classes nil t))))
-         ;; ERB/HTML: class="foo bar baz"
-         ((string-match "class=\"\\([^\"]+\\)\"" line)
-          (let ((classes (split-string (match-string 1 line) " " t)))
-            (if (= (length classes) 1)
-                (car classes)
-              (completing-read "Class: " classes nil t))))
-         ;; Ruby hash-style: class: "foo bar" or class: 'foo bar'
-         ((string-match "class:\\s-*[\"']\\([^\"']+\\)[\"']" line)
-          (let ((classes (split-string (match-string 1 line) " " t)))
-            (if (= (length classes) 1)
-                (car classes)
-              (completing-read "Class: " classes nil t))))
-         ;; Fallback: symbol at point if it looks like a class name
-         (t
-          (let ((sym (thing-at-point 'symbol t)))
-            (when (and sym (string-match-p "\\`[a-zA-Z_-][a-zA-Z0-9_-]*\\'" sym))
-              sym))))))))
+;;; SCSS resolver (uses shared matcher from dwim-nav.el)
 
 (defun +tim/rails--stylesheet-dirs (root)
   "Return list of existing stylesheet directories in project ROOT."
@@ -127,56 +106,52 @@ Tracks brace depth to stay within scope. Returns line number or nil."
             (forward-line 1)))))
     (nreverse hits)))
 
-(defun +tim/rails-scss-lookup-handler (_identifier)
-  "Lookup handler: jump from CSS class in a template to its SCSS/CSS definition.
+(defun +tim/rails--resolve-css-class (class)
+  "Find SCSS/CSS definition for CLASS in Rails stylesheet dirs.
+Returns list of plists (:label :file :line) or nil.
 Handles BEM nested selectors (e.g. &__content inside .block)."
-  (when (derived-mode-p 'web-mode 'slim-mode 'haml-mode 'html-mode 'mhtml-mode)
-    (when-let* ((class (+tim/rails--css-class-at-point))
-                (root (doom-project-root))
-                (dirs (+tim/rails--stylesheet-dirs root)))
-      (let ((results nil))
-        ;; Pass 1: direct grep for .classname
-        (dolist (hit (+tim/rails--rg-class class dirs))
-          (push (cons (format "%s:%d: .%s"
-                              (file-relative-name (car hit) root)
-                              (cdr hit) class)
-                      hit)
-                results))
-        ;; Pass 2: BEM nested resolution if direct grep found nothing
-        (unless results
-          (let ((split (+tim/rails--split-bem-class class)))
-            (while (and (null results) split)
-              (let ((block (car split))
-                    (suffix (cdr split)))
-                (dolist (hit (+tim/rails--rg-class block dirs))
-                  (when-let ((nested-line
-                              (+tim/rails--find-nested-selector
-                               (car hit) (cdr hit) suffix)))
-                    (push (cons (format "%s:%d: &%s"
-                                        (file-relative-name (car hit) root)
-                                        nested-line suffix)
-                                (cons (car hit) nested-line))
-                          results)))
-                ;; If still no results and block itself has a BEM separator,
-                ;; try one level up (e.g. foo__bar--baz → find foo__bar first)
-                (setq split (and (null results)
-                                 (+tim/rails--split-bem-class block)))))))
-        ;; Jump to result
-        (when results
-          (setq results (nreverse results))
-          (let* ((pick (if (= (length results) 1)
-                           (cdar results)
-                         (let ((chosen (completing-read "SCSS match: "
-                                                        (mapcar #'car results) nil t)))
-                           (cdr (assoc chosen results)))))
-                 (file (car pick))
-                 (line (cdr pick)))
-            (find-file file)
-            (goto-char (point-min))
-            (forward-line (1- line))
-            t))))))
+  (when-let* ((root (doom-project-root))
+              (dirs (+tim/rails--stylesheet-dirs root)))
+    (let ((results nil))
+      ;; Pass 1: direct grep for .classname
+      (dolist (hit (+tim/rails--rg-class class dirs))
+        (push (list :label (format "%s:%d: .%s"
+                                   (file-relative-name (car hit) root)
+                                   (cdr hit) class)
+                    :file (car hit)
+                    :line (cdr hit))
+              results))
+      ;; Pass 2: BEM nested resolution if direct grep found nothing
+      (unless results
+        (let ((split (+tim/rails--split-bem-class class)))
+          (while (and (null results) split)
+            (let ((block (car split))
+                  (suffix (cdr split)))
+              (dolist (hit (+tim/rails--rg-class block dirs))
+                (when-let ((nested-line
+                            (+tim/rails--find-nested-selector
+                             (car hit) (cdr hit) suffix)))
+                  (push (list :label (format "%s:%d: &%s"
+                                             (file-relative-name (car hit) root)
+                                             nested-line suffix)
+                              :file (car hit)
+                              :line nested-line)
+                        results)))
+              (setq split (and (null results)
+                               (+tim/rails--split-bem-class block)))))))
+      (nreverse results))))
 
-;;; Route jumping handler
+(defun +tim/rails-scss-dwim-handler (_identifier)
+  "DWIM handler: jump from CSS class in template to SCSS definition."
+  (when-let* ((class (+dwim-nav-css-class-at-point))
+              (hits (+tim/rails--resolve-css-class class)))
+    (if (= (length hits) 1)
+        (progn
+          (+dwim-nav--jump-to (car hits))
+          (+dwim-nav-result-jumped))
+      (+dwim-nav-result-candidates hits))))
+
+;;; Route jumping
 
 (defun +tim/rails--current-action ()
   "Return the Ruby method name at or above point, or nil."
@@ -204,11 +179,11 @@ Handles BEM nested selectors (e.g. &__content inside .block)."
        ((string-match "controller:\\s-*[:'\"]+\\([a-z_/]+\\)" line)
         (cons (match-string 1 line) nil))))))
 
-(defun +tim/rails-route-lookup-handler (_identifier)
-  "Lookup handler: jump between controller actions and route definitions."
+(defun +tim/rails-routes-dwim-handler (_identifier)
+  "DWIM handler: jump between controller actions and route definitions."
   (let ((root (doom-project-root)))
     (cond
-     ;; In a controller → jump to routes.rb and search
+     ;; In a controller → jump to routes.rb
      ((when-let ((info (+tim/rails--controller-info)))
         (let* ((controller (car info))
                (action (cdr info))
@@ -221,9 +196,9 @@ Handles BEM nested selectors (e.g. &__content inside .block)."
           (when (file-exists-p routes-file)
             (find-file routes-file)
             (goto-char (point-min))
-            (if (re-search-forward pattern nil t)
-                (progn (beginning-of-line) t)
-              t)))))
+            (when (re-search-forward pattern nil t)
+              (beginning-of-line))
+            (+dwim-nav-result-jumped)))))
      ;; In routes.rb → jump to controller
      ((when-let* ((ref (+tim/rails--route-ref-at-point))
                   (controller (car ref))
@@ -239,22 +214,41 @@ Handles BEM nested selectors (e.g. &__content inside .block)."
              (format "^[[:space:]]*def[[:space:]]+%s\\b" (regexp-quote action))
              nil t)
             (beginning-of-line))
-          t))))))
+          (+dwim-nav-result-jumped)))))))
 
-;;; Combined dispatch + registration
+;;; Rule registration
 
-(defun +tim/rails-nav-definition-handler (identifier)
-  "Combined Rails lookup handler: tries partial, SCSS, and route handlers."
-  (or (+tim/rails-partial-file-handler identifier)
-      (+tim/rails-scss-lookup-handler identifier)
-      (+tim/rails-route-lookup-handler identifier)))
+(+dwim-nav-rule! rails-partial
+  :modes (web-mode slim-mode haml-mode html-mode mhtml-mode)
+  :frameworks (rails)
+  :predicate (lambda ()
+               (let ((path (thing-at-point 'filename t)))
+                 (and path (not (string-empty-p path)))))
+  :handler #'+tim/rails-partial-dwim-handler
+  :priority 10
+  :label "Rails partial")
 
-;; :definition works via set-lookup-handlers!
-(set-lookup-handlers! '+tim/rails-nav-mode
-  :definition #'+tim/rails-nav-definition-handler)
+(+dwim-nav-rule! rails-scss
+  :modes (web-mode slim-mode haml-mode html-mode mhtml-mode)
+  :frameworks (rails)
+  :predicate #'+dwim-nav-css-class-at-point
+  :handler #'+tim/rails-scss-dwim-handler
+  :priority 20
+  :label "Rails SCSS")
 
-;; :file must be registered manually (Doom bug: make-list 5 truncates cl-mapc,
-;; skipping :file and :xref-backend handlers entirely).
+(+dwim-nav-rule! rails-routes
+  :modes (ruby-mode ruby-ts-mode)
+  :frameworks (rails)
+  :predicate (lambda ()
+               (or (+tim/rails--controller-info)
+                   (and (buffer-file-name)
+                        (string-match-p "routes\\.rb\\'" (buffer-file-name)))))
+  :handler #'+tim/rails-routes-dwim-handler
+  :priority 10
+  :label "Rails routes")
+
+;;; gf handler (stays on +lookup-file-functions, separate from dwim-nav)
+
 (defun +tim/rails-nav-mode-setup-h ()
   "Register :file handler for gf."
   (if +tim/rails-nav-mode
