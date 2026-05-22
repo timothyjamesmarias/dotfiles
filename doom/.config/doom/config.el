@@ -319,7 +319,7 @@ Works from markdown fenced blocks, org src blocks, .mmd files, or region."
 (load! "modules/framework-detect")
 (load! "modules/maizzle")
 (load! "modules/rails-nav")
-(load! "modules/ruby-etags")
+;; (load! "modules/ruby-etags")  ; disabled while testing dwim-nav
 (load! "modules/claude")
 (load! "modules/database")
 (load! "modules/ebooks")

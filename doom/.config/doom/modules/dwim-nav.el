@@ -1,12 +1,19 @@
 ;;; modules/dwim-nav.el --- DWIM navigation dispatcher -*- lexical-binding: t; -*-
 ;;
-;; Tiered, context-aware navigation system for `gd`.
-;; Dispatch order: context rules → LSP (with def/ref flip) → xref/tags → grep.
+;; Context-aware navigation layer for `gd`.
 ;;
-;; Rules are registered via `+dwim-nav-rule!' and filtered by major mode,
-;; detected framework, and a predicate function.  Shared matchers (e.g.,
-;; CSS class extraction) live here; framework-specific resolvers stay in
-;; their own modules.
+;; Registers a Doom lookup handler at the front of
+;; `+lookup-definition-functions' that runs context-aware rules
+;; (filtered by major mode, framework, and predicate) before Doom's
+;; default handlers (eglot/xref, dumb-jump, project search).
+;;
+;; If no context rule matches, Doom's chain runs unmodified.
+;; A thin `gd' wrapper adds def→ref flip: when the entire definition
+;; chain fails (returns nil), try references instead.
+;;
+;; Rules are registered by framework modules (rails-nav.el, maizzle.el,
+;; etc.) via `+dwim-nav-rule!'.  Shared matchers (e.g., CSS class
+;; extraction) live here for reuse across frameworks.
 
 ;;; Rule data structure & registry
 
@@ -146,11 +153,9 @@ Same-priority rules that both produce results get candidates merged."
           (when results
             (cl-return
              (if (= (length results) 1)
-                 ;; Single rule matched
                  (let ((label (caar results))
                        (r (cdar results)))
                    (cons (format "[%s]" label) r))
-               ;; Multiple same-priority rules: merge candidates
                (+dwim-nav--merge-results results))))))))
 
 (defun +dwim-nav--merge-results (results)
@@ -162,7 +167,6 @@ RESULTS is a list of (LABEL . result) conses."
             (r (cdr entry)))
         (pcase r
           ('(jumped)
-           ;; A rule already jumped — honour it, label and done
            (cl-return-from +dwim-nav--merge-results
              (cons (format "[%s]" label) r)))
           (`(candidates . ,items)
@@ -174,178 +178,88 @@ RESULTS is a list of (LABEL . result) conses."
       (cons "[multi]"
             (cons 'candidates (nreverse all-candidates))))))
 
-(defun +dwim-nav--xref-at-point-p (xref-item origin)
-  "Return non-nil if XREF-ITEM points to the same location as ORIGIN marker."
-  (condition-case nil
-      (let* ((loc (xref-item-location xref-item))
-             (marker (xref-location-marker loc)))
-        (and (eq (marker-buffer marker) (marker-buffer origin))
-             (<= (abs (- (marker-position marker) (marker-position origin)))
-                 (length (or (thing-at-point 'symbol) "")))))
-    (error nil)))
-
-(defun +dwim-nav--try-lsp (identifier origin)
-  "Try eglot definition.  If already on definition, flip to references.
-Returns result protocol value or nil."
-  (when (and (eglot-server-capable :definitionProvider)
-             identifier)
-    (condition-case nil
-        (let ((defs (xref-backend-definitions 'eglot identifier)))
-          (cond
-           ((null defs) nil)
-           ;; Single def at current position → flip to references
-           ((and (= (length defs) 1)
-                 (+dwim-nav--xref-at-point-p (car defs) origin))
-            (if (eglot-server-capable :referencesProvider)
-                (let ((refs (xref-backend-references 'eglot identifier)))
-                  (when refs
-                    (if (= (length refs) 1)
-                        (progn
-                          (xref-pop-to-location (xref-item-location (car refs)))
-                          '(jumped))
-                      (xref--show-xrefs (lambda () refs) nil)
-                      '(jumped))))
-              nil))
-           ;; Single def elsewhere → jump
-           ((= (length defs) 1)
-            (xref-pop-to-location (xref-item-location (car defs)))
-            '(jumped))
-           ;; Multiple defs → show picker
-           (t
-            (xref--show-defs (lambda () defs) nil)
-            '(jumped))))
-      (error nil))))
-
-(defun +dwim-nav--try-xref (identifier)
-  "Try non-eglot xref backends for IDENTIFIER.
-Returns result protocol value or nil."
-  (when identifier
-    (condition-case nil
-        ;; Get xref backends, skipping eglot if present
-        (let* ((xref-backend-functions
-                (cl-remove-if (lambda (fn)
-                                (eq (ignore-errors (funcall fn)) 'eglot))
-                              xref-backend-functions))
-               (backend (xref-find-backend)))
-          (when backend
-            (let ((defs (xref-backend-definitions backend identifier)))
-              (cond
-               ((null defs) nil)
-               ((= (length defs) 1)
-                (xref-pop-to-location (xref-item-location (car defs)))
-                '(jumped))
-               (t
-                (xref--show-defs (lambda () defs) nil)
-                '(jumped))))))
-      (error nil))))
-
-(defun +dwim-nav--try-grep (identifier)
-  "Fallback: ripgrep search for IDENTIFIER in project.
-Returns result protocol value or nil."
-  (when (and identifier (doom-project-p))
-    (condition-case nil
-        (progn
-          (+default/search-project-for-symbol-at-point
-           identifier (doom-project-root))
-          '(jumped))
-      (error nil))))
-
 (defun +dwim-nav--jump-to (item)
   "Jump to ITEM, a plist with :file and :line."
   (find-file (plist-get item :file))
   (goto-char (point-min))
   (forward-line (1- (plist-get item :line))))
 
-(defun +dwim-nav--handle-result (result tier-label origin)
-  "Handle a dispatch RESULT, showing TIER-LABEL in the echo area.
-ORIGIN is the marker where the jump started."
-  (pcase result
-    ('(jumped)
-     (message "%s" (propertize tier-label 'face 'success)))
-    (`(candidates . ,items)
-     (let* ((choices
-             (mapcar (lambda (it)
-                       (let ((label (or (plist-get it :tier-label)
-                                        tier-label)))
-                         (cons (format "%s %s"
-                                       (propertize (format "[%s]" label)
-                                                   'face 'warning)
-                                       (plist-get it :label))
-                               it)))
-                     items))
-            (pick (completing-read "Jump to: " (mapcar #'car choices) nil t))
-            (item (cdr (assoc pick choices))))
-       (when item
-         (+dwim-nav--jump-to item)
-         (message "%s" (propertize tier-label 'face 'success))))))
-  ;; Record jump if we moved
-  (when (and origin
-             (not (and (eq (current-buffer) (marker-buffer origin))
-                       (= (point) (marker-position origin)))))
-    (with-current-buffer (marker-buffer origin)
-      (better-jumper-set-jump (marker-position origin)))))
+(defun +dwim-nav--show-candidates (items tier-label)
+  "Display ITEMS via completing-read with TIER-LABEL prefix."
+  (let* ((choices (mapcar (lambda (it)
+                            (cons (format "%s %s"
+                                         tier-label
+                                         (plist-get it :label))
+                                  it))
+                          items))
+         (pick (completing-read "Jump to: " (mapcar #'car choices) nil t))
+         (item (cdr (assoc pick choices))))
+    (when item
+      (+dwim-nav--jump-to item))))
 
-;;; Main dispatch
+;;; Doom lookup handler
 
-;;;###autoload
+(defun +dwim-nav-lookup-handler (identifier)
+  "Doom lookup handler: tries context-aware rules before LSP/dumb-jump.
+Added to `+lookup-definition-functions' at the front of the chain.
+
+Returns non-nil if a context rule handled the navigation, nil to
+let Doom's default handlers (xref/eglot, dumb-jump, grep) run."
+  (let* ((framework (ignore-errors
+                      (+tim/detect-framework (doom-project-root))))
+         (applicable (+dwim-nav--applicable-rules framework)))
+    (when applicable
+      (let ((result (+dwim-nav--try-rules applicable identifier)))
+        (when result
+          (let ((tier-label (car result))
+                (r (cdr result)))
+            (pcase r
+              ('(jumped)
+               (message "%s" tier-label)
+               t)
+              (`(candidates . ,items)
+               (+dwim-nav--show-candidates items tier-label)
+               t))))))))
+
+;; Prepend to Doom's lookup chain (depth -90 = before all defaults)
+(add-hook '+lookup-definition-functions #'+dwim-nav-lookup-handler -90)
+
+;;; DWIM gd wrapper (def→ref flip)
+
 (defun +dwim/navigate (identifier &optional arg)
-  "DWIM navigation: context rules → LSP (with def/ref flip) → tags → grep.
+  "DWIM go-to-definition with def→ref flip.
 
-With prefix ARG, fall through to Doom's `+lookup/definition' handler picker."
+Runs `+lookup/definition' (which includes our context rules at the
+front, then eglot/xref, dumb-jump, and grep).
+
+If the cursor doesn't move (eglot resolved to current position, i.e.,
+we're already on the definition) and eglot is active, tries
+`+lookup/references' instead.  Also catches the case where the entire
+chain fails (`user-error')."
   (interactive (list (doom-thing-at-point-or-region) current-prefix-arg))
-  (cond
-   ;; Prefix arg → escape hatch to Doom's handler picker
-   (arg
-    (+lookup/definition identifier arg))
-   ;; Nothing under point
-   ((null identifier)
-    (user-error "Nothing under point"))
-   ;; Normal DWIM dispatch
-   (t
-    (let* ((origin (point-marker))
-           (framework (ignore-errors
-                        (+tim/detect-framework (doom-project-root))))
-           (result nil)
-           (tier-label nil))
-
-      ;; Tier 1: Context rules
-      (let ((applicable (+dwim-nav--applicable-rules framework)))
-        (when applicable
-          (when-let ((r (+dwim-nav--try-rules applicable identifier)))
-            (setq tier-label (car r)
-                  result (cdr r)))))
-
-      ;; Tier 2: LSP (eglot) with definition↔reference flip
-      (unless result
-        (when (and (fboundp 'eglot-managed-p) (eglot-managed-p))
-          (let ((r (+dwim-nav--try-lsp identifier origin)))
-            (when r
-              (setq result r
-                    tier-label "[LSP]")))))
-
-      ;; Tier 3: xref/tags (non-eglot backends)
-      (unless result
-        (let ((r (+dwim-nav--try-xref identifier)))
-          (when r
-            (setq result r
-                  tier-label "[tags]"))))
-
-      ;; Tier 4: grep fallback
-      (unless result
-        (let ((r (+dwim-nav--try-grep identifier)))
-          (when r
-            (setq result r
-                  tier-label "[rg]"))))
-
-      ;; Handle result or report failure
-      (if result
-          (+dwim-nav--handle-result result tier-label origin)
-        (set-marker origin nil)
-        (user-error "No navigation target found for %S"
-                    (substring-no-properties identifier)))
-
-      (set-marker origin nil)))))
-
-;;; Keybinding
+  (let ((origin-buf (current-buffer))
+        (origin-pos (point)))
+    (condition-case nil
+        (let ((result (+lookup/definition identifier arg)))
+          ;; If deferred (consult picker open), don't interfere.
+          ;; If cursor didn't move and eglot is active, flip to references.
+          (when (and (not (eq result 'deferred))
+                     (not arg)
+                     (eq (current-buffer) origin-buf)
+                     (= (point) origin-pos)
+                     identifier
+                     (fboundp 'eglot-managed-p)
+                     (eglot-managed-p))
+            (+lookup/references identifier)))
+      (user-error
+       (if (and (not arg)
+                identifier
+                (fboundp 'eglot-managed-p)
+                (eglot-managed-p))
+           (+lookup/references identifier)
+         (user-error "Couldn't find the definition of %S"
+                     (substring-no-properties identifier)))))))
 
 (map! :nv "gd" #'+dwim/navigate)
+(after! eglot
+  (map! :map eglot-mode-map :nv "gd" #'+dwim/navigate))
