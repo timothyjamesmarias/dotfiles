@@ -215,17 +215,18 @@ RESULTS is a list of (LABEL . result) conses."
   (forward-line (1- (plist-get item :line))))
 
 (defun +dwim-nav--show-candidates (items tier-label)
-  "Display ITEMS via completing-read with TIER-LABEL prefix."
-  (let* ((choices (mapcar (lambda (it)
-                            (cons (format "%s %s"
-                                         tier-label
-                                         (plist-get it :label))
-                                  it))
-                          items))
-         (pick (completing-read "Jump to: " (mapcar #'car choices) nil t))
-         (item (cdr (assoc pick choices))))
-    (when item
-      (+dwim-nav--jump-to item))))
+  "Display ITEMS as xref results with file preview via consult-xref.
+ITEMS is a list of plists with :label :file :line.
+Falls back to completing-read if xref infrastructure is unavailable."
+  (let ((xrefs (mapcar (lambda (it)
+                          (xref-make
+                           (format "%s %s" tier-label (plist-get it :label))
+                           (xref-make-file-location
+                            (plist-get it :file)
+                            (plist-get it :line)
+                            0)))
+                        items)))
+    (xref--show-xrefs (lambda () xrefs) nil)))
 
 ;;; Doom lookup handler
 
@@ -249,7 +250,7 @@ let Doom's default handlers (xref/eglot, dumb-jump, grep) run."
                t)
               (`(candidates . ,items)
                (+dwim-nav--show-candidates items tier-label)
-               t))))))))
+               'deferred))))))))
 
 ;; Prepend to Doom's lookup chain (depth -90 = before all defaults)
 (add-hook '+lookup-definition-functions #'+dwim-nav-lookup-handler -90)
