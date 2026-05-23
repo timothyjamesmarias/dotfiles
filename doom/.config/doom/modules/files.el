@@ -171,9 +171,32 @@
                      (regexp-quote (car pair)) (cdr pair) content t t)))
     content))
 
+(defun +tim/new-file--default-dir ()
+  "Return a context-aware default directory for new file creation.
+Uses the directory at point in treemacs/dired, otherwise project root."
+  (cond
+   ;; Treemacs: use directory at point (or parent if file is selected)
+   ((and (bound-and-true-p treemacs--in-this-buffer)
+         (fboundp 'treemacs-current-button))
+    (let ((btn (treemacs-current-button)))
+      (if btn
+          (let ((path (treemacs-safe-button-get btn :path)))
+            (if (and path (file-directory-p path))
+                (file-name-as-directory path)
+              (if path
+                  (file-name-directory path)
+                default-directory)))
+        default-directory)))
+   ;; Dired/dirvish: use current dired directory
+   ((derived-mode-p 'dired-mode)
+    (dired-current-directory))
+   ;; Fallback: project root or default-directory
+   (t (or (and (fboundp 'doom-project-root) (doom-project-root))
+          default-directory))))
+
 (defun +tim/new-file ()
   "Create a new file from a template.
-Interactive flow: pick language → pick kind → enter filename → create."
+Interactive flow: pick language → pick kind → choose path (find-file style) → create."
   (interactive)
   (let* ((conf (+tim/templates--parse-conf))
          (_ (unless conf (user-error "No templates found in %s" +tim/templates-dir)))
@@ -191,15 +214,19 @@ Interactive flow: pick language → pick kind → enter filename → create."
          ;; 3. Get template entry
          (entry (+tim/templates--get lang kind))
          (ext (plist-get entry :ext))
-         ;; 4. Target directory
-         (dir (or (and (fboundp 'doom-project-root) (doom-project-root))
-                  default-directory))
-         ;; 5. Filename
-         (input (read-string (format "File name (.%s): " ext)))
-         (input (if (string-suffix-p (concat "." ext) input)
-                    input
-                  (concat input "." ext)))
-         (filepath (expand-file-name input dir)))
+         ;; 4. Path with find-file style completion
+         (default-dir (+tim/new-file--default-dir))
+         (filepath (read-file-name
+                    (format "Create %s %s (.%s): " lang kind ext)
+                    default-dir nil nil nil
+                    (lambda (name)
+                      (or (file-directory-p name)
+                          (string-suffix-p (concat "." ext) name)))))
+         ;; Auto-append extension if not present
+         (filepath (if (string-suffix-p (concat "." ext) filepath)
+                       filepath
+                     (concat filepath "." ext)))
+         (filepath (expand-file-name filepath)))
     ;; Check for existing file
     (when (file-exists-p filepath)
       (user-error "File already exists: %s" filepath))
@@ -221,8 +248,18 @@ Interactive flow: pick language → pick kind → enter filename → create."
       (unless (re-search-forward "TODO" nil t)
         (goto-char (point-max)))
       (save-buffer)
-      (message "Created %s" (file-relative-name filepath dir)))))
+      (message "Created %s" filepath))))
 
 (map! :leader
       (:prefix "f"
        :desc "New file from template" "n" #'+tim/new-file))
+
+;; Dired/dirvish: N creates a new file from template in the current directory
+(after! dired
+  (map! :map dirvish-mode-map
+        :n "N" #'+tim/new-file))
+
+;; Treemacs: N creates a new file from template at the selected node
+(after! treemacs
+  (map! :map treemacs-mode-map
+        :n "N" #'+tim/new-file))
