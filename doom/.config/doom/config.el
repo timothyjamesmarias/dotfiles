@@ -3,6 +3,9 @@
 ;; --- Settings ---
 (setq org-directory "~/notes/")
 (setq native-comp-deferred-compilation nil)
+(after! evil-escape
+  (setq evil-escape-key-sequence "jk"
+        evil-escape-delay 0.15))
 (setq display-line-numbers-type 'relative)
 (setq server-name "doom")
 (setq doom-theme 'doom-gruvbox)
@@ -36,6 +39,20 @@
 ;; --- Vterm ---
 (after! vterm
   (define-key vterm-mode-map (kbd "M-o") #'term-fast-toggle)
+  (evil-define-key 'emacs vterm-mode-map (kbd "C-g") #'evil-normal-state)
+
+  (defun tim/vterm-jk-escape ()
+    "In vterm emacs-state, intercept `j` and switch to normal state if `k` follows."
+    (interactive)
+    (vterm-send-string "j")
+    (let ((evt (read-event nil nil 0.15)))
+      (cond
+       ((and evt (char-equal evt ?k))
+        (vterm-send-key "<backspace>")
+        (evil-normal-state))
+       (evt (push (cons t evt) unread-command-events))))) ;; re-queue non-k key
+
+  (evil-define-key 'emacs vterm-mode-map (kbd "j") #'tim/vterm-jk-escape)
 
   (defun tim/vterm-dnd--paths (data)
     "Return a list of file path strings from a drag-n-drop event DATA."
