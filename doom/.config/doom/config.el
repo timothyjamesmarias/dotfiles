@@ -36,6 +36,23 @@
   (setq magit-rebase-arguments '("--autostash"))
   (setq magit-pull-arguments '("--rebase" "--autostash")))
 
+;; --- Blamer (inline git blame, JetBrains GitToolBox-style) ---
+(use-package! blamer
+  :defer 1
+  :custom
+  (blamer-idle-time 0.3)
+  (blamer-min-offset 40)
+  (blamer-author-formatter " ✎ %s ")
+  (blamer-datetime-formatter "[%s] ")
+  (blamer-commit-formatter "● %s")
+  :custom-face
+  (blamer-face ((t :foreground "#7a88cf"
+                   :background nil
+                   :height 0.9
+                   :italic t)))
+  :config
+  (global-blamer-mode 1))
+
 ;; --- Vterm ---
 (after! vterm
   (define-key vterm-mode-map (kbd "M-o") #'term-fast-toggle)
