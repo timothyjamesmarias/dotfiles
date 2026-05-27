@@ -180,6 +180,7 @@
 (setq +workspaces-switch-project-function #'dired)
 
 (after! projectile
+  (setq treemacs-follow-mode t)
   (advice-add #'projectile-visit-project-tags-table :override #'ignore)
   ;; Use `rg --files` so projectile honors .gitignore AND .rgignore (and
   ;; .ignore) in one pass. Falls back to projectile's default if rg is missing.
