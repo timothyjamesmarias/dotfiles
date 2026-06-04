@@ -13,7 +13,30 @@
         evil-escape-delay 0.15))
 (setq display-line-numbers-type 'relative)
 (setq server-name "doom")
-(setq doom-theme 'doom-one)
+;; everforest contrast: "hard" | "medium" | "soft" (default soft)
+;; palette: "material" | "mix" | "original" (default material)
+;; These must be set BEFORE the theme loads, since the theme builds its
+;; palette at load time.
+(setq doom-everforest-background "medium"
+      doom-everforest-palette "material")
+;; doom-everforest is installed via `package!' (straight), so its build dir is
+;; on `load-path' but NOT on `custom-theme-load-path' — register it so
+;; `load-theme' can find the theme file.
+(when-let ((lib (locate-library "doom-everforest-theme")))
+  (add-to-list 'custom-theme-load-path (file-name-directory lib)))
+(setq doom-theme 'doom-everforest)
+;; --- Punch up tree-sitter (treesit) highlighting under Everforest -----------
+;; doom-themes-base mutes these secondary faces by blending toward fg, which
+;; looks flat on Everforest's soft palette. Map them to full palette colors.
+;; `custom-set-faces!' re-applies automatically when the theme (re)loads.
+(custom-set-faces!
+  `(font-lock-function-call-face   :foreground ,(doom-color 'teal)   :slant normal)
+  `(font-lock-variable-use-face    :foreground ,(doom-color 'blue))
+  `(font-lock-property-use-face    :foreground ,(doom-color 'yellow))
+  `(font-lock-property-name-face   :foreground ,(doom-color 'yellow) :weight normal)
+  `(font-lock-operator-face        :foreground ,(doom-color 'orange))
+  `(font-lock-bracket-face         :foreground ,(doom-color 'fg))
+  `(font-lock-delimiter-face       :foreground ,(doom-color 'base7)))
 (setq doom-modeline-minor-modes t)
 (setq doom-font (font-spec :family "MonoLisa" :size 14))
 (setq-default line-spacing 0.3)
@@ -365,3 +388,4 @@ Works from markdown fenced blocks, org src blocks, .mmd files, or region."
 (load! "modules/database")
 (load! "modules/ebooks")
 (load! "modules/elfeed")
+(load! "modules/magit")
