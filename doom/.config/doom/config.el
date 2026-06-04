@@ -8,7 +8,7 @@
         evil-escape-delay 0.15))
 (setq display-line-numbers-type 'relative)
 (setq server-name "doom")
-(setq doom-theme 'doom-gruvbox)
+(setq doom-theme 'doom-one)
 (setq doom-modeline-minor-modes t)
 (setq doom-font (font-spec :family "MonoLisa" :size 14))
 (setq-default line-spacing 0.3)
