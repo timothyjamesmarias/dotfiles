@@ -2,7 +2,12 @@
 
 ;; --- Settings ---
 (setq org-directory "~/notes/")
-(setq native-comp-deferred-compilation nil)
+(setq native-comp-jit-compilation nil)
+;; Make `doom/reload' AOT native-compile changed packages (incremental).
+(setq doom-reload-command
+      (if (featurep :system 'android)
+          "sh %s sync -B -e --aot"
+        "%s sync -B -e --aot"))
 (after! evil-escape
   (setq evil-escape-key-sequence "jk"
         evil-escape-delay 0.15))
