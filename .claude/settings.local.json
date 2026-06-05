@@ -118,7 +118,9 @@
       "Bash(awk '{print \"alive pid\", $2}')",
       "Bash($EC *)",
       "Bash(awk '{print \"pid\",$2}')",
-      "Bash(/opt/homebrew/bin/emacsclient --socket-name=doom -e '\\(with-current-buffer \\(find-file-noselect \"/tmp/ts-probe.py\"\\) *)"
+      "Bash(/opt/homebrew/bin/emacsclient --socket-name=doom -e '\\(with-current-buffer \\(find-file-noselect \"/tmp/ts-probe.py\"\\) *)",
+      "Bash(/opt/homebrew/bin/emacsclient --socket-name=doom -c -n)",
+      "Bash(/opt/homebrew/bin/emacsclient --socket-name=doom -e '\\(list *)"
     ],
     "deny": [],
     "ask": [],

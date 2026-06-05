@@ -18,7 +18,9 @@
 ;; These must be set BEFORE the theme loads, since the theme builds its
 ;; palette at load time.
 (setq doom-everforest-background "medium"
-      doom-everforest-palette "material")
+      doom-everforest-palette "material"
+      ;; the theme enlarges dired listings by default; keep them at normal size
+      doom-everforest-dired-height 1.0)
 ;; doom-everforest is installed via `package!' (straight), so its build dir is
 ;; on `load-path' but NOT on `custom-theme-load-path' — register it so
 ;; `load-theme' can find the theme file.
@@ -36,7 +38,17 @@
   `(font-lock-property-name-face   :foreground ,(doom-color 'yellow) :weight normal)
   `(font-lock-operator-face        :foreground ,(doom-color 'orange))
   `(font-lock-bracket-face         :foreground ,(doom-color 'fg))
-  `(font-lock-delimiter-face       :foreground ,(doom-color 'base7)))
+  `(font-lock-delimiter-face       :foreground ,(doom-color 'base7))
+  ;; Flatten org headings: theme enlarges levels 1-3 and bolds all 8.
+  ;; Only :height/:weight are overridden, so the theme's heading colors remain.
+  '(org-level-1 :height 1.0 :weight normal)
+  '(org-level-2 :height 1.0 :weight normal)
+  '(org-level-3 :height 1.0 :weight normal)
+  '(org-level-4 :weight normal)
+  '(org-level-5 :weight normal)
+  '(org-level-6 :weight normal)
+  '(org-level-7 :weight normal)
+  '(org-level-8 :weight normal))
 (setq doom-modeline-minor-modes t)
 (setq doom-font (font-spec :family "MonoLisa" :size 14))
 (setq-default line-spacing 0.3)
