@@ -400,3 +400,4 @@ Works from markdown fenced blocks, org src blocks, .mmd files, or region."
 (load! "modules/ebooks")
 (load! "modules/elfeed")
 (load! "modules/magit")
+(load! "modules/dwim-delim")
