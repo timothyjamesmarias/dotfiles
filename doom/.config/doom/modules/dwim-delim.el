@@ -74,4 +74,10 @@ INCLUSIVE controls whether delimiters are included in the range."
                                              (when range
                                                (evil-visual-char
                                                 (evil-range-beginning range)
-                                                (1- (evil-range-end range))))))))
+                                                (1- (evil-range-end range))))))
+       :desc "Select around delimiter" "a" (cmd!
+                                            (let ((range (+dwim-delim--nearest-range t)))
+                                              (when range
+                                                (evil-visual-char
+                                                 (evil-range-beginning range)
+                                                 (1- (evil-range-end range))))))))
