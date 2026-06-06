@@ -20,13 +20,28 @@
 (setq doom-everforest-background "medium"
       doom-everforest-palette "material"
       ;; the theme enlarges dired listings by default; keep them at normal size
-      doom-everforest-dired-height 1.0)
+      doom-everforest-dired-height 1.0
+      doom-everforest-light-dired-height 1.0)
 ;; doom-everforest is installed via `package!' (straight), so its build dir is
 ;; on `load-path' but NOT on `custom-theme-load-path' — register it so
 ;; `load-theme' can find the theme file.
 (when-let ((lib (locate-library "doom-everforest-theme")))
   (add-to-list 'custom-theme-load-path (file-name-directory lib)))
 (setq doom-theme 'doom-everforest)
+
+(defun my/toggle-everforest ()
+  "Toggle between doom-everforest dark and light themes."
+  (interactive)
+  (let ((next (if (eq doom-theme 'doom-everforest)
+                  'doom-everforest-light
+                'doom-everforest)))
+    (setq doom-theme next)
+    (load-theme next t)))
+
+(map! :leader
+      :desc "Toggle everforest dark/light"
+      "t h" #'my/toggle-everforest)
+
 ;; --- Punch up tree-sitter (treesit) highlighting under Everforest -----------
 ;; doom-themes-base mutes these secondary faces by blending toward fg, which
 ;; looks flat on Everforest's soft palette. Map them to full palette colors.
