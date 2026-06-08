@@ -17,7 +17,7 @@
 ;; palette: "material" | "mix" | "original" (default material)
 ;; These must be set BEFORE the theme loads, since the theme builds its
 ;; palette at load time.
-(setq doom-everforest-background "medium"
+(setq doom-everforest-background "hard"
       doom-everforest-palette "material"
       ;; the theme enlarges dired listings by default; keep them at normal size
       doom-everforest-dired-height 1.0
