@@ -39,9 +39,6 @@ brew "kubectl"
 brew "elixir-ls"
 brew "kotlin-lsp"
 
-# JVM (required for ejc-sql JDBC bridge)
-brew "leiningen"
-
 # Version managers
 brew "asdf"
 
@@ -52,3 +49,11 @@ brew "asdf"
 # cask "alacritty"
 cask "karabiner-elements"
 cask "aerospace"
+
+# LISP
+brew "sbcl"
+brew "chezscheme"
+brew "guile"
+
+# JVM (required for ejc-sql JDBC bridge)
+brew "leiningen"
