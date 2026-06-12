@@ -16,6 +16,7 @@ GNU Stow packages — each top-level dir maps into `$HOME`:
 | `ideavim/`     | `~/.ideavimrc` (JetBrains)          |
 | `ripgrep/`     | `~/.ripgreprc`                      |
 | `scripts/`     | `~/.local/scripts/`                 |
+| `ssh/`         | `~/.ssh/config.d/`                  |
 | `zsh/`         | `~/.zshrc`, `~/.config/zsh/`        |
 
 Not stowed:
@@ -27,10 +28,12 @@ Not stowed:
 
 ```bash
 ./install-packages                                    # Brewfile via Homebrew
-stow alacritty claude doom editorconfig git ideavim ripgrep scripts zsh
+stow alacritty claude doom editorconfig git ideavim ripgrep scripts ssh zsh
 ```
 
 Doom is bootstrapped separately — see https://github.com/doomemacs/doomemacs.
+
+**Manual step (SSH):** Add `Include ~/.ssh/config.d/*.conf` to the top of `~/.ssh/config` (before any `Host` blocks) so the stowed SSH defaults are picked up.
 
 ## Where things live
 

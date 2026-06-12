@@ -1,16 +1,7 @@
-# --- GitHub SSH Agent Setup ---
+# --- SSH Key Loading ---
+# Keys are managed by the macOS system SSH agent (launchd).
+# UseKeychain + AddKeysToAgent are set in ~/.ssh/config.d/defaults.conf
+# so all processes (including GUI Emacs) share the same agent.
 
-# Start ssh-agent if not running
-if [ -z "$SSH_AUTH_SOCK" ] || ! pgrep -u "$USER" ssh-agent >/dev/null; then
-  eval "$(ssh-agent -s)" >/dev/null
-fi
-
-# Always add key if not already added
-if ! ssh-add -l 2>/dev/null | grep -q "github"; then
-  ssh-add ~/.ssh/github >/dev/null 2>&1
-fi
-
-# Always add key if not already added
-if ! ssh-add -l 2>/dev/null | grep -q "cablelabs"; then
-  ssh-add ~/.ssh/cablelabs >/dev/null 2>&1
-fi
+ssh-add --apple-use-keychain ~/.ssh/github 2>/dev/null
+ssh-add --apple-use-keychain ~/.ssh/cablelabs 2>/dev/null
