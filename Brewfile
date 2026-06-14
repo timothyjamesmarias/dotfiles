@@ -37,7 +37,7 @@ brew "kubectl"
 
 # Language servers
 brew "elixir-ls"
-brew "kotlin-lsp"
+brew "JetBrains/utils/kotlin-lsp"
 
 # Version managers
 brew "asdf"
