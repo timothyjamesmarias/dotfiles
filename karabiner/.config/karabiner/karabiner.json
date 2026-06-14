@@ -242,7 +242,90 @@
                         ]
                     },
                     {
-                        "description": "C-n/C-p = down/up arrow (outside Emacs/terminals)",
+                        "description": "Tab (dual-role): hold = nav layer, tap = tab",
+                        "manipulators": [
+                            {
+                                "from": { "key_code": "tab" },
+                                "parameters": {
+                                    "basic.to_if_alone_timeout_milliseconds": 500,
+                                    "basic.to_if_held_down_threshold_milliseconds": 100
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "set_variable": {
+                                            "name": "tab_nav_layer",
+                                            "value": 0
+                                        }
+                                    }
+                                ],
+                                "to_if_alone": [{ "key_code": "tab" }],
+                                "to_if_held_down": [
+                                    {
+                                        "set_variable": {
+                                            "name": "tab_nav_layer",
+                                            "value": 1
+                                        }
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "Nav layer: HJKL = arrows",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "tab_nav_layer",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": { "key_code": "h" },
+                                "to": [{ "key_code": "left_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "tab_nav_layer",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": { "key_code": "j" },
+                                "to": [{ "key_code": "down_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "tab_nav_layer",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": { "key_code": "k" },
+                                "to": [{ "key_code": "up_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "tab_nav_layer",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": { "key_code": "l" },
+                                "to": [{ "key_code": "right_arrow" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "C-n/C-p = down/up arrow (outside Emacs/terminals/JetBrains)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -252,7 +335,8 @@
                                             "^io\\.alacritty",
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.mitchellh\\.ghostty",
-                                            "^net\\.kovidgoyal\\.kitty"
+                                            "^net\\.kovidgoyal\\.kitty",
+                                            "^com\\.jetbrains\\."
                                         ],
                                         "type": "frontmost_application_unless"
                                     }
@@ -272,7 +356,8 @@
                                             "^io\\.alacritty",
                                             "^com\\.apple\\.Terminal",
                                             "^com\\.mitchellh\\.ghostty",
-                                            "^net\\.kovidgoyal\\.kitty"
+                                            "^net\\.kovidgoyal\\.kitty",
+                                            "^com\\.jetbrains\\."
                                         ],
                                         "type": "frontmost_application_unless"
                                     }
