@@ -110,6 +110,7 @@
 
 ;; --- Vterm ---
 (after! vterm
+  (setq evil-collection-vterm-send-escape-to-vterm-p t)
   (define-key vterm-mode-map (kbd "M-o") #'term-fast-toggle)
   (evil-define-key 'emacs vterm-mode-map (kbd "C-g") #'evil-normal-state)
 
