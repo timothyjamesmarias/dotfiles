@@ -1,6 +1,12 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
 ;; --- Settings ---
+;; Treat both left and right Option/Alt as Meta on the macOS NS port.
+;; Without this, right-Option falls through to macOS's character composer
+;; and inserts symbols (´, ©, …) instead of acting as a modifier.
+(when (eq window-system 'ns)
+  (setq ns-right-option-modifier 'meta
+        ns-alternate-modifier 'meta))
 (setq org-directory "~/notes/")
 (setq native-comp-jit-compilation nil)
 ;; Make `doom/reload' AOT native-compile changed packages (incremental).
