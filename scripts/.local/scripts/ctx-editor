@@ -1,0 +1,22 @@
+#!/bin/sh
+# Context-aware $EDITOR dispatcher (used by Claude Code, git, etc.).
+# Decision is made at invocation time, not shell startup, so it reflects
+# whether Emacs is *currently* running.
+#
+#   1. JetBrains IDE terminal -> open in that IDE, blocking until closed
+#   2. Doom Emacs server reachable -> emacsclient
+#   3. ad-hoc shell with no Emacs -> vi
+
+if [ "$TERMINAL_EMULATOR" = "JetBrains-JediTerm" ]; then
+  case "$__CFBundleIdentifier" in
+    com.google.android.studio) exec studio --wait "$@" ;;
+    com.jetbrains.PhpStorm)    exec phpstorm --wait "$@" ;;
+  esac
+fi
+
+# Probe the Doom server; --eval t succeeds only if a server is listening.
+if emacsclient --socket-name=doom --eval t >/dev/null 2>&1; then
+  exec emacsclient --socket-name=doom "$@"
+fi
+
+exec vi "$@"

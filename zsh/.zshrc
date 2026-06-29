@@ -12,7 +12,11 @@ fi
 
 # --- Basic environment setup ---
 export LANG=en_US.UTF-8
-export EDITOR="emacsclient --socket-name=doom"
+
+# --- Editor ---
+# ctx-editor (in ~/.local/scripts) picks the right editor at invocation time:
+# JetBrains IDE terminal -> that IDE; Doom server up -> emacsclient; else -> vi.
+export EDITOR="ctx-editor"
 
 # --- Shell behavior ---
 chmod +x "$HOME/.local/scripts"
