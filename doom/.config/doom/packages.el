@@ -52,9 +52,6 @@
 (package! evil-cleverparens)
 (package! blamer)
 (package! simple-httpd)
-(package! doom-everforest
-  :recipe (:host github :repo "Cardoso1994/doom-everforest-theme"
-           :files ("doom-everforest-theme.el" "doom-everforest-light-theme.el")))
 
 ;; Doom's packages are pinned to a specific commit and updated from release to
 ;; release. The `unpin!' macro allows you to unpin single packages...

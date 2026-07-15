@@ -19,38 +19,29 @@
         evil-escape-delay 0.15))
 (setq display-line-numbers-type 'relative)
 (setq server-name "doom")
-;; everforest contrast: "hard" | "medium" | "soft" (default soft)
-;; palette: "material" | "mix" | "original" (default material)
-;; These must be set BEFORE the theme loads, since the theme builds its
-;; palette at load time.
-(setq doom-everforest-background "hard"
-      doom-everforest-palette "material"
-      ;; the theme enlarges dired listings by default; keep them at normal size
-      doom-everforest-dired-height 1.0
-      doom-everforest-light-dired-height 1.0)
-;; doom-everforest is installed via `package!' (straight), so its build dir is
-;; on `load-path' but NOT on `custom-theme-load-path' — register it so
-;; `load-theme' can find the theme file.
-(when-let ((lib (locate-library "doom-everforest-theme")))
-  (add-to-list 'custom-theme-load-path (file-name-directory lib)))
-(setq doom-theme 'doom-everforest)
+;; Themes: doom-dark+ (VS Code Dark+) for dark, doom-one-light for light.
+;; Both ship with doom-themes, so no `package!' / custom-theme-load-path setup
+;; is needed.
+(defvar my/dark-theme  'doom-dark+)
+(defvar my/light-theme 'doom-one-light)
+(setq doom-theme my/dark-theme)
 
-(defun my/toggle-everforest ()
-  "Toggle between doom-everforest dark and light themes."
+(defun my/toggle-theme ()
+  "Toggle between the dark and light Doom themes."
   (interactive)
-  (let ((next (if (eq doom-theme 'doom-everforest)
-                  'doom-everforest-light
-                'doom-everforest)))
+  (let ((next (if (eq doom-theme my/dark-theme)
+                  my/light-theme
+                my/dark-theme)))
     (setq doom-theme next)
     (load-theme next t)))
 
 (map! :leader
-      :desc "Toggle everforest dark/light"
-      "t h" #'my/toggle-everforest)
+      :desc "Toggle dark/light theme"
+      "t h" #'my/toggle-theme)
 
-;; --- Punch up tree-sitter (treesit) highlighting under Everforest -----------
+;; --- Punch up tree-sitter (treesit) highlighting -----------------------------
 ;; doom-themes-base mutes these secondary faces by blending toward fg, which
-;; looks flat on Everforest's soft palette. Map them to full palette colors.
+;; looks flat. Map them to full palette colors instead.
 ;; `custom-set-faces!' re-applies automatically when the theme (re)loads.
 (custom-set-faces!
   `(font-lock-function-call-face   :foreground ,(doom-color 'teal)   :slant normal)
