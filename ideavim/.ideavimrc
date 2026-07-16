@@ -351,8 +351,8 @@ let g:WhichKeyDesc_notes_browse = '<leader>nb Browse scratch files'
 let g:WhichKeyDesc_open = '<leader>o +open'
 nmap <Leader>of <Action>(EditSourceInNewWindow)
 nmap <Leader>oF <Action>(OpenProjectWindows)
-noremap <Leader>op :<C-u>NERDTreeToggle<CR>
-noremap <Leader>oP :<C-u>NERDTreeFind<CR>
+noremap <Leader>op :<C-u>NERDTreeFind<CR>
+noremap <Leader>oP :<C-u>NERDTreeToggle<CR>
 nmap <Leader>oo <Action>(RevealIn)
 nmap <Leader>ot <Action>(ActivateTerminalToolWindow)
 nmap <Leader>oT <Action>(Terminal.OpenInTerminal)
@@ -363,8 +363,8 @@ nmap <Leader>ow <Action>(OpenProjectWindows)
 
 let g:WhichKeyDesc_open_window = '<leader>of New window'
 let g:WhichKeyDesc_open_select = '<leader>oF Select window'
-let g:WhichKeyDesc_open_project = '<leader>op Toggle project view'
-let g:WhichKeyDesc_open_find = '<leader>oP Find in project view'
+let g:WhichKeyDesc_open_project = '<leader>op Find in project view'
+let g:WhichKeyDesc_open_find = '<leader>oP Toggle project view'
 let g:WhichKeyDesc_open_reveal = '<leader>oo Reveal in filer'
 let g:WhichKeyDesc_open_term = '<leader>ot Open terminal'
 let g:WhichKeyDesc_open_term_here = '<leader>oT Open terminal here'
