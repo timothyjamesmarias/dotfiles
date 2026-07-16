@@ -150,7 +150,7 @@
 
   (defun tim/with-editor-export-maybe ()
     "Export EDITOR into vterm unless this is a Claude Code buffer."
-    (unless (string= (buffer-name) +tim/claude-buffer-name)
+    (unless (string-prefix-p "*claude" (buffer-name))
       (with-editor-export-editor)))
 
   (add-hook 'vterm-mode-hook #'tim/with-editor-export-maybe))

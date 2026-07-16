@@ -1,61 +1,39 @@
 ;;; modules/claude.el --- Claude Code integration -*- lexical-binding: t; -*-
 
-(defvar +tim/claude-buffer-name "*claude*"
-  "Buffer name for the dedicated Claude Code vterm.")
+;; claude-code.el (stevemolitor) drives the `claude' CLI from Emacs. We use
+;; the vterm backend so it inherits our vterm tweaks in config.el (jk-escape,
+;; drag-n-drop path insertion). The package manages its own per-project
+;; buffers named `*claude:<project>*', so there's no hand-rolled launcher
+;; anymore -- see git history for the previous vterm wrapper.
+;;
+;; The `C-c c' command map is enabled globally; the leader bindings below
+;; mirror it under `SPC o c' to match the old muscle memory.
 
-(defun +tim/--claude-require ()
-  "Ensure the `claude' CLI is available on PATH."
-  (unless (executable-find "claude")
-    (user-error "`claude' CLI not found on PATH")))
+(defun +tim/claude-display-buffer-right (buffer)
+  "Display the claude code BUFFER in a right-side horizontal split."
+  (display-buffer buffer '((display-buffer-in-direction)
+                           (direction . right)
+                           (window-width . 0.5))))
 
-(defun +tim/--claude-launch (cmd &optional dir)
-  "Open a dedicated vterm buffer running CMD in a right-side split.
-If DIR is non-nil, use it as `default-directory'.
-If the buffer already exists with a live process, just switch to it."
-  (+tim/--claude-require)
-  (let ((buf (get-buffer +tim/claude-buffer-name)))
-    (if (and buf (get-buffer-process buf))
-        (if-let ((win (get-buffer-window buf t)))
-            (select-window win)
-          (select-window (split-window-right))
-          (switch-to-buffer buf))
-      (when buf (kill-buffer buf))
-      (require 'vterm)
-      (let* ((default-directory (or dir default-directory))
-             (editor (format "%s --socket-name=%s"
-                             (shell-quote-argument
-                              (expand-file-name with-editor-emacsclient-executable))
-                             (shell-quote-argument
-                              (expand-file-name server-name server-socket-dir))))
-             (vterm-environment (append (list (concat "EDITOR=" editor))
-                                        vterm-environment)))
-        (select-window (split-window-right))
-        (let ((vterm-buffer-name +tim/claude-buffer-name)
-              (vterm-shell cmd))
-          (vterm--internal #'switch-to-buffer))))))
-
-(defun +tim/claude ()
-  "Open Claude Code in a dedicated vterm popup."
-  (interactive)
-  (+tim/--claude-launch "claude"))
-
-(defun +tim/claude-resume ()
-  "Resume the last Claude Code session in a dedicated vterm popup."
-  (interactive)
-  (+tim/--claude-launch "claude --resume"))
-
-(defun +tim/claude-project ()
-  "Open Claude Code in the project root."
-  (interactive)
-  (let ((root (or (and (fboundp 'doom-project-root) (doom-project-root))
-                  (locate-dominating-file default-directory ".git")
-                  default-directory)))
-    (+tim/--claude-launch "claude" root)))
-
-(map! :leader
-      (:prefix ("o c" . "claude")
-       :desc "Open Claude"          "c" #'+tim/claude
-       :desc "Resume session"       "r" #'+tim/claude-resume
-       :desc "Claude in project"    "p" #'+tim/claude-project)
-      (:prefix "o"
-       :desc "Resume Claude"        "C" #'+tim/claude-resume))
+(use-package! claude-code
+  :init
+  (setq claude-code-terminal-backend 'vterm
+        claude-code-display-window-fn #'+tim/claude-display-buffer-right)
+  :config
+  (claude-code-mode)
+  (map! :leader
+        (:prefix ("o c" . "claude")
+         :desc "Start / switch"       "c" #'claude-code
+         :desc "New in project"       "p" #'claude-code
+         :desc "Continue last"        "r" #'claude-code-continue
+         :desc "Resume (pick)"        "R" #'claude-code-resume
+         :desc "Toggle window"        "t" #'claude-code-toggle
+         :desc "Command menu"         "m" #'claude-code-transient
+         :desc "Send region/buffer"   "s" #'claude-code-send-region
+         :desc "Send with context"    "x" #'claude-code-send-command-with-context
+         :desc "Fix error at point"   "e" #'claude-code-fix-error-at-point
+         :desc "Slash commands"       "/" #'claude-code-slash-commands
+         :desc "Switch to buffer"     "b" #'claude-code-switch-to-buffer
+         :desc "Select instance"      "l" #'claude-code-select-buffer)
+        (:prefix "o"
+         :desc "Continue Claude"      "C" #'claude-code-continue)))

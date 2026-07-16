@@ -45,6 +45,9 @@
 ;; (package! builtin-package :pin "1a2b3c4d5e")
 
 
+(package! claude-code
+  :recipe (:host github :repo "stevemolitor/claude-code.el"
+           :files ("*.el" (:exclude "images/*"))))
 (package! ejc-sql)
 (package! nov)
 (package! ob-mermaid)
