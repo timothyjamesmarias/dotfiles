@@ -22,8 +22,8 @@
 ;; Themes: doom-dark+ (VS Code Dark+) for dark, doom-one-light for light.
 ;; Both ship with doom-themes, so no `package!' / custom-theme-load-path setup
 ;; is needed.
-(defvar my/dark-theme  'modus-vivendi)
-(defvar my/light-theme 'modus-operandi)
+(defvar my/dark-theme  'doom-dark+)
+(defvar my/light-theme 'doom-one-light)
 (setq doom-theme my/dark-theme)
 
 (defun my/toggle-theme ()
