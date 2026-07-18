@@ -22,8 +22,10 @@ export EDITOR="ctx-editor"
 chmod +x "$HOME/.local/scripts"
 
 # --- Path ---
-export PATH="$HOME/.asdf/shims:$HOME/.asdf/bin:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.local/scripts:$HOME/.composer/vendor/bin:/opt/homebrew/bin:$HOME/go/bin:$HOME/.config/emacs/bin:$PATH"
-export ASDF_DATA_DIR=/Users/$(whoami)/.asdf
+# asdf 0.16+ is a Go binary (installed via Homebrew); it provides no bin/ dir of
+# its own, so only the shims belong on PATH.
+export ASDF_DATA_DIR="$HOME/.asdf"
+export PATH="$ASDF_DATA_DIR/shims:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.local/scripts:$HOME/.composer/vendor/bin:/opt/homebrew/bin:$HOME/go/bin:$HOME/.config/emacs/bin:$PATH"
 
 # --- Homebrew configuration ---
 HOMEBREW_NO_AUTO_UPDATE=1
