@@ -107,20 +107,37 @@
 
 ;; --- Vterm ---
 (after! vterm
-  (setq evil-collection-vterm-send-escape-to-vterm-p t)
+  ;; Send ESC through to the pty instead of leaving insert state. Setting
+  ;; `evil-collection-vterm-send-escape-to-vterm-p' does NOT do this -- it is a
+  ;; `defvar-local' that evil-collection only reads to decide which way its
+  ;; toggle command should flip. Bind the key directly, which is exactly what
+  ;; `evil-collection-vterm-toggle-send-escape' installs. C-g (below) and `jk'
+  ;; remain the ways back to normal state.
+  (evil-define-key 'insert vterm-mode-map (kbd "<escape>") #'vterm--self-insert)
+
   (define-key vterm-mode-map (kbd "M-o") #'term-fast-toggle)
   (evil-define-key 'emacs vterm-mode-map (kbd "C-g") #'evil-normal-state)
 
+  (defun tim/vterm-claude-buffer-p ()
+    "Return non-nil if the current buffer is a Claude Code vterm buffer."
+    (string-prefix-p "*claude" (buffer-name)))
+
   (defun tim/vterm-jk-escape ()
-    "In vterm emacs-state, intercept `j` and switch to normal state if `k` follows."
+    "In vterm emacs-state, intercept `j` and switch to normal state if `k` follows.
+
+Skipped in Claude Code buffers: the 0.15s `read-event' blocks the TUI and the
+`<backspace>' correction makes it redraw, which causes visible flicker and
+re-queues non-`k' keys out of order. Use C-g to leave insert state there."
     (interactive)
-    (vterm-send-string "j")
-    (let ((evt (read-event nil nil 0.15)))
-      (cond
-       ((and evt (char-equal evt ?k))
-        (vterm-send-key "<backspace>")
-        (evil-normal-state))
-       (evt (push (cons t evt) unread-command-events))))) ;; re-queue non-k key
+    (if (tim/vterm-claude-buffer-p)
+        (vterm-send-string "j")
+      (vterm-send-string "j")
+      (let ((evt (read-event nil nil 0.15)))
+        (cond
+         ((and evt (char-equal evt ?k))
+          (vterm-send-key "<backspace>")
+          (evil-normal-state))
+         (evt (push (cons t evt) unread-command-events)))))) ;; re-queue non-k key
 
   (evil-define-key 'emacs vterm-mode-map (kbd "j") #'tim/vterm-jk-escape)
 
@@ -150,10 +167,21 @@
 
   (defun tim/with-editor-export-maybe ()
     "Export EDITOR into vterm unless this is a Claude Code buffer."
-    (unless (string-prefix-p "*claude" (buffer-name))
+    (unless (tim/vterm-claude-buffer-p)
       (with-editor-export-editor)))
 
-  (add-hook 'vterm-mode-hook #'tim/with-editor-export-maybe))
+  (add-hook 'vterm-mode-hook #'tim/with-editor-export-maybe)
+
+  (defun tim/vterm-fix-cell-grid ()
+    "Restore a uniform character cell grid so full-screen TUIs paint correctly.
+
+The global `line-spacing' of 0.3 pads every row, so box borders drawn across
+many lines drift out of alignment. The line-number gutter steals columns, so
+vterm reports a width to the pty that doesn't match the drawable area."
+    (setq-local line-spacing nil)
+    (display-line-numbers-mode -1))
+
+  (add-hook 'vterm-mode-hook #'tim/vterm-fix-cell-grid))
 
 ;; --- Tags ---
 (defun +tim/tag-find-all ()
