@@ -9,6 +9,23 @@
 ;; The `C-c c' command map is enabled globally; the leader bindings below
 ;; mirror it under `SPC o c' to match the old muscle memory.
 
+(defconst +tim/claude-inherited-session-vars
+  '("CLAUDE_CODE_CHILD_SESSION"
+    "CLAUDE_CODE_SESSION_ID"
+    "CLAUDECODE"
+    "CLAUDE_CODE_ENTRYPOINT"
+    "CLAUDE_CODE_EXECPATH")
+  "Env vars that mark a `claude' process as a nested child session.
+If Emacs was launched from inside a Claude session it inherits these,
+and every `claude' we spawn then looks like a child of that long-dead
+session -- it writes no transcript and never shows up in /resume.")
+
+(defun +tim/claude-scrub-inherited-session-env (&rest _)
+  "Unset inherited Claude session vars for the spawned `claude' process.
+Entries without a `=' remove the variable, and `process-environment' is
+searched front-to-back, so these shadow whatever Emacs inherited."
+  +tim/claude-inherited-session-vars)
+
 (defun +tim/claude-display-buffer-right (buffer)
   "Display the claude code BUFFER in a right-side horizontal split."
   (display-buffer buffer '((display-buffer-in-direction)
@@ -20,6 +37,8 @@
   (setq claude-code-terminal-backend 'vterm
         claude-code-display-window-fn #'+tim/claude-display-buffer-right)
   :config
+  (add-hook 'claude-code-process-environment-functions
+            #'+tim/claude-scrub-inherited-session-env)
   (claude-code-mode)
   (map! :leader
         (:prefix ("o c" . "claude")

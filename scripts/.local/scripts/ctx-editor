@@ -9,8 +9,17 @@
 
 if [ "$TERMINAL_EMULATOR" = "JetBrains-JediTerm" ]; then
   case "$__CFBundleIdentifier" in
-    com.google.android.studio) exec studio --wait "$@" ;;
-    com.jetbrains.PhpStorm)    exec phpstorm --wait "$@" ;;
+    com.google.android.studio)  exec studio --wait "$@" ;;
+    com.jetbrains.PhpStorm)     exec phpstorm --wait "$@" ;;
+    com.jetbrains.intellij|com.jetbrains.intellij.ce)
+      # Call the app launcher directly: the Toolbox `idea` wrapper uses
+      # `open -na`, which spawns a throwaway instance instead of opening a
+      # tab in the running one. The file must come before --wait; leading
+      # options are rejected as unrecognized.
+      idea_bin="$HOME/Applications/IntelliJ IDEA.app/Contents/MacOS/idea"
+      [ -x "$idea_bin" ] || idea_bin=idea
+      exec "$idea_bin" "$@" --wait
+      ;;
   esac
 fi
 
