@@ -22,7 +22,7 @@
 ;; Themes: doom-dark+ (VS Code Dark+) for dark, doom-one-light for light.
 ;; Both ship with doom-themes, so no `package!' / custom-theme-load-path setup
 ;; is needed.
-(defvar my/dark-theme  'doom-dark+)
+(defvar my/dark-theme  'doom-ir-black)
 (defvar my/light-theme 'doom-one-light)
 (setq doom-theme my/dark-theme)
 
@@ -60,7 +60,11 @@
   '(org-level-5 :weight normal)
   '(org-level-6 :weight normal)
   '(org-level-7 :weight normal)
-  '(org-level-8 :weight normal))
+  '(org-level-8 :weight normal)
+  ;; doom-themes-base makes this face inherit gnus-group-news-low, but gnus's
+  ;; own defface inherits the other way — an inheritance cycle that errors on
+  ;; frame creation once gnus is loaded (eww -> mm-url -> gnus).
+  '(gnus-group-news-low-empty :inherit nil))
 (setq doom-modeline-minor-modes t)
 (setq doom-font (font-spec :family "MonoLisa" :size 14))
 (setq-default line-spacing 0.3)
@@ -224,6 +228,12 @@ vterm reports a width to the pty that doesn't match the drawable area."
 (set-eglot-client! '(php-mode php-ts-mode) '("intelephense" "--stdio"))
 (set-eglot-client! '(elixir-mode elixir-ts-mode heex-ts-mode) '("elixir-ls-wrapper"))
 
+;; Offload JSON->elisp conversion to the emacs-lsp-booster wrapper so server
+;; traffic doesn't block the UI thread.
+(use-package! eglot-booster
+  :after eglot
+  :config (eglot-booster-mode))
+
 (after! eglot
   ;; Suppress chatty capabilities that clog the event loop.
   ;; Tree-sitter handles highlighting; custom handlers cover navigation gaps.
@@ -237,6 +247,25 @@ vterm reports a width to the pty that doesn't match the drawable area."
 
   ;; Throttle change notifications — default 0.5s is aggressive during fast edits
   (setq eglot-send-changes-idle-time 0.75)
+
+  (setq eglot-sync-connect nil
+        eglot-connect-timeout 60)
+
+  ;; `eglot-ensure' connects from `post-command-hook', which runs before the
+  ;; first redisplay. Connect from an idle timer instead.
+  (defadvice! +tim/eglot-connect-when-idle-a ()
+    :override #'eglot-ensure
+    (when buffer-file-name
+      (let ((buf (current-buffer)))
+        (run-with-idle-timer
+         0.3 nil
+         (lambda ()
+           (when (buffer-live-p buf)
+             (with-current-buffer buf
+               (unless (eglot-current-server)
+                 (condition-case err
+                     (apply #'eglot--connect (eglot--guess-contact))
+                   (error (eglot--warn (error-message-string err))))))))))))
 
   ;; Don't extend eglot xref to non-managed buffers
   (setq eglot-extend-to-xref nil)
