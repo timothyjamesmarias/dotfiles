@@ -396,3 +396,4 @@ vterm reports a width to the pty that doesn't match the drawable area."
 (load! "modules/magit")
 (load! "modules/dwim-delim")
 (load! "modules/mermaid")
+(load! "modules/sessionizer")
