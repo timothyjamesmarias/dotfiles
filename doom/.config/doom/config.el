@@ -187,6 +187,19 @@ vterm reports a width to the pty that doesn't match the drawable area."
 
   (add-hook 'vterm-mode-hook #'tim/vterm-fix-cell-grid))
 
+;; --- Ghostel ---
+;; libghostty-based terminal, coexisting with vterm while evaluating it as
+;; the claude-code backend. The native module is a prebuilt binary that
+;; downloads on first use.
+(use-package! ghostel
+  :defer t
+  :init
+  (setq ghostel-module-auto-install 'download))
+
+(use-package! evil-ghostel
+  :after (ghostel evil)
+  :hook (ghostel-mode . evil-ghostel-mode))
+
 ;; --- Tags ---
 (defun +tim/tag-find-all ()
   "Pick between dumb-jump definition, rg usages, tags, and xref history."

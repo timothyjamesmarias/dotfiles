@@ -1,8 +1,8 @@
 ;;; modules/claude.el --- Claude Code integration -*- lexical-binding: t; -*-
 
 ;; claude-code.el (stevemolitor) drives the `claude' CLI from Emacs. We use
-;; the vterm backend so it inherits our vterm tweaks in config.el (jk-escape,
-;; drag-n-drop path insertion). The package manages its own per-project
+;; the ghostel backend (see config.el); the vterm tweaks there (jk-escape,
+;; drag-n-drop path insertion) no longer apply. The package manages its own per-project
 ;; buffers named `*claude:<project>*', so there's no hand-rolled launcher
 ;; anymore -- see git history for the previous vterm wrapper.
 ;;
@@ -34,7 +34,7 @@ searched front-to-back, so these shadow whatever Emacs inherited."
 
 (use-package! claude-code
   :init
-  (setq claude-code-terminal-backend 'vterm
+  (setq claude-code-terminal-backend 'ghostel
         claude-code-display-window-fn #'+tim/claude-display-buffer-right)
   :config
   (add-hook 'claude-code-process-environment-functions
