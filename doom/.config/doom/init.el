@@ -1,5 +1,11 @@
 ;;; init.el -*- lexical-binding: t; -*-
 
+;; astro-ts-mode's autoloads call `treesit-ready-p' at top level; they run
+;; before anything loads treesit, which aborts Doom's entire startup with a
+;; void-function error. This file loads before package autoloads, so preload
+;; treesit here. (cli.el does the same for batch CLI sessions.)
+(require 'treesit nil t)
+
 ;; This file controls what Doom modules are enabled and what order they load
 ;; in. Remember to run 'doom sync' after modifying it!
 

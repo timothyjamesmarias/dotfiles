@@ -240,6 +240,23 @@ vterm reports a width to the pty that doesn't match the drawable area."
 (set-eglot-client! '(kotlin-mode kotlin-ts-mode) '("kotlin-lsp" "--stdio"))
 (set-eglot-client! '(php-mode php-ts-mode) '("intelephense" "--stdio"))
 (set-eglot-client! '(elixir-mode elixir-ts-mode heex-ts-mode) '("elixir-ls-wrapper"))
+(set-eglot-client! 'typst-ts-mode '("tinymist"))
+;; astro-ls resolves tsdk relative to the project root.
+(set-eglot-client! 'astro-ts-mode
+                   '("astro-ls" "--stdio"
+                     :initializationOptions
+                     (:typescript (:tsdk "./node_modules/typescript/lib"))))
+
+;; --- Typst / Astro (no Doom modules; plain treesit modes) ---
+(after! treesit
+  (dolist (src '((typst "https://github.com/uben0/tree-sitter-typst")
+                 (astro "https://github.com/virchau13/tree-sitter-astro")
+                 (html "https://github.com/tree-sitter/tree-sitter-html")
+                 (css "https://github.com/tree-sitter/tree-sitter-css")))
+    (add-to-list 'treesit-language-source-alist src)))
+
+(add-to-list 'auto-mode-alist '("\\.typ\\'" . typst-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.astro\\'" . astro-ts-mode))
 
 ;; Offload JSON->elisp conversion to the emacs-lsp-booster wrapper so server
 ;; traffic doesn't block the UI thread.
