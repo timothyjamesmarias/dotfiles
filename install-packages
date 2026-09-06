@@ -52,6 +52,26 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     echo ""
     log_info "To update packages: brew bundle --file=~/dotfiles/Brewfile"
     log_info "To cleanup unlisted: brew bundle cleanup --file=~/dotfiles/Brewfile --force"
+
+    # Cargo packages (not available in Homebrew)
+    CARGO_PACKAGES=(
+        emacs-lsp-booster
+    )
+
+    if command -v cargo &> /dev/null; then
+        for pkg in "${CARGO_PACKAGES[@]}"; do
+            if command -v "$pkg" &> /dev/null; then
+                log_success "$pkg already installed"
+            else
+                log_info "Installing $pkg via cargo..."
+                cargo install --locked "$pkg"
+                log_success "$pkg installed"
+            fi
+        done
+    else
+        log_warn "cargo not found; skipping cargo packages: ${CARGO_PACKAGES[*]}"
+        log_warn "Install rustup first: https://rustup.rs"
+    fi
 else
     log_error "Unsupported operating system: $OSTYPE"
     exit 1
