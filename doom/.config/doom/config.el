@@ -240,6 +240,7 @@ vterm reports a width to the pty that doesn't match the drawable area."
 (set-eglot-client! '(kotlin-mode kotlin-ts-mode) '("kotlin-lsp" "--stdio"))
 (set-eglot-client! '(php-mode php-ts-mode) '("intelephense" "--stdio"))
 (set-eglot-client! '(elixir-mode elixir-ts-mode heex-ts-mode) '("elixir-ls-wrapper"))
+(set-eglot-client! '(ruby-mode ruby-ts-mode) '("ruby-lsp"))
 (set-eglot-client! 'typst-ts-mode '("tinymist"))
 ;; astro-ls resolves tsdk relative to the project root.
 (set-eglot-client! 'astro-ts-mode
@@ -299,6 +300,72 @@ vterm reports a width to the pty that doesn't match the drawable area."
 
   ;; Don't extend eglot xref to non-managed buffers
   (setq eglot-extend-to-xref nil)
+
+  ;; Don't log every message to *EGLOT events*. The pretty-printing runs on
+  ;; the main thread and is the largest client-side cost during indexing.
+  (setq eglot-events-buffer-config '(:size 0 :format full))
+  ;; Skip mode-line/redisplay churn from $/progress while servers index.
+  (setq eglot-report-progress nil)
+
+  ;; Eglot creates one OS-level watch per project directory *per* watcher
+  ;; registration, synchronously, inside the request handler. ruby-lsp and its
+  ;; addons register five, so a 600-dir project costs ~3000 kqueue watches and
+  ;; a ~1.2s freeze on connect. Share one watch per directory and fan events
+  ;; out to every registration's handler instead.
+  (defvar +eglot--watch-share nil
+    "Bound to (SERVER . ID) while inside `eglot--watch-globs'.")
+  (defvar +eglot--shared-watches (make-hash-table :test #'equal)
+    "DIR -> (DESC REFCOUNT . (((SERVER . ID) . CALLBACK) ...)).")
+  (defvar +eglot--shared-descs (make-hash-table :test #'equal)
+    "DESC -> DIR, reverse lookup for `file-notify-rm-watch'.")
+
+  (defadvice! +eglot--watch-globs-share-a (fn server id &rest args)
+    :around #'eglot--watch-globs
+    (let ((+eglot--watch-share (cons server id)))
+      (apply fn server id args)))
+
+  (defadvice! +eglot--file-notify-add-watch-share-a (fn file flags callback)
+    :around #'file-notify-add-watch
+    (if (not +eglot--watch-share)
+        (funcall fn file flags callback)
+      (let* ((dir (file-name-as-directory (expand-file-name file)))
+             (cell (gethash dir +eglot--shared-watches))
+             (entry (cons +eglot--watch-share callback)))
+        (if cell
+            (progn (cl-incf (cadr cell))
+                   (push entry (cddr cell))
+                   (car cell))
+          (let* ((cell (list nil 1 entry))
+                 (desc (funcall fn file flags
+                                (lambda (event)
+                                  (dolist (e (cddr cell))
+                                    (when (jsonrpc-running-p (caar e))
+                                      (funcall (cdr e) event)))))))
+            (setcar cell desc)
+            (puthash dir cell +eglot--shared-watches)
+            (puthash desc dir +eglot--shared-descs)
+            desc)))))
+
+  (defadvice! +eglot--file-notify-rm-watch-share-a (fn desc)
+    :around #'file-notify-rm-watch
+    (let ((dir (gethash desc +eglot--shared-descs)))
+      (if (not dir)
+          (funcall fn desc)
+        (let ((cell (gethash dir +eglot--shared-watches)))
+          (when (<= (cl-decf (cadr cell)) 0)
+            (remhash dir +eglot--shared-watches)
+            (remhash desc +eglot--shared-descs)
+            (funcall fn desc))))))
+
+  (defadvice! +eglot--unregister-watches-share-a (server method id)
+    :before #'eglot-unregister-capability
+    (when (eq method 'workspace/didChangeWatchedFiles)
+      (maphash (lambda (_dir cell)
+                 (setcdr (cdr cell)
+                         (cl-remove-if (lambda (e) (and (eq (caar e) server)
+                                                        (equal (cdar e) id)))
+                                       (cddr cell))))
+               +eglot--shared-watches)))
 
   ;; Single-line eldoc — reduce rendering cost on every cursor pause
   (setq eldoc-echo-area-use-multiline-p nil)
