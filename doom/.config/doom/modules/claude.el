@@ -26,6 +26,36 @@ Entries without a `=' remove the variable, and `process-environment' is
 searched front-to-back, so these shadow whatever Emacs inherited."
   +tim/claude-inherited-session-vars)
 
+;; Claude Code's "edit prompt in $EDITOR" runs emacsclient from the claude
+;; buffer; server.el visits the scratch file over the claude window, and on
+;; `server-edit' (C-x #) it kills the buffer without restoring where the
+;; edit came from -- you land on some unrelated buffer. Remember the claude
+;; buffer at visit time and jump back once server.el is done. The jump is
+;; deferred with a timer because `server-done-hook' runs before server.el's
+;; own final buffer switch, which would clobber a direct switch here.
+(defvar-local +tim/claude-server-origin nil
+  "Claude buffer this server edit was launched from, if any.")
+
+(defun +tim/claude-server-remember-origin ()
+  "Mark the claude buffer as origin when an edit starts in its window."
+  (let ((buf (window-buffer (selected-window))))
+    (when (string-prefix-p "*claude" (buffer-name buf))
+      (setq +tim/claude-server-origin buf))))
+
+(defun +tim/claude-server-return-to-origin ()
+  "Return to the claude buffer this server edit came from."
+  (let ((origin +tim/claude-server-origin))
+    (when (buffer-live-p origin)
+      (run-at-time 0 nil
+                   (lambda ()
+                     (when (buffer-live-p origin)
+                       (if-let* ((win (get-buffer-window origin)))
+                           (select-window win)
+                         (switch-to-buffer origin))))))))
+
+(add-hook 'server-visit-hook #'+tim/claude-server-remember-origin)
+(add-hook 'server-done-hook #'+tim/claude-server-return-to-origin)
+
 (defun +tim/claude-display-buffer-right (buffer)
   "Display the claude code BUFFER in a right-side horizontal split."
   (display-buffer buffer '((display-buffer-in-direction)

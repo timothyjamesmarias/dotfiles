@@ -8,6 +8,12 @@
   (setq ns-right-option-modifier 'meta
         ns-alternate-modifier 'meta))
 (setq org-directory "~/notes/")
+;; Subprocesses (claude-code buffers, shells, compile) inherit this; the
+;; `doom env' snapshot deliberately excludes EDITOR (see cli.el) because a
+;; snapshot taken inside an Emacs/Claude shell once captured a dead
+;; emacsclient path. ctx-editor probes the doom socket at invocation time.
+(setenv "EDITOR" "ctx-editor")
+(setenv "GIT_EDITOR" nil)
 (setq native-comp-jit-compilation nil)
 ;; Make `doom/reload' AOT native-compile changed packages (incremental).
 (setq doom-reload-command
