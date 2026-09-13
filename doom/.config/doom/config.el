@@ -25,11 +25,11 @@
         evil-escape-delay 0.15))
 (setq display-line-numbers-type 'relative)
 (setq server-name "doom")
-;; Themes: doom-dark+ (VS Code Dark+) for dark, doom-one-light for light.
-;; Both ship with doom-themes, so no `package!' / custom-theme-load-path setup
-;; is needed.
-(defvar my/dark-theme  'doom-ir-black)
-(defvar my/light-theme 'doom-one-light)
+;; Themes: contrast-tuned Everforest forks vendored in $DOOMDIR/themes/
+;; (Doom puts that dir on `custom-theme-load-path' automatically, so no
+;; `package!' setup is needed). See the theme files for the WCAG numbers.
+(defvar my/dark-theme  'doom-everforest)
+(defvar my/light-theme 'doom-everforest-light)
 (setq doom-theme my/dark-theme)
 
 (defun my/toggle-theme ()
