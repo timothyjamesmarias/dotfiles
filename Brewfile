@@ -33,7 +33,9 @@ brew "imagemagick"
 # Cloud & Containers
 brew "awscli"
 brew "docker"
+brew "docker-compose"
 brew "kubectl"
+cask "docker-desktop"
 
 # Language servers
 brew "elixir-ls"
