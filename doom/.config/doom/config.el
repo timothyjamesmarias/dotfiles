@@ -191,7 +191,20 @@ vterm reports a width to the pty that doesn't match the drawable area."
     (setq-local line-spacing nil)
     (display-line-numbers-mode -1))
 
-  (add-hook 'vterm-mode-hook #'tim/vterm-fix-cell-grid))
+  (add-hook 'vterm-mode-hook #'tim/vterm-fix-cell-grid)
+
+  (defun tim/vterm-cd (dir)
+    "cd the current vterm to DIR, chosen with find-file-style navigation.
+
+Inside the prompt, C-x C-d (consult-dir) jumps to a project/recent/bookmark
+directory, after which navigation can continue from there."
+    (interactive (list (read-directory-name "cd: " nil nil t)))
+    ;; Leading space keeps the command out of shell history (HIST_IGNORE_SPACE).
+    (vterm-send-string
+     (concat " cd " (shell-quote-argument (file-local-name (expand-file-name dir)))))
+    (vterm-send-return))
+
+  (define-key vterm-mode-map (kbd "C-x C-d") #'tim/vterm-cd))
 
 ;; --- Ghostel ---
 ;; libghostty-based terminal, coexisting with vterm while evaluating it as
