@@ -1,7 +1,6 @@
 # --- SSH Key Loading ---
-# Keys are managed by the macOS system SSH agent (launchd).
-# UseKeychain + AddKeysToAgent are set in ~/.ssh/config.d/defaults.conf
-# so all processes (including GUI Emacs) share the same agent.
-
-ssh-add --apple-use-keychain ~/.ssh/github 2>/dev/null
-ssh-add --apple-use-keychain ~/.ssh/cablelabs 2>/dev/null
+# Keys are managed by the macOS system SSH agent (launchd) and load on demand:
+# UseKeychain + AddKeysToAgent in ~/.ssh/config.d/defaults.conf let ssh pull
+# the passphrase from the keychain, and config.d/github.conf names the
+# non-default key file so ssh can find it without a prior ssh-add.
+# No shell-startup ssh-add needed.
