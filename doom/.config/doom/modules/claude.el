@@ -56,6 +56,21 @@ searched front-to-back, so these shadow whatever Emacs inherited."
 (add-hook 'server-visit-hook #'+tim/claude-server-remember-origin)
 (add-hook 'server-done-hook #'+tim/claude-server-return-to-origin)
 
+;; C-x passthrough: ghostel lists "C-x" in `ghostel-keymap-exceptions', so it
+;; never reaches the Claude TUI. Rebinding it buffer-locally in insert state
+;; only (via `claude-code-start-hook') keeps C-x as the Emacs prefix in normal
+;; state and in every other ghostel buffer. `ghostel--send-encoded' (the same
+;; call evil-ghostel's Ctrl-passthrough uses) respects the kitty keyboard
+;; protocol Claude Code negotiates, unlike sending the raw 0x18 byte.
+(defun +tim/claude-send-C-x ()
+  "Send C-x to the Claude terminal."
+  (interactive)
+  (ghostel--send-encoded "x" "ctrl"))
+
+(defun +tim/claude-enable-C-x-passthrough ()
+  "Route insert-state C-x to the Claude TUI in this buffer."
+  (evil-local-set-key 'insert (kbd "C-x") #'+tim/claude-send-C-x))
+
 (defun +tim/claude-display-buffer-right (buffer)
   "Display the claude code BUFFER in a right-side horizontal split."
   (display-buffer buffer '((display-buffer-in-direction)
@@ -69,6 +84,7 @@ searched front-to-back, so these shadow whatever Emacs inherited."
   :config
   (add-hook 'claude-code-process-environment-functions
             #'+tim/claude-scrub-inherited-session-env)
+  (add-hook 'claude-code-start-hook #'+tim/claude-enable-C-x-passthrough)
   (claude-code-mode)
   (map! :leader
         (:prefix ("o c" . "claude")
