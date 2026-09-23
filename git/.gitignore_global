@@ -1,5 +1,6 @@
 tags
-.claude/
+.claude/*
+!.claude/skills/
 .format
 .tool-versions
 .project.conf
