@@ -48,6 +48,7 @@
 (package! claude-code
   :recipe (:host github :repo "stevemolitor/claude-code.el"
            :files ("*.el" (:exclude "images/*"))))
+(package! monet :recipe (:host github :repo "stevemolitor/monet"))
 (package! ghostel)
 (package! evil-ghostel
   :recipe (:host github :repo "dakra/ghostel"

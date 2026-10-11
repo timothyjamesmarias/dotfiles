@@ -77,6 +77,65 @@ searched front-to-back, so these shadow whatever Emacs inherited."
                            (direction . right)
                            (window-width . 0.5))))
 
+;; Monet implements Claude Code's (undocumented) IDE protocol so proposed
+;; edits open as a unified diff in Emacs instead of in the TUI. The protocol is
+;; reverse-engineered and can break on a Claude Code update, so Monet is
+;; wrapped in failsafes: a broken server never blocks launching Claude, and
+;; `+tim/claude-toggle-emacs-diffs' turns it off without touching config.
+(defvar +tim/claude-use-emacs-diffs t
+  "When non-nil, start a Monet server so Claude shows diffs in Emacs.")
+
+(defun +tim/claude-monet-env (key directory)
+  "Return Monet's IDE env vars for the Claude process, or nil on any failure.
+Monet's own `monet-start-server-function' signals when its websocket server
+fails to start, which would abort the Claude launch; without these vars
+Claude simply falls back to its native TUI diffs."
+  (when +tim/claude-use-emacs-diffs
+    (condition-case err
+        (monet-start-server-function key directory)
+      (error
+       (message "Monet unavailable, using Claude's native diffs: %s"
+                (error-message-string err))
+       nil))))
+
+(defun +tim/claude-toggle-emacs-diffs ()
+  "Toggle Monet for future Claude sessions and stop any running servers.
+Use this when a Claude Code update breaks the IDE protocol: stopping the
+servers also unblocks a session stuck waiting on a diff response."
+  (interactive)
+  (setq +tim/claude-use-emacs-diffs (not +tim/claude-use-emacs-diffs))
+  (unless +tim/claude-use-emacs-diffs
+    (monet-stop-all-servers))
+  (message "Emacs diffs for Claude: %s (restart Claude to apply)"
+           (if +tim/claude-use-emacs-diffs "on" "off")))
+
+;; Diff placement: Claude runs in a split, so show the diff in the other
+;; pane when one exists, else take over the current (Claude) window rather
+;; than splitting. Monet's cleanup calls `delete-window' unconditionally,
+;; which errors on a sole window and would collapse the split when the
+;; diff borrowed a pane, so restore the window's previous buffer first.
+(defun +tim/display-buffer-other-window-or-here (buffer alist)
+  "Display BUFFER in some other window, or in the selected one if alone."
+  (or (display-buffer-use-some-window buffer (cons '(inhibit-same-window . t) alist))
+      (display-buffer-same-window buffer alist)))
+
+(defun +tim/monet-diff-cleanup-tool (diff-context)
+  "Give the diff's window back to its previous buffer, then let Monet clean up."
+  (let ((diff-buffer (alist-get 'diff-buffer diff-context)))
+    (when-let* ((window (and (buffer-live-p diff-buffer)
+                             (get-buffer-window diff-buffer))))
+      (quit-restore-window window)))
+  (monet-simple-diff-cleanup-tool diff-context))
+
+(use-package! monet
+  :after claude-code
+  :config
+  (setq monet-diff-cleanup-tool #'+tim/monet-diff-cleanup-tool)
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Diff: " (+tim/display-buffer-other-window-or-here)))
+  (add-hook 'claude-code-process-environment-functions #'+tim/claude-monet-env)
+  (monet-mode))
+
 (use-package! claude-code
   :init
   (setq claude-code-terminal-backend 'ghostel
@@ -99,6 +158,8 @@ searched front-to-back, so these shadow whatever Emacs inherited."
          :desc "Fix error at point"   "e" #'claude-code-fix-error-at-point
          :desc "Slash commands"       "/" #'claude-code-slash-commands
          :desc "Switch to buffer"     "b" #'claude-code-switch-to-buffer
-         :desc "Select instance"      "l" #'claude-code-select-buffer)
+         :desc "Select instance"      "l" #'claude-code-select-buffer
+         :desc "Toggle Emacs diffs"   "d" #'+tim/claude-toggle-emacs-diffs
+         :desc "Stop Monet servers"   "D" #'monet-stop-all-servers)
         (:prefix "o"
          :desc "Continue Claude"      "C" #'claude-code-continue)))
