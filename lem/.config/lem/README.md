@@ -14,6 +14,7 @@ cd ~/dotfiles && stow lem           # -> ~/.config/lem/{init,perspectives,sessio
 git clone https://github.com/lem-project/lem.git ~/opt/lem
 cd ~/opt/lem && make webview        # or: make sdl2 / make ncurses
 ln -sf ~/opt/lem/lem ~/.local/bin/lem
+lem-app                             # ~/Applications/Lem.app for Spotlight/Dock (scripts/)
 ```
 
 Needs `sbcl` and `qlot` (brew / https://qlot.tech/installer). If qlot reports a

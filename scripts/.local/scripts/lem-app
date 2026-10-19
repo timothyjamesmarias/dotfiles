@@ -1,0 +1,47 @@
+#!/bin/bash
+# Build ~/Applications/Lem.app wrapping ~/opt/lem/lem so Spotlight/Dock can launch it.
+set -e
+
+LEM_BINARY="$HOME/opt/lem/lem"
+APP_DIR="$HOME/Applications/Lem.app"
+ICON="$HOME/.config/lem/Lem.icns"
+
+[ -x "$LEM_BINARY" ] || { echo "lem binary not found at $LEM_BINARY (cd ~/opt/lem && make webview)"; exit 1; }
+
+mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
+
+cat > "$APP_DIR/Contents/MacOS/Lem" <<'LAUNCHER'
+#!/bin/bash
+export PATH="$HOME/.local/bin:/opt/homebrew/bin:$PATH"
+exec "$HOME/opt/lem/lem" "$@"
+LAUNCHER
+chmod +x "$APP_DIR/Contents/MacOS/Lem"
+
+cat > "$APP_DIR/Contents/Info.plist" <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>Lem</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.lem-project.lem</string>
+    <key>CFBundleName</key>
+    <string>Lem</string>
+    <key>CFBundleDisplayName</key>
+    <string>Lem</string>
+    <key>CFBundleVersion</key>
+    <string>1.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon.icns</string>
+</dict>
+</plist>
+PLIST
+
+cp "$ICON" "$APP_DIR/Contents/Resources/AppIcon.icns"
+xattr -cr "$APP_DIR"
+echo "Created $APP_DIR"
