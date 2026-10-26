@@ -28,7 +28,7 @@
 ;; Themes: contrast-tuned Everforest forks vendored in $DOOMDIR/themes/
 ;; (Doom puts that dir on `custom-theme-load-path' automatically, so no
 ;; `package!' setup is needed). See the theme files for the WCAG numbers.
-(defvar my/dark-theme  'doom-everforest)
+(defvar my/dark-theme  'doom-islands-dark)
 (defvar my/light-theme 'doom-everforest-light)
 (setq doom-theme my/dark-theme)
 
@@ -45,18 +45,21 @@
       :desc "Toggle dark/light theme"
       "t h" #'my/toggle-theme)
 
-;; --- Punch up tree-sitter (treesit) highlighting -----------------------------
-;; doom-themes-base mutes these secondary faces by blending toward fg, which
-;; looks flat. Map them to full palette colors instead.
+;; --- Sparse highlighting ------------------------------------------------------
+;; Identifiers stay plain so hue only marks structure (keywords, strings,
+;; constants, comments), the way JetBrains schemes do. Doom raises
+;; `treesit-font-lock-level' to 4, which colors every call and property use.
 ;; `custom-set-faces!' re-applies automatically when the theme (re)loads.
+;; `unspecified' rather than `doom-color': both vendored everforest themes are
+;; defined at startup, so `doom-color' answers from whichever was defined last.
+(setq treesit-font-lock-level 3)
 (custom-set-faces!
-  `(font-lock-function-call-face   :foreground ,(doom-color 'teal)   :slant normal)
-  `(font-lock-variable-use-face    :foreground ,(doom-color 'blue))
-  `(font-lock-property-use-face    :foreground ,(doom-color 'yellow))
-  `(font-lock-property-name-face   :foreground ,(doom-color 'yellow) :weight normal)
-  `(font-lock-operator-face        :foreground ,(doom-color 'orange))
-  `(font-lock-bracket-face         :foreground ,(doom-color 'fg))
-  `(font-lock-delimiter-face       :foreground ,(doom-color 'base7))
+  '(font-lock-type-face          :foreground unspecified)
+  '(font-lock-function-name-face :foreground unspecified)
+  '(font-lock-variable-name-face :foreground unspecified)
+  '(font-lock-property-name-face :foreground unspecified :weight normal)
+  '(font-lock-comment-face       :slant italic)
+  '(font-lock-doc-face           :slant italic)
   ;; Flatten org headings: theme enlarges levels 1-3 and bolds all 8.
   ;; Only :height/:weight are overridden, so the theme's heading colors remain.
   '(org-level-1 :height 1.0 :weight normal)
@@ -73,7 +76,7 @@
   '(gnus-group-news-low-empty :inherit nil))
 (setq doom-modeline-minor-modes t)
 (setq doom-font (font-spec :family "MonoLisa" :size 14))
-(setq-default line-spacing 0.3)
+(setq-default line-spacing 0.5)
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 (global-display-line-numbers-mode)
 (defun my-custom-banner ()
@@ -85,6 +88,8 @@
      'face '+dashboard-banner)))
 (setq +dashboard-ascii-banner-fn #'my-custom-banner)
 (setq treemacs-width 50)
+;; `global-display-line-numbers-mode' would otherwise number the project tree.
+(add-hook 'treemacs-mode-hook (lambda () (display-line-numbers-mode -1)))
 
 ;; --- Evil ---
 (after! evil
