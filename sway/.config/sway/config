@@ -1,0 +1,66 @@
+# Sway: bootstrap session until EWM is packaged. Keys mirror the old
+# AeroSpace layout (mod + hjkl / 1-5) so muscle memory carries over.
+include /etc/sway/config.d/*
+
+set $mod Mod4
+set $term foot
+set $lock swaylock -f -c 1e2326
+
+font pango:JetBrainsMono Nerd Font 10
+output * bg #2b3339 solid_color
+input type:touchpad {
+    tap enabled
+    natural_scroll enabled
+}
+floating_modifier $mod
+default_border pixel 2
+gaps inner 8
+
+bindsym $mod+Return exec $term
+bindsym $mod+e exec emacsclient --socket-name=doom -c -n -a emacs
+bindsym $mod+b exec firefox
+bindsym $mod+q kill
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+e exec swaymsg exit
+bindsym $mod+Escape exec $lock
+
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+bindsym $mod+Shift+h move left
+bindsym $mod+Shift+j move down
+bindsym $mod+Shift+k move up
+bindsym $mod+Shift+l move right
+bindsym $mod+f fullscreen
+bindsym $mod+Shift+space floating toggle
+bindsym $mod+slash layout toggle split
+bindsym $mod+comma layout tabbed
+
+bindsym $mod+1 workspace number 1
+bindsym $mod+2 workspace number 2
+bindsym $mod+3 workspace number 3
+bindsym $mod+4 workspace number 4
+bindsym $mod+5 workspace number 5
+bindsym $mod+Shift+1 move container to workspace number 1
+bindsym $mod+Shift+2 move container to workspace number 2
+bindsym $mod+Shift+3 move container to workspace number 3
+bindsym $mod+Shift+4 move container to workspace number 4
+bindsym $mod+Shift+5 move container to workspace number 5
+
+bindsym --locked XF86AudioRaiseVolume exec pamixer -i 5
+bindsym --locked XF86AudioLowerVolume exec pamixer -d 5
+bindsym --locked XF86AudioMute exec pamixer -t
+bindsym --locked XF86AudioMicMute exec pamixer --default-source -t
+bindsym --locked XF86MonBrightnessUp exec brightnessctl set +5%
+bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5%-
+bindsym Print exec grim -g "$(slurp)" - | wl-copy
+
+bar {
+    position top
+    font pango:JetBrainsMono Nerd Font 10
+    status_command while true; do echo "$(cat /sys/class/power_supply/BAT0/capacity)%  $(date '+%a %d %b  %H:%M')"; sleep 30; done
+}
+
+exec mako
+exec swayidle -w timeout 600 '$lock' before-sleep '$lock'

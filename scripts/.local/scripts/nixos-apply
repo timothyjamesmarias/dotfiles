@@ -1,0 +1,9 @@
+#!/bin/sh
+# Copy the tracked NixOS config for this host into /etc/nixos and switch to it.
+set -eu
+
+src="$HOME/dotfiles/nixos/$(hostname)/configuration.nix"
+[ -f "$src" ] || { echo "no config for host $(hostname): $src" >&2; exit 1; }
+
+sudo cp "$src" /etc/nixos/configuration.nix
+sudo nixos-rebuild switch

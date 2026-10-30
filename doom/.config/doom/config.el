@@ -24,7 +24,19 @@
   (setq evil-escape-key-sequence "jk"
         evil-escape-delay 0.15))
 (setq display-line-numbers-type 'relative)
+;; :ui (emoji +unicode) still leaves emojify in image mode, which prompts to
+;; download an emoji sprite set on first buffer. A C-g there aborts the rest of
+;; doom-first-buffer-hook (gcmh, smartparens, ...). Unicode needs no download.
+(after! emojify (setq emojify-display-style 'unicode))
 (setq server-name "doom")
+
+;; On macOS a launchd daemon owns the socket. Elsewhere, start the server in
+;; the first launched Emacs so the emacsclient aliases and ctx-editor work.
+(defun +tim/ensure-server ()
+  (require 'server)
+  (unless (server-running-p) (server-start)))
+(unless (daemonp)
+  (add-hook 'doom-after-init-hook #'+tim/ensure-server))
 ;; Themes: contrast-tuned Everforest forks vendored in $DOOMDIR/themes/
 ;; (Doom puts that dir on `custom-theme-load-path' automatically, so no
 ;; `package!' setup is needed). See the theme files for the WCAG numbers.
@@ -75,7 +87,9 @@
   ;; frame creation once gnus is loaded (eww -> mm-url -> gnus).
   '(gnus-group-news-low-empty :inherit nil))
 (setq doom-modeline-minor-modes t)
-(setq doom-font (font-spec :family "MonoLisa" :size 14))
+;; MonoLisa is licensed on the Mac only. Linux hosts use the Nerd Font NixOS installs.
+(setq doom-font (font-spec :family (if (eq system-type 'darwin) "MonoLisa" "JetBrainsMono Nerd Font")
+                           :size 14))
 (setq-default line-spacing 0.5)
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 (global-display-line-numbers-mode)
@@ -503,6 +517,7 @@ directory, after which navigation can continue from there."
 (load! "modules/files")
 (load! "modules/ripgrep")
 (load! "modules/macos")
+(when (locate-library "ewm") (load! "modules/ewm"))
 (load! "modules/notes")
 (load! "modules/dwim-nav")
 (load! "modules/framework-detect")

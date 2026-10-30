@@ -18,6 +18,7 @@ GNU Stow packages — each top-level dir maps into `$HOME`:
 | `ripgrep/`     | `~/.ripgreprc`                      |
 | `scripts/`     | `~/.local/scripts/`                 |
 | `ssh/`         | `~/.ssh/config.d/`                  |
+| `sway/`        | `~/.config/sway/` (Linux only)      |
 | `zsh/`         | `~/.zshrc`, `~/.config/zsh/`        |
 
 Not stowed:
