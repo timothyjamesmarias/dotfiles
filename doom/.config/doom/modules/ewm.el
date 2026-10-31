@@ -83,6 +83,7 @@ Copy and paste are already EWM defaults.")
 (defun +ewm/launcher ()
   "Switch to a running app or launch an installed one."
   (interactive)
+  (require 'consult)
   (consult--multi '(+ewm-consult-source-running-apps +ewm-consult-source-emacs +ewm-consult-source-xdg-apps)
                   :prompt "App: "))
 
