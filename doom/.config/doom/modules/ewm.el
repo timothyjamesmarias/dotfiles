@@ -125,3 +125,80 @@ Copy and paste are already EWM defaults.")
     "s-L" #'ewm-lock-session
     "s-N" #'ewm-frame-new
     "s-W" #'ewm-frame-close))
+
+;;; Status bar
+;;
+;; Emacs's tab bar runs along the top of every EWM frame, so it is the global
+;; bar. No tabs, just a right-aligned status string refreshed on a timer.
+
+(defvar +ewm-bar-interval 5 "Seconds between status bar refreshes.")
+(defvar +ewm-bar--string "" "The rendered status bar text.")
+(defvar +ewm-bar--cpu-sample nil "Last (busy . total) jiffies from /proc/stat.")
+(defvar +ewm-bar--timer nil "The refresh timer, so reloading this file does not stack them.")
+
+(defun +ewm-bar--read-file (file)
+  (with-temp-buffer (insert-file-contents file) (buffer-string)))
+
+(defun +ewm-bar--cpu ()
+  "CPU busy percentage since the previous sample, or -- on the first call."
+  (let* ((fields (cdr (split-string (car (split-string (+ewm-bar--read-file "/proc/stat") "\n")))))
+         (jiffies (mapcar #'string-to-number fields))
+         (idle (+ (nth 3 jiffies) (nth 4 jiffies)))
+         (total (apply #'+ jiffies))
+         (sample (cons (- total idle) total))
+         (previous +ewm-bar--cpu-sample))
+    (setq +ewm-bar--cpu-sample sample)
+    (if (null previous)
+        "--"
+      (let ((busy (- (car sample) (car previous)))
+            (span (- (cdr sample) (cdr previous))))
+        (format "%d%%" (if (> span 0) (/ (* 100 busy) span) 0))))))
+
+(defun +ewm-bar--memory ()
+  "Used memory in GiB out of total, from /proc/meminfo."
+  (let* ((info (+ewm-bar--read-file "/proc/meminfo"))
+         (field (lambda (key)
+                  (and (string-match (concat "^" key ":[ \t]+\\([0-9]+\\)") info)
+                       (string-to-number (match-string 1 info)))))
+         (total (funcall field "MemTotal"))
+         (available (funcall field "MemAvailable")))
+    (format "%.1f/%.0fG" (/ (- total available) 1048576.0) (/ total 1048576.0))))
+
+(defun +ewm-bar--wifi ()
+  "Active SSID and signal from NetworkManager, or offline."
+  (let ((active (seq-find (lambda (line) (string-prefix-p "yes:" line))
+                          (ignore-errors (process-lines "nmcli" "-t" "-f" "ACTIVE,SSID,SIGNAL" "dev" "wifi")))))
+    (if (null active)
+        "offline"
+      (pcase-let ((`(,_ ,ssid ,signal) (split-string active ":")))
+        (format "%s %s%%" ssid signal)))))
+
+(defun +ewm-bar--battery ()
+  "Battery percentage, with AC when on mains power."
+  (let* ((data (funcall battery-status-function))
+         (percent (truncate (string-to-number (or (cdr (assq ?p data)) "0"))))
+         ;; battery.el reports the AC line as "AC" or "on-line" depending on the sysfs layout.
+         (on-ac (member (cdr (assq ?L data)) (list "AC" "on-line"))))
+    (format "%d%%%s" percent (if on-ac " AC" ""))))
+
+(defun +ewm-bar-update ()
+  "Rebuild the status string and redraw every frame's tab bar."
+  (setq +ewm-bar--string
+        (format " CPU %s   RAM %s   WIFI %s   BAT %s   %s "
+                (+ewm-bar--cpu) (+ewm-bar--memory) (+ewm-bar--wifi) (+ewm-bar--battery)
+                (format-time-string "%a %b %-d  %H:%M")))
+  (force-mode-line-update t))
+
+(defun +ewm-bar-format ()
+  "`tab-bar-format' item showing the status string."
+  `((status menu-item ,+ewm-bar--string ignore)))
+
+(after! ewm
+  (require 'battery)
+  (setq tab-bar-format '(tab-bar-format-align-right +ewm-bar-format)
+        tab-bar-show t)
+  ;; Dialogs and other floats are not screens; no bar on them.
+  (add-to-list 'pop-up-frame-alist '(tab-bar-lines . 0))
+  (tab-bar-mode 1)
+  (when +ewm-bar--timer (cancel-timer +ewm-bar--timer))
+  (setq +ewm-bar--timer (run-with-timer 0 +ewm-bar-interval #'+ewm-bar-update)))
