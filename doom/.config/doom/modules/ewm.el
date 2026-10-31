@@ -15,6 +15,9 @@
 ;; pgtk draws child frames inside the parent frame's Wayland surface, and EWM
 ;; paints application views on top of that surface. Vertico's popup therefore
 ;; vanishes behind any app window it overlaps, so use the plain minibuffer.
+;; A floating EWM frame via `vertico-buffer-mode' stacks correctly but was
+;; tried and dropped: its extra redraws make Emacs swallow C-g as a quit
+;; during redisplay, so the first C-g often failed to close it.
 (remove-hook 'vertico-mode-hook #'vertico-posframe-mode)
 ;; The minibuffer pushes app content up when it grows. Keep it to about a
 ;; quarter of a 54-line frame instead of Doom's 17 lines.
