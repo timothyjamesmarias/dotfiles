@@ -1,9 +1,10 @@
 #!/bin/sh
 # Copy the tracked NixOS config for this host into /etc/nixos and switch to it.
+# hardware-configuration.nix stays in /etc/nixos; it is generated per machine.
 set -eu
 
-src="$HOME/dotfiles/nixos/$(hostname)/configuration.nix"
-[ -f "$src" ] || { echo "no config for host $(hostname): $src" >&2; exit 1; }
+src="$HOME/dotfiles/nixos/$(hostname)"
+[ -f "$src/configuration.nix" ] || { echo "no config for host $(hostname): $src" >&2; exit 1; }
 
-sudo cp "$src" /etc/nixos/configuration.nix
+sudo cp "$src"/*.nix /etc/nixos/
 sudo nixos-rebuild switch

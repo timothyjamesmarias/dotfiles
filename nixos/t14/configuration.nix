@@ -3,6 +3,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ./dev.nix
     # EWM (Emacs Wayland Manager): ships its own NixOS module and login session.
     "${builtins.fetchGit {
       url = "https://codeberg.org/ezemtsov/ewm.git";
