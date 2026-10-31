@@ -173,6 +173,24 @@ Copy and paste are already EWM defaults.")
       (pcase-let ((`(,_ ,ssid ,signal) (split-string active ":")))
         (format "%s %s%%" ssid signal)))))
 
+(defun +ewm-bar--volume ()
+  "Default PipeWire sink volume, or mute."
+  (let ((line (car (ignore-errors (process-lines "wpctl" "get-volume" "@DEFAULT_AUDIO_SINK@")))))
+    (cond ((null line) "--")
+          ((string-match-p "MUTED" line) "mute")
+          ((string-match "\\([0-9.]+\\)" line)
+           (format "%d%%" (round (* 100 (string-to-number (match-string 1 line))))))
+          (t "--"))))
+
+(defun +ewm-bar--brightness ()
+  "Backlight level as a percentage of its maximum."
+  (let ((dir (car (file-expand-wildcards "/sys/class/backlight/*"))))
+    (if (null dir)
+        "--"
+      (let ((level (string-to-number (+ewm-bar--read-file (concat dir "/brightness"))))
+            (max (string-to-number (+ewm-bar--read-file (concat dir "/max_brightness")))))
+        (format "%d%%" (/ (* 100 level) (max max 1)))))))
+
 (defun +ewm-bar--battery ()
   "Battery percentage, with AC when on mains power."
   (let* ((data (funcall battery-status-function))
@@ -184,8 +202,9 @@ Copy and paste are already EWM defaults.")
 (defun +ewm-bar-update ()
   "Rebuild the status string and redraw every frame's tab bar."
   (setq +ewm-bar--string
-        (format " CPU %s   RAM %s   WIFI %s   BAT %s   %s "
-                (+ewm-bar--cpu) (+ewm-bar--memory) (+ewm-bar--wifi) (+ewm-bar--battery)
+        (format " CPU %s   RAM %s   WIFI %s   VOL %s   BRI %s   BAT %s   %s "
+                (+ewm-bar--cpu) (+ewm-bar--memory) (+ewm-bar--wifi)
+                (+ewm-bar--volume) (+ewm-bar--brightness) (+ewm-bar--battery)
                 (format-time-string "%a %b %-d  %H:%M")))
   (force-mode-line-update t))
 
