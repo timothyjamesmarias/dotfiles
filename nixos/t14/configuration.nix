@@ -64,6 +64,16 @@
   environment.pathsToLink = [ "/share/wayland-sessions" ];
 
   programs.ewm.enable = true;
+  # EWM routes portal calls to the GNOME portal, which delegates file dialogs
+  # to Nautilus. Nautilus is not installed, so browser save dialogs failed
+  # silently. This mirrors EWM's portal config with the GTK chooser instead.
+  xdg.portal.config.ewm = {
+    default = [ "gnome" "gtk" ];
+    "org.freedesktop.impl.portal.FileChooser" = [ "gtk" ];
+    "org.freedesktop.impl.portal.Access" = [ "gtk" ];
+    "org.freedesktop.impl.portal.Notification" = [ "gtk" ];
+    "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
+  };
   # EWM targets nixpkgs unstable, which names 0.3 libdisplay-info_0_3. On 26.05
   # the plain attribute is already 0.3.0, so alias it.
   nixpkgs.overlays = [ (final: prev: { libdisplay-info_0_3 = prev.libdisplay-info; }) ];
