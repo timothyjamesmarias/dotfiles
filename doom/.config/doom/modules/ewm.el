@@ -224,3 +224,21 @@ Copy and paste are already EWM defaults.")
   (tab-bar-mode 1)
   (when +ewm-bar--timer (cancel-timer +ewm-bar--timer))
   (setq +ewm-bar--timer (run-with-timer 0 +ewm-bar-interval #'+ewm-bar-update)))
+
+;; The media keys run as compositor actions, which never tell Emacs anything.
+;; Route them through Emacs instead so the bar refreshes right after the change.
+;; Cost: while Emacs is hung these keys wait with it.
+(defun +ewm-bar--refreshing (command)
+  "Return a command that runs COMMAND, then refreshes the bar once it settled."
+  (lambda ()
+    (interactive)
+    (funcall command)
+    (run-with-timer 0.3 nil #'+ewm-bar-update)))
+
+(after! ewm
+  (pcase-dolist (`(,key . ,command) '(("<AudioRaiseVolume>" . ewm-volume-raise)
+                                      ("<AudioLowerVolume>" . ewm-volume-lower)
+                                      ("<AudioMute>" . ewm-volume-mute)
+                                      ("<MonBrightnessUp>" . ewm-brightness-up)
+                                      ("<MonBrightnessDown>" . ewm-brightness-down)))
+    (keymap-set ewm-mode-map key (ewm-key (+ewm-bar--refreshing command) :fullscreen :repeat))))
