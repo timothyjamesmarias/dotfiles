@@ -49,44 +49,6 @@ Copy and paste are already EWM defaults.")
 ;; filter `next-buffer' and friends consult. App windows are real buffers.
 (add-hook 'doom-real-buffer-functions #'ewm-surface-buffer-p)
 
-;;; Launcher: a Spotlight-style list of running and launchable apps. The same
-;;; sources also join `consult-buffer', since each app window is a buffer and
-;;; killing it closes the app.
-
-(defvar +ewm-consult-source-running-apps
-  `(:name "Running apps" :narrow ?r :category buffer
-    :items ,(lambda () (mapcar #'buffer-name (seq-filter #'ewm-surface-buffer-p (buffer-list))))
-    :state ,#'consult--buffer-state)
-  "`consult-buffer' source for open application windows.")
-
-(defun +ewm-launchable-apps ()
-  "Installed desktop apps. Emacs is the desktop here, so a nested one is never wanted."
-  (seq-remove (lambda (name) (string-prefix-p "Emacs" name))
-              (mapcar #'car (ewm-list-xdg-apps))))
-
-(defvar +ewm-consult-source-emacs
-  `(:name "Emacs" :narrow ?e :category app
-    :items ("Emacs")
-    :action ,(lambda (_name) (switch-to-buffer (+ewm--last-emacs-buffer))))
-  "`consult-buffer' source so \"Emacs\" means back to the last buffer, not a new process.")
-
-(defvar +ewm-consult-source-xdg-apps
-  `(:name "Apps" :narrow ?a :category app
-    :items ,#'+ewm-launchable-apps
-    :action ,#'ewm-launch-xdg-command)
-  "`consult-buffer' source for installed desktop applications.")
-
-(after! consult
-  (add-to-list 'consult-buffer-sources '+ewm-consult-source-running-apps 'append)
-  (add-to-list 'consult-buffer-sources '+ewm-consult-source-xdg-apps 'append))
-
-(defun +ewm/launcher ()
-  "Switch to a running app or launch an installed one."
-  (interactive)
-  (require 'consult)
-  (consult--multi '(+ewm-consult-source-running-apps +ewm-consult-source-emacs +ewm-consult-source-xdg-apps)
-                  :prompt "App: "))
-
 (defun +ewm--app-ring ()
   "App windows in creation order, so the cycle is stable."
   (seq-sort-by #'ewm-surface-buffer-p #'< (seq-filter #'ewm-surface-buffer-p (buffer-list))))
