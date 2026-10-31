@@ -93,8 +93,12 @@
   ;; frame creation once gnus is loaded (eww -> mm-url -> gnus).
   '(gnus-group-news-low-empty :inherit nil))
 (setq doom-modeline-minor-modes t)
-;; MonoLisa is licensed on the Mac only. Linux hosts use the Nerd Font NixOS installs.
-(setq doom-font (font-spec :family (if (eq system-type 'darwin) "MonoLisa" "JetBrainsMono Nerd Font")
+;; MonoLisa is a licensed font installed by hand (~/.local/share/fonts on Linux),
+;; never through the package manager. A missing doom-font aborts Doom's init
+;; hook chain, so fall back to the Nerd Font NixOS installs when it is absent.
+(setq doom-font (font-spec :family (if (find-font (font-spec :family "MonoLisa"))
+                                       "MonoLisa"
+                                     "JetBrainsMono Nerd Font")
                            :size 14))
 (setq-default line-spacing 0.5)
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))

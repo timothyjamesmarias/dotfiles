@@ -74,6 +74,7 @@
     gh
     delta
     neovim
+    unzip
     helix
     glow
     cloc
