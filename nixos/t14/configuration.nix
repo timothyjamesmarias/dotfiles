@@ -52,6 +52,14 @@
     settings.default_session.command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-session --sessions /run/current-system/sw/share/wayland-sessions";
   };
   security.pam.services.swaylock = { };
+
+  # SSH agent at login, the keychain-style setup from the Mac: gcr-ssh-agent is
+  # socket-activated, exports SSH_AUTH_SOCK to the systemd user session, lists
+  # every ~/.ssh/*.pub and loads the private key on first use. Passphrases can
+  # be saved in the login keyring, which PAM unlocks at greetd login.
+  services.gnome.gcr-ssh-agent.enable = true;
+  services.gnome.gnome-keyring.enable = true;
+  security.pam.services.greetd.enableGnomeKeyring = true;
   # Expose sway.desktop and ewm.desktop to tuigreet.
   environment.pathsToLink = [ "/share/wayland-sessions" ];
 
