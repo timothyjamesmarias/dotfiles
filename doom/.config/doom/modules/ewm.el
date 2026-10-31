@@ -32,6 +32,7 @@
 ;; shortcut move to Shift+Super, EWM's existing frame layer. Emacs reports a
 ;; shifted letter as the uppercase letter, so those bind as "s-F", not "S-s-f".
 ;; Frames stay on s-1..9; Firefox selects tabs with Alt+digit on Linux.
+;; Shift+Super+digit sends the focused window's buffer to that frame.
 
 (defconst +ewm-editing-keys
   '(("C-n" . "<down>") ("C-p" . "<up>")
@@ -72,6 +73,32 @@ Copy and paste are already EWM defaults.")
                        (t (+ewm--last-emacs-buffer)))))
     (when target (switch-to-buffer target))))
 
+(defconst +ewm-shifted-digits '("!" "@" "#" "$" "%" "^" "&" "*" "(")
+  "Shift+1..9 on a US layout, which is how Emacs reports Super+Shift+digit.")
+
+(defun +ewm--workspace-frame (number)
+  "Frame of workspace NUMBER on the focused output, or nil."
+  (nth (1- number) (ewm--strip-frames (ewm--frame-output (ewm--focused-frame)))))
+
+(defun +ewm--show-previous-buffer (window)
+  "Put WINDOW back on its previous buffer, or the dashboard if it has none."
+  (let ((buffer (window-buffer window)))
+    (switch-to-prev-buffer window)
+    (when (eq (window-buffer window) buffer)
+      (set-window-buffer window (doom-fallback-buffer)))))
+
+(defun +ewm/send-to-workspace (number)
+  "Move the focused window's buffer to workspace NUMBER, staying here, as i3 does."
+  (interactive "nWorkspace: ")
+  (let* ((window (frame-selected-window (ewm--focused-frame)))
+         (buffer (window-buffer window))
+         (target (+ewm--workspace-frame number)))
+    (unless target (user-error "No workspace %d" number))
+    (when (eq target (window-frame window)) (user-error "Already on workspace %d" number))
+    ;; Leave first: an app window can only be shown in one place at a time.
+    (+ewm--show-previous-buffer window)
+    (set-window-buffer (frame-selected-window target) buffer)
+    (+ewm-bar--redraw-soon)))
 
 (after! ewm
   (setopt ewm-surface-emulate-keys
@@ -90,7 +117,12 @@ Copy and paste are already EWM defaults.")
     "s-F" #'ewm-toggle-fullscreen
     "s-L" #'ewm-lock-session
     "s-N" #'ewm-frame-new
-    "s-W" #'ewm-frame-close))
+    "s-W" #'ewm-frame-close)
+  (seq-do-indexed (lambda (key index)
+                    (let ((number (1+ index)))
+                      (keymap-set ewm-mode-map (concat "s-" key)
+                                  (lambda () (interactive) (+ewm/send-to-workspace number)))))
+                  +ewm-shifted-digits))
 
 ;;; Status bar
 ;;
