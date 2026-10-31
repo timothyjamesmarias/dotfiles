@@ -72,6 +72,7 @@ Copy and paste are already EWM defaults.")
                        (t (+ewm--last-emacs-buffer)))))
     (when target (switch-to-buffer target))))
 
+
 (after! ewm
   (setopt ewm-surface-emulate-keys
           (append +ewm-editing-keys
@@ -177,16 +178,58 @@ Copy and paste are already EWM defaults.")
   "`tab-bar-format' item showing the status string."
   `((status menu-item ,+ewm-bar--string ignore)))
 
+;; Workspaces. Each output shows a strip of frames and s-1..9 jumps to the Nth,
+;; so those frames are the workspaces. The left of the bar lists the strip of
+;; this frame's output, tiling-WM style: the number, the apps inside, and the
+;; frame you are on highlighted. Emacs draws a tab bar with its own frame
+;; selected, so `selected-frame' is the frame that owns the bar.
+
+(defface +ewm-bar-workspace-current '((t :inherit (highlight bold)))
+  "The workspace whose bar is being drawn.")
+
+(defun +ewm-bar--frame-apps (frame)
+  "Names of the apps shown in FRAME's windows, without duplicates."
+  (delete-dups
+   (seq-keep (lambda (window) (buffer-local-value 'ewm-surface-app (window-buffer window)))
+             (window-list frame 'never (frame-first-window frame)))))
+
+(defun +ewm-bar--workspace-item (frame number)
+  "Tab bar item for FRAME, workspace NUMBER. Clicking it focuses FRAME."
+  (let ((label (format " %s " (string-join (cons (number-to-string number) (+ewm-bar--frame-apps frame)) " "))))
+    `(,(intern (format "ewm-workspace-%d" number))
+      menu-item
+      ,(if (eq frame (selected-frame)) (propertize label 'face '+ewm-bar-workspace-current) label)
+      ,(lambda () (interactive) (select-frame-set-input-focus frame)))))
+
+(defun +ewm-bar-workspaces-format ()
+  "`tab-bar-format' items for the workspaces on this frame's output."
+  (when-let* ((output (ewm--frame-output (selected-frame))))
+    (seq-map-indexed (lambda (frame index) (+ewm-bar--workspace-item frame (1+ index)))
+                     (ewm--strip-frames output))))
+
+;; The compositor reports a new frame's place and app ids a moment after Emacs
+;; asks, and moving a frame in the strip never redraws Emacs on its own.
+(defconst +ewm-bar-settle-delay 0.3 "Seconds to let the compositor settle before redrawing.")
+
+(defun +ewm-bar--redraw-soon (&rest _)
+  "Redraw every bar once the compositor has caught up."
+  (run-with-timer +ewm-bar-settle-delay nil #'force-mode-line-update t))
+
 (after! ewm
   (require 'battery)
   ;; doom-themes hides the tab bar by painting its text in the background
   ;; colour. Style it like the mode line instead.
   (custom-set-faces! '(tab-bar :background unspecified :foreground unspecified :inherit mode-line))
-  (setq tab-bar-format '(tab-bar-format-align-right +ewm-bar-format)
+  (setq tab-bar-format '(+ewm-bar-workspaces-format tab-bar-format-align-right +ewm-bar-format)
         tab-bar-show t)
   ;; Dialogs and other floats are not screens; no bar on them.
   (add-to-list 'pop-up-frame-alist '(tab-bar-lines . 0))
   (tab-bar-mode 1)
+  (add-hook 'after-make-frame-functions #'+ewm-bar--redraw-soon)
+  (add-hook 'delete-frame-functions #'+ewm-bar--redraw-soon)
+  (add-hook 'ewm-update-app-hook #'+ewm-bar--redraw-soon)
+  (dolist (command '(ewm-frame-move-left ewm-frame-move-right ewm-frame-move-to-next-output))
+    (advice-add command :after #'+ewm-bar--redraw-soon))
   (when +ewm-bar--timer (cancel-timer +ewm-bar--timer))
   (setq +ewm-bar--timer (run-with-timer 0 +ewm-bar-interval #'+ewm-bar-update)))
 
@@ -198,7 +241,7 @@ Copy and paste are already EWM defaults.")
   (lambda ()
     (interactive)
     (funcall command)
-    (run-with-timer 0.3 nil #'+ewm-bar-update)))
+    (run-with-timer +ewm-bar-settle-delay nil #'+ewm-bar-update)))
 
 (after! ewm
   (pcase-dolist (`(,key . ,command) '(("<AudioRaiseVolume>" . ewm-volume-raise)
