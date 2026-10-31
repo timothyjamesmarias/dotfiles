@@ -100,6 +100,11 @@ Copy and paste are already EWM defaults.")
     (set-window-buffer (frame-selected-window target) buffer)
     (+ewm-bar--redraw-soon)))
 
+;; Snap between workspaces instead of sliding. EWM has one switch for its
+;; animations, so this also drops the fade-in on new windows.
+(after! ewm
+  (setopt ewm-animations-enabled nil))
+
 (after! ewm
   (setopt ewm-surface-emulate-keys
           (append +ewm-editing-keys
