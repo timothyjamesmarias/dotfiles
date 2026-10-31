@@ -197,7 +197,7 @@ Copy and paste are already EWM defaults.")
   (require 'battery)
   ;; doom-themes hides the tab bar by painting its text in the background
   ;; colour. Style it like the mode line instead.
-  (custom-set-faces! '(tab-bar :inherit mode-line))
+  (custom-set-faces! '(tab-bar :background unspecified :foreground unspecified :inherit mode-line))
   (setq tab-bar-format '(tab-bar-format-align-right +ewm-bar-format)
         tab-bar-show t)
   ;; Dialogs and other floats are not screens; no bar on them.
