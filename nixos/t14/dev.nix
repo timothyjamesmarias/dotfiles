@@ -66,8 +66,8 @@
     gotests
     gore
 
-    # CLI
-    claude-code
+    # CLI. Claude Code comes from its native installer in ~/.local/bin, which
+    # self-updates; nixpkgs lags it by weeks.
     bat
     jq
     btop

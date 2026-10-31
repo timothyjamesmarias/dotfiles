@@ -37,6 +37,12 @@
   (unless (server-running-p) (server-start)))
 (unless (daemonp)
   (add-hook 'doom-after-init-hook #'+tim/ensure-server))
+;; Started by systemd on Linux, Emacs never sees the shell's PATH additions.
+;; ~/.local/bin holds Claude Code's native install among others.
+(unless (eq system-type 'darwin)
+  (let ((local-bin (expand-file-name "~/.local/bin")))
+    (add-to-list 'exec-path local-bin)
+    (setenv "PATH" (concat local-bin path-separator (getenv "PATH")))))
 ;; Themes: contrast-tuned Everforest forks vendored in $DOOMDIR/themes/
 ;; (Doom puts that dir on `custom-theme-load-path' automatically, so no
 ;; `package!' setup is needed). See the theme files for the WCAG numbers.
