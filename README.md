@@ -30,6 +30,7 @@ Not stowed:
 
 ```bash
 ./install-packages                                    # Brewfile via Homebrew
+mkdir -p ~/.config ~/.local   # otherwise stow folds them into symlinks into this repo
 stow alacritty claude doom editorconfig git ideavim lem ripgrep scripts ssh zsh
 ```
 
